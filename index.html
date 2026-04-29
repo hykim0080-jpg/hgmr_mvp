@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>한글마루 - V6 유의어 인정</title>
+    <title>한글마루 - V7 데이터 저장</title>
     <style>
         body { background-color: #f1f5f9; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .app-wrapper { width: 100%; max-width: 550px; }
@@ -25,9 +25,7 @@
         button.btn-secondary:hover { background-color: #64748b; }
         
         .correct input { border-color: #10b981; background-color: #ecfdf5; color: #047857; }
-        /* 유의어 인정 시 스타일 (파란색 테마) */
         .synonym input { border-color: #3b82f6; background-color: #eff6ff; color: #1d4ed8; }
-        
         .wrong input { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         .show-answer input { border-color: #ef4444; background-color: #fef2f2; color: #b91c1c; }
         
@@ -45,9 +43,9 @@
 <body>
     <div class="app-wrapper">
         <div class="dashboard" id="dashboard">
-            <div>🔥 연속 학습: 5일차</div>
+            <div>🔥 연속 학습: <span id="streak-text">1일차</span></div>
             <div style="text-align: right;">
-                ⭐ Lv.1 (<span id="exp-text">0</span>/200)
+                ⭐ Lv.<span id="level-text">1</span> (<span id="exp-text">0</span>/200)
                 <div class="exp-bar-container"><div class="exp-fill" id="exp-bar"></div></div>
             </div>
         </div>
@@ -64,7 +62,7 @@
         <div class="quiz-container result-screen" id="result-box">
             <h2>🎉 오늘의 미션 완료!</h2>
             <div class="stats">
-                획득한 경험치: <strong style="color:#f59e0b;">+<span id="final-exp">0</span> EXP</strong><br>
+                현재 누적 경험치: <strong style="color:#f59e0b;"><span id="final-exp">0</span> EXP</strong><br>
                 재학습한 단어 수: <strong id="retry-count">0</strong>개
             </div>
             <button onclick="location.reload()">다시 복습하기</button>
@@ -72,7 +70,7 @@
     </div>
 
     <script>
-        // DB에 accepts 배열(유의어/대체어 리스트) 추가
+        // 문제 데이터
         let quizQueue = [
             { target: "수렴", accepts: ["통합", "취합", "집약", "모음"], meaning: "의견이나 사상 따위가 여럿으로 나뉘어 있는 것을 하나로 모음", sentence: "새로운 서비스의 기획안을 확정하기 전, 팀원들의 다양한 의견을 ____하는 과정을 거쳤다.", level: 1 },
             { target: "결함", accepts: ["오류", "문제", "하자", "버그"], meaning: "잘못되어 흠이 있는 부분이나 부족한 점", sentence: "하드웨어 제어 시스템에서 치명적인 ____이 발견되어 상용화 일정이 연기되었다.", level: 1 },
@@ -81,18 +79,53 @@
             { target: "종속", accepts: ["의존", "예속", "귀속"], meaning: "주된 것에 딸려 붙거나 그 지배를 받음", sentence: "광역 교통 인프라가 과도하게 발달하면, 지방 중소도시의 상권이 대도시에 ____되는 현상이 나타날 수 있다.", level: 2 }
         ];
 
-        let currentExp = 0; let totalQuestions = quizQueue.length; let completedQuestions = 0; let retryCount = 0;
+        // ===== 1. 로컬 스토리지 데이터 불러오기 =====
+        let currentExp = parseInt(localStorage.getItem('hm_exp')) || 0;
+        let streakDays = parseInt(localStorage.getItem('hm_streak')) || 1;
+        let lastDate = localStorage.getItem('hm_last_date');
+        
+        // 날짜 계산을 통한 연속 학습일(Streak) 로직
+        const today = new Date().toLocaleDateString();
+        if (lastDate !== today) {
+            let yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (lastDate === yesterday.toLocaleDateString()) {
+                streakDays++; // 어제 접속했다면 1일 추가
+            } else if (lastDate !== null) {
+                streakDays = 1; // 하루라도 빼먹었다면 1일차로 초기화
+            }
+            localStorage.setItem('hm_last_date', today);
+            localStorage.setItem('hm_streak', streakDays);
+        }
+
+        let totalQuestions = quizQueue.length; let completedQuestions = 0; let retryCount = 0;
         const sentenceEl = document.getElementById('sentence-text'); const meaningEl = document.getElementById('meaning-text');
         const inputEl = document.getElementById('answer-input'); const submitBtn = document.getElementById('submit-btn');
         const showAnswerBtn = document.getElementById('show-answer-btn'); const inputGroup = document.getElementById('input-group');
-        const progressEl = document.getElementById('progress'); const expText = document.getElementById('exp-text');
-        const expBar = document.getElementById('exp-bar'); const quizBox = document.getElementById('quiz-box');
+        const progressEl = document.getElementById('progress'); const quizBox = document.getElementById('quiz-box');
         const resultBox = document.getElementById('result-box'); const dashboard = document.getElementById('dashboard');
 
         let isWaiting = false; let hasFailedCurrent = false;
 
+        // ===== 2. 화면에 불러온 데이터 세팅하기 =====
+        function updateDashboard() {
+            const currentLevel = Math.floor(currentExp / 200) + 1; // 200마다 레벨 1 증가
+            const expInLevel = currentExp % 200; // 현재 레벨에서의 경험치 퍼센트
+            
+            document.getElementById('streak-text').textContent = `${streakDays}일차`;
+            document.getElementById('level-text').textContent = currentLevel;
+            document.getElementById('exp-text').textContent = expInLevel;
+            document.getElementById('exp-bar').style.width = `${(expInLevel / 200) * 100}%`;
+            
+            // 데이터 저장
+            localStorage.setItem('hm_exp', currentExp);
+        }
+
         function loadQuestion() {
             isWaiting = false; hasFailedCurrent = false;
+            updateDashboard(); // 문제 로드할 때마다 UI 최신화
+
             if (quizQueue.length === 0) { showResult(); return; }
             const currentWord = quizQueue[0];
             sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
@@ -109,46 +142,33 @@
 
             const currentWord = quizQueue[0];
 
-            // 1. 완벽한 정답
             if (userAnswer === currentWord.target) {
                 isWaiting = true;
-                inputGroup.classList.remove('wrong', 'show-answer', 'synonym');
-                inputGroup.classList.add('correct');
+                inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); inputGroup.classList.add('correct');
                 inputEl.value = currentWord.target;
                 sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#10b981; font-weight:800;">${currentWord.target}</span>`);
                 
-                if (!hasFailedCurrent) {
-                    currentExp += 20; expText.textContent = currentExp; expBar.style.width = `${(currentExp / 200) * 100}%`;
-                }
+                if (!hasFailedCurrent) currentExp += 20; 
+                
                 quizQueue.shift(); completedQuestions++;
+                updateDashboard(); // 경험치 증가 후 바로 저장 및 렌더링
                 setTimeout(loadQuestion, 800);
 
-            // 2. 유의어 인정 로직 추가
             } else if (currentWord.accepts && currentWord.accepts.includes(userAnswer)) {
                 isWaiting = true;
-                inputGroup.classList.remove('wrong', 'show-answer', 'correct');
-                inputGroup.classList.add('synonym');
-                
-                // 원래 정답이 무엇인지 알려주는 피드백
+                inputGroup.classList.remove('wrong', 'show-answer', 'correct'); inputGroup.classList.add('synonym');
                 inputEl.value = `${userAnswer} (정답: ${currentWord.target})`;
                 sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${currentWord.target}</span>`);
                 
-                // 유의어는 맞춘 것으로 인정하여 경험치 부여
-                if (!hasFailedCurrent) {
-                    currentExp += 20; expText.textContent = currentExp; expBar.style.width = `${(currentExp / 200) * 100}%`;
-                }
-                quizQueue.shift(); completedQuestions++;
+                if (!hasFailedCurrent) currentExp += 20;
                 
-                // 안내 메시지를 읽을 시간을 주기 위해 1.5초 대기
+                quizQueue.shift(); completedQuestions++;
+                updateDashboard(); 
                 setTimeout(loadQuestion, 1500);
 
-            // 3. 완전한 오답
             } else {
-                inputGroup.classList.remove('wrong', 'show-answer', 'synonym');
-                void inputGroup.offsetWidth; 
-                inputGroup.classList.add('wrong');
-                inputEl.value = '';
-                inputEl.placeholder = '다시 시도해보세요!';
+                inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); void inputGroup.offsetWidth; 
+                inputGroup.classList.add('wrong'); inputEl.value = ''; inputEl.placeholder = '다시 시도해보세요!';
                 
                 if (!hasFailedCurrent) {
                     hasFailedCurrent = true; totalQuestions++; retryCount++;
@@ -161,8 +181,7 @@
             if (quizQueue.length === 0 || isWaiting) return;
             isWaiting = true;
             const currentWord = quizQueue[0];
-            inputGroup.classList.remove('wrong', 'correct', 'synonym');
-            inputGroup.classList.add('show-answer');
+            inputGroup.classList.remove('wrong', 'correct', 'synonym'); inputGroup.classList.add('show-answer');
             inputEl.value = currentWord.target; inputEl.disabled = true;
             sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${currentWord.target}</span>`);
             
@@ -176,7 +195,8 @@
 
         function showResult() {
             dashboard.style.display = 'none'; quizBox.style.display = 'none'; resultBox.style.display = 'block';
-            document.getElementById('final-exp').textContent = currentExp; document.getElementById('retry-count').textContent = retryCount;
+            document.getElementById('final-exp').textContent = currentExp; 
+            document.getElementById('retry-count').textContent = retryCount;
         }
 
         submitBtn.addEventListener('click', checkAnswer);
