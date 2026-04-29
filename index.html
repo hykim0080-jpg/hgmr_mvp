@@ -71,13 +71,27 @@
 
     <script>
         // 문제 데이터
-        let quizQueue = [
-            { target: "수렴", accepts: ["통합", "취합", "집약", "모음"], meaning: "의견이나 사상 따위가 여럿으로 나뉘어 있는 것을 하나로 모음", sentence: "새로운 서비스의 기획안을 확정하기 전, 팀원들의 다양한 의견을 ____하는 과정을 거쳤다.", level: 1 },
-            { target: "결함", accepts: ["오류", "문제", "하자", "버그"], meaning: "잘못되어 흠이 있는 부분이나 부족한 점", sentence: "하드웨어 제어 시스템에서 치명적인 ____이 발견되어 상용화 일정이 연기되었다.", level: 1 },
-            { target: "직관적", accepts: ["감각적", "본능적", "즉각적"], meaning: "판단이나 추리를 거치지 아니하고 대상을 직접적으로 파악하는 (것)", sentence: "사용자가 복잡한 튜토리얼 없이도 기능을 바로 이해할 수 있도록 ____인 UI를 설계했다.", level: 1 },
-            { target: "상충", accepts: ["충돌", "모순", "대립", "상반"], meaning: "맞지 아니하고 서로 어긋남", sentence: "자율주행 시스템의 안전 주행 로직과 구급차의 긴급 통행권이 서로 ____하는 법적 딜레마를 분석했다.", level: 2 },
-            { target: "종속", accepts: ["의존", "예속", "귀속"], meaning: "주된 것에 딸려 붙거나 그 지배를 받음", sentence: "광역 교통 인프라가 과도하게 발달하면, 지방 중소도시의 상권이 대도시에 ____되는 현상이 나타날 수 있다.", level: 2 }
-        ];
+        let quizQueue = [];
+
+        // 외부 json 파일을 불러오는 비동기 함수
+async function fetchQuizData() {
+    try {
+        // words.json 파일 요청
+        const response = await fetch('words.json'); 
+        // JSON 형태의 글자를 자바스크립트가 이해할 수 있는 배열로 변환
+        const data = await response.json(); 
+        
+        // 불러온 데이터를 큐에 넣기
+        quizQueue = data;
+        totalQuestions = quizQueue.length;
+        
+        // 데이터를 다 불러온 후에야 첫 번째 문제를 화면에 띄웁니다.
+        loadQuestion(); 
+    } catch (error) {
+        console.error("데이터 로드 실패:", error);
+        document.getElementById('sentence-text').textContent = "데이터를 불러오는 데 실패했습니다.";
+    }
+}
 
         // ===== 1. 로컬 스토리지 데이터 불러오기 =====
         let currentExp = parseInt(localStorage.getItem('hm_exp')) || 0;
@@ -203,7 +217,7 @@
         showAnswerBtn.addEventListener('click', revealAnswer);
         inputEl.addEventListener('keypress', function(e) { if (e.key === 'Enter') checkAnswer(); });
 
-        loadQuestion();
+        fetchQuizData();
     </script>
 </body>
 </html>
