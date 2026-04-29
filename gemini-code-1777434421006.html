@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한글마루 - V6 유의어 인정</title>
+    <style>
+        body { background-color: #f1f5f9; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .app-wrapper { width: 100%; max-width: 550px; }
+        .dashboard { display: flex; justify-content: space-between; background-color: #1e293b; color: white; padding: 15px 25px; border-radius: 16px 16px 0 0; font-weight: bold; font-size: 14px; }
+        .exp-bar-container { width: 100px; height: 8px; background-color: #475569; border-radius: 4px; margin-top: 5px; overflow: hidden; }
+        .exp-fill { height: 100%; background-color: #f59e0b; width: 0%; transition: width 0.5s ease; }
+        .quiz-container { background-color: white; padding: 40px; border-radius: 0 0 16px 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: center; position: relative; }
+        .progress-bar { width: 100%; height: 6px; background-color: #e2e8f0; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background-color: #10b981; width: 0%; transition: width 0.3s ease; }
+        .sentence { font-size: 22px; font-weight: bold; color: #1e293b; margin-bottom: 15px; line-height: 1.6; word-break: keep-all; min-height: 90px; }
+        .meaning { font-size: 15px; color: #64748b; margin-bottom: 30px; background-color: #f8fafc; padding: 12px; border-radius: 8px; display: inline-block; line-height: 1.4; }
+        .level-badge { background-color: #3b82f6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-right: 8px; vertical-align: middle; }
+        .input-group { display: flex; gap: 8px; justify-content: center; }
+        input[type="text"] { padding: 15px 20px; font-size: 18px; border: 2px solid #cbd5e1; border-radius: 12px; width: 50%; text-align: center; outline: none; transition: all 0.2s; font-weight: bold; }
+        input[type="text"]:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+        button { padding: 15px 20px; font-size: 16px; font-weight: bold; color: white; background-color: #10b981; border: none; border-radius: 12px; cursor: pointer; transition: background-color 0.2s; white-space: nowrap; }
+        button:hover { background-color: #059669; }
+        button.btn-secondary { background-color: #94a3b8; }
+        button.btn-secondary:hover { background-color: #64748b; }
+        
+        .correct input { border-color: #10b981; background-color: #ecfdf5; color: #047857; }
+        /* 유의어 인정 시 스타일 (파란색 테마) */
+        .synonym input { border-color: #3b82f6; background-color: #eff6ff; color: #1d4ed8; }
+        
+        .wrong input { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        .show-answer input { border-color: #ef4444; background-color: #fef2f2; color: #b91c1c; }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .result-screen { display: none; }
+        .result-screen h2 { color: #10b981; margin-bottom: 10px; }
+        .result-screen .stats { font-size: 18px; color: #475569; margin-bottom: 30px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <div class="dashboard" id="dashboard">
+            <div>🔥 연속 학습: 5일차</div>
+            <div style="text-align: right;">
+                ⭐ Lv.1 (<span id="exp-text">0</span>/200)
+                <div class="exp-bar-container"><div class="exp-fill" id="exp-bar"></div></div>
+            </div>
+        </div>
+        <div class="quiz-container" id="quiz-box">
+            <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+            <div class="sentence" id="sentence-text">로딩 중...</div>
+            <div class="meaning" id="meaning-text"></div>
+            <div class="input-group" id="input-group">
+                <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off">
+                <button id="submit-btn">제출</button>
+                <button id="show-answer-btn" class="btn-secondary">정답 보기</button>
+            </div>
+        </div>
+        <div class="quiz-container result-screen" id="result-box">
+            <h2>🎉 오늘의 미션 완료!</h2>
+            <div class="stats">
+                획득한 경험치: <strong style="color:#f59e0b;">+<span id="final-exp">0</span> EXP</strong><br>
+                재학습한 단어 수: <strong id="retry-count">0</strong>개
+            </div>
+            <button onclick="location.reload()">다시 복습하기</button>
+        </div>
+    </div>
+
+    <script>
+        // DB에 accepts 배열(유의어/대체어 리스트) 추가
+        let quizQueue = [
+            { target: "수렴", accepts: ["통합", "취합", "집약", "모음"], meaning: "의견이나 사상 따위가 여럿으로 나뉘어 있는 것을 하나로 모음", sentence: "새로운 서비스의 기획안을 확정하기 전, 팀원들의 다양한 의견을 ____하는 과정을 거쳤다.", level: 1 },
+            { target: "결함", accepts: ["오류", "문제", "하자", "버그"], meaning: "잘못되어 흠이 있는 부분이나 부족한 점", sentence: "하드웨어 제어 시스템에서 치명적인 ____이 발견되어 상용화 일정이 연기되었다.", level: 1 },
+            { target: "직관적", accepts: ["감각적", "본능적", "즉각적"], meaning: "판단이나 추리를 거치지 아니하고 대상을 직접적으로 파악하는 (것)", sentence: "사용자가 복잡한 튜토리얼 없이도 기능을 바로 이해할 수 있도록 ____인 UI를 설계했다.", level: 1 },
+            { target: "상충", accepts: ["충돌", "모순", "대립", "상반"], meaning: "맞지 아니하고 서로 어긋남", sentence: "자율주행 시스템의 안전 주행 로직과 구급차의 긴급 통행권이 서로 ____하는 법적 딜레마를 분석했다.", level: 2 },
+            { target: "종속", accepts: ["의존", "예속", "귀속"], meaning: "주된 것에 딸려 붙거나 그 지배를 받음", sentence: "광역 교통 인프라가 과도하게 발달하면, 지방 중소도시의 상권이 대도시에 ____되는 현상이 나타날 수 있다.", level: 2 }
+        ];
+
+        let currentExp = 0; let totalQuestions = quizQueue.length; let completedQuestions = 0; let retryCount = 0;
+        const sentenceEl = document.getElementById('sentence-text'); const meaningEl = document.getElementById('meaning-text');
+        const inputEl = document.getElementById('answer-input'); const submitBtn = document.getElementById('submit-btn');
+        const showAnswerBtn = document.getElementById('show-answer-btn'); const inputGroup = document.getElementById('input-group');
+        const progressEl = document.getElementById('progress'); const expText = document.getElementById('exp-text');
+        const expBar = document.getElementById('exp-bar'); const quizBox = document.getElementById('quiz-box');
+        const resultBox = document.getElementById('result-box'); const dashboard = document.getElementById('dashboard');
+
+        let isWaiting = false; let hasFailedCurrent = false;
+
+        function loadQuestion() {
+            isWaiting = false; hasFailedCurrent = false;
+            if (quizQueue.length === 0) { showResult(); return; }
+            const currentWord = quizQueue[0];
+            sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
+            meaningEl.innerHTML = `<span class="level-badge">Lv.${currentWord.level}</span>💡 ${currentWord.meaning}`;
+            inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group'; inputEl.disabled = false;
+            progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
+            inputEl.focus();
+        }
+
+        function checkAnswer() {
+            if (quizQueue.length === 0 || isWaiting) return;
+            const userAnswer = inputEl.value.trim();
+            if (userAnswer === "") return; 
+
+            const currentWord = quizQueue[0];
+
+            // 1. 완벽한 정답
+            if (userAnswer === currentWord.target) {
+                isWaiting = true;
+                inputGroup.classList.remove('wrong', 'show-answer', 'synonym');
+                inputGroup.classList.add('correct');
+                inputEl.value = currentWord.target;
+                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#10b981; font-weight:800;">${currentWord.target}</span>`);
+                
+                if (!hasFailedCurrent) {
+                    currentExp += 20; expText.textContent = currentExp; expBar.style.width = `${(currentExp / 200) * 100}%`;
+                }
+                quizQueue.shift(); completedQuestions++;
+                setTimeout(loadQuestion, 800);
+
+            // 2. 유의어 인정 로직 추가
+            } else if (currentWord.accepts && currentWord.accepts.includes(userAnswer)) {
+                isWaiting = true;
+                inputGroup.classList.remove('wrong', 'show-answer', 'correct');
+                inputGroup.classList.add('synonym');
+                
+                // 원래 정답이 무엇인지 알려주는 피드백
+                inputEl.value = `${userAnswer} (정답: ${currentWord.target})`;
+                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${currentWord.target}</span>`);
+                
+                // 유의어는 맞춘 것으로 인정하여 경험치 부여
+                if (!hasFailedCurrent) {
+                    currentExp += 20; expText.textContent = currentExp; expBar.style.width = `${(currentExp / 200) * 100}%`;
+                }
+                quizQueue.shift(); completedQuestions++;
+                
+                // 안내 메시지를 읽을 시간을 주기 위해 1.5초 대기
+                setTimeout(loadQuestion, 1500);
+
+            // 3. 완전한 오답
+            } else {
+                inputGroup.classList.remove('wrong', 'show-answer', 'synonym');
+                void inputGroup.offsetWidth; 
+                inputGroup.classList.add('wrong');
+                inputEl.value = '';
+                inputEl.placeholder = '다시 시도해보세요!';
+                
+                if (!hasFailedCurrent) {
+                    hasFailedCurrent = true; totalQuestions++; retryCount++;
+                    quizQueue.push({...currentWord}); 
+                }
+            }
+        }
+
+        function revealAnswer() {
+            if (quizQueue.length === 0 || isWaiting) return;
+            isWaiting = true;
+            const currentWord = quizQueue[0];
+            inputGroup.classList.remove('wrong', 'correct', 'synonym');
+            inputGroup.classList.add('show-answer');
+            inputEl.value = currentWord.target; inputEl.disabled = true;
+            sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${currentWord.target}</span>`);
+            
+            if (!hasFailedCurrent) {
+                hasFailedCurrent = true; totalQuestions++; retryCount++;
+                quizQueue.push({...currentWord});
+            }
+            quizQueue.shift();
+            setTimeout(loadQuestion, 2000);
+        }
+
+        function showResult() {
+            dashboard.style.display = 'none'; quizBox.style.display = 'none'; resultBox.style.display = 'block';
+            document.getElementById('final-exp').textContent = currentExp; document.getElementById('retry-count').textContent = retryCount;
+        }
+
+        submitBtn.addEventListener('click', checkAnswer);
+        showAnswerBtn.addEventListener('click', revealAnswer);
+        inputEl.addEventListener('keypress', function(e) { if (e.key === 'Enter') checkAnswer(); });
+
+        loadQuestion();
+    </script>
+</body>
+</html>
