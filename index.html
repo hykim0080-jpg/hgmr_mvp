@@ -41,7 +41,20 @@
     </style>
 </head>
 <body>
+    <div id="login-screen" style="text-align: center; margin-top: 50px;">
+        <h1>한글마루</h1>
+        <button id="google-login-btn">구글 계정으로 시작하기</button>
+        <br><br>
+        <button id="anon-login-btn">로그인 없이 시작하기</button>
+      </div>
+    
+      <!-- 2. 기존 코드(퀴즈, 경험치 바 등)가 시작되기 직전에 app-screen 여는 태그를 넣는다. -->
+      <div id="app-screen" style="display: none;">
     <div class="app-wrapper">
+        <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 12px; font-size: 15px;">
+            <span id="user-info" style="font-weight: bold; margin-right: 12px; color: #475569;">로그인 정보 불러오는 중...</span>
+            <button id="logout-btn" style="padding: 6px 14px; font-size: 13px; background-color: #ef4444; border-radius: 8px;">로그아웃</button>
+        </div>
         <div class="dashboard" id="dashboard">
             <div>🔥 연속 학습: <span id="streak-text">-일차</span></div>
             <div style="text-align: right;">
@@ -68,219 +81,264 @@
             <button onclick="location.reload()">다시 복습하기</button>
         </div>
     </div>
+</div>
 
     <!-- 파이어베이스 모듈을 사용하기 위해 type="module" 선언 -->
-    <script type="module">
-        // ===== 1. 파이어베이스 SDK 불러오기 및 초기화 =====
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+   <!-- 파이어베이스 모듈을 사용하기 위해 type="module" 선언 -->
+   <script type="module">
+    // ===== 1. 파이어베이스 SDK 불러오기 및 초기화 (버전 11.0.0으로 완벽 통일!) =====
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDSSvJSfL0B8lRflALTZvKjcoDRsYE01Sg",
-            authDomain: "hgmr-9109e.firebaseapp.com",
-            projectId: "hgmr-9109e",
-            storageBucket: "hgmr-9109e.firebasestorage.app",
-            messagingSenderId: "212108763277",
-            appId: "1:212108763277:web:0b2fdb82863d096a5102c4"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDSSvJSfL0B8lRflALTZvKjcoDRsYE01Sg",
+        authDomain: "hgmr-9109e.firebaseapp.com",
+        projectId: "hgmr-9109e",
+        storageBucket: "hgmr-9109e.firebasestorage.app",
+        messagingSenderId: "212108763277",
+        appId: "1:212108763277:web:0b2fdb82863d096a5102c4"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        // 테스트용 유저 문서 참조 (users 컬렉션 안의 test_user 문서)
-        const userDocRef = doc(db, "users", "test_user");
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    let userDocRef; // 유저별 DB 주소를 담을 변수
 
-        // ===== 2. 전역 상태 변수 =====
-        let currentExp = 0;
-        let streakDays = 1;
-        let lastDate = null;
-        let quizQueue = [];
-        let totalQuestions = 0; 
-        let completedQuestions = 0; 
-        let retryCount = 0;
-        let isWaiting = false; 
-        let hasFailedCurrent = false;
+    // ===== 2. 전역 상태 변수 =====
+    let currentExp = 0;
+    let streakDays = 1;
+    let lastDate = null;
+    let quizQueue = [];
+    let totalQuestions = 0; 
+    let completedQuestions = 0; 
+    let retryCount = 0;
+    let isWaiting = false; 
+    let hasFailedCurrent = false;
 
-        // DOM 요소
-        const sentenceEl = document.getElementById('sentence-text'); 
-        const meaningEl = document.getElementById('meaning-text');
-        const inputEl = document.getElementById('answer-input'); 
-        const submitBtn = document.getElementById('submit-btn');
-        const showAnswerBtn = document.getElementById('show-answer-btn'); 
-        const inputGroup = document.getElementById('input-group');
-        const progressEl = document.getElementById('progress'); 
-        const quizBox = document.getElementById('quiz-box');
-        const resultBox = document.getElementById('result-box'); 
-        const dashboard = document.getElementById('dashboard');
+    // DOM 요소
+    const sentenceEl = document.getElementById('sentence-text'); 
+    const meaningEl = document.getElementById('meaning-text');
+    const inputEl = document.getElementById('answer-input'); 
+    const submitBtn = document.getElementById('submit-btn');
+    const showAnswerBtn = document.getElementById('show-answer-btn'); 
+    const inputGroup = document.getElementById('input-group');
+    const progressEl = document.getElementById('progress'); 
+    const quizBox = document.getElementById('quiz-box');
+    const resultBox = document.getElementById('result-box'); 
+    const dashboard = document.getElementById('dashboard');
 
-        // ===== 3. 앱 초기화 (Firestore 데이터 로드) =====
-        async function initApp() {
-            try {
-                // 1) Firestore에서 유저 데이터 가져오기
-                const docSnap = await getDoc(userDocRef);
-                
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    currentExp = data.exp || 0;
-                    streakDays = data.streak || 1;
-                    lastDate = data.last_date || null;
+    // ===== 3. 로그인 및 인증 로직 =====
+    document.getElementById("google-login-btn").addEventListener("click", () => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider).catch(err => console.error("구글 로그인 실패:", err));
+    });
+
+    document.getElementById("anon-login-btn").addEventListener("click", () => {
+        signInAnonymously(auth).catch(err => console.error("익명 로그인 실패:", err));
+    });
+
+    // 로그인 상태 감지 (여기서 앱 실행 여부를 결정!)
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const userInfoEl = document.getElementById("user-info");
+                if (user.isAnonymous) {
+                    userInfoEl.textContent = "👻 익명 사용자";
+                } else {
+                    // 구글 로그인인 경우 이름 표시 (이름이 없으면 이메일 표시)
+                    userInfoEl.textContent = `⭐ ${user.displayName || user.email} 님`;
                 }
+            // 로그인이 확인되면 앱 화면을 띄운다.
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("app-screen").style.display = "block";
 
-                // 2) 날짜 계산을 통한 연속 학습일(Streak) 로직
-                const today = new Date().toLocaleDateString();
-                if (lastDate !== today) {
-                    let yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    
-                    if (lastDate === yesterday.toLocaleDateString()) {
-                        streakDays++; // 어제 접속했다면 1일 추가
-                    } else if (lastDate !== null) {
-                        streakDays = 1; // 하루라도 빼먹었다면 1일차로 초기화
-                    }
-                    lastDate = today;
-                    
-                    // 변경된 날짜와 스트릭 정보를 Firestore에 미리 업데이트
-                    await syncUserData();
-                }
+            // 해당 유저만의 고유 ID로 DB 공간 설정
+            userDocRef = doc(db, "users", user.uid);
 
-                // 3) 퀴즈 데이터 로드 시작
-                await fetchQuizData();
-
-            } catch (error) {
-                console.error("Firestore 초기화 에러:", error);
-                sentenceEl.textContent = "데이터베이스 연결에 실패했습니다.";
-            }
-        }
-
-        // ===== 4. Firestore에 데이터 동기화 (저장) 함수 =====
-        async function syncUserData() {
-            try {
-                await setDoc(userDocRef, {
-                    exp: currentExp,
-                    streak: streakDays,
-                    last_date: lastDate
-                }, { merge: true }); // 기존 데이터에 덮어쓰기/병합
-            } catch (error) {
-                console.error("데이터 저장 실패:", error);
-            }
-        }
-
-        // ===== 5. 퀴즈 로직 =====
-        async function fetchQuizData() {
-            try {
-                const response = await fetch('words.json'); 
-                const data = await response.json(); 
-                
-                quizQueue = data;
-                totalQuestions = quizQueue.length;
-                
-                // 데이터 로드가 끝나면 UI 활성화 및 문제 표시
-                submitBtn.disabled = false;
-                showAnswerBtn.disabled = false;
-                loadQuestion(); 
-            } catch (error) {
-                console.error("단어 데이터 로드 실패:", error);
-                sentenceEl.textContent = "단어 데이터를 불러오는 데 실패했습니다.";
-            }
-        }
-
-        function updateDashboard() {
-            const currentLevel = Math.floor(currentExp / 200) + 1; 
-            const expInLevel = currentExp % 200; 
+            // 유저 정보가 세팅되었으니, 이제 퀴즈 데이터를 불러오고 앱을 시작한다!
+            initApp();
             
-            document.getElementById('streak-text').textContent = `${streakDays}일차`;
-            document.getElementById('level-text').textContent = currentLevel;
-            document.getElementById('exp-text').textContent = expInLevel;
-            document.getElementById('exp-bar').style.width = `${(expInLevel / 200) * 100}%`;
+        } else {
+            // 로그아웃 상태이면 로그인 화면만 보여준다.
+            document.getElementById("login-screen").style.display = "block";
+            document.getElementById("app-screen").style.display = "none";
+        }
+    });
+    // 👇 새롭게 추가하는 로그아웃 버튼 동작 로직 👇
+    document.getElementById("logout-btn").addEventListener("click", () => {
+            signOut(auth).then(() => {
+                // 로그아웃이 완료되면 화면을 완전히 새로고침하여 초기 상태로 돌림
+                location.reload(); 
+            }).catch((error) => {
+                console.error("로그아웃 실패:", error);
+            });
+        });
+
+    // ===== 4. 앱 초기화 (Firestore 데이터 로드) =====
+    async function initApp() {
+        try {
+            // 기존 코드를 그대로 유지! (userDocRef는 이제 로그인한 유저의 방을 가리킴)
+            const docSnap = await getDoc(userDocRef);
             
-            // UI가 업데이트될 때마다 Firestore에 동기화
-            syncUserData();
-        }
-
-        function loadQuestion() {
-            isWaiting = false; hasFailedCurrent = false;
-            updateDashboard();
-
-            if (quizQueue.length === 0) { showResult(); return; }
-            const currentWord = quizQueue[0];
-            sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
-            meaningEl.innerHTML = `<span class="level-badge">Lv.${currentWord.level}</span>💡 ${currentWord.meaning}`;
-            inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group'; inputEl.disabled = false;
-            progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
-            inputEl.focus();
-        }
-
-        function checkAnswer() {
-            if (quizQueue.length === 0 || isWaiting) return;
-            const userAnswer = inputEl.value.trim();
-            if (userAnswer === "") return; 
-
-            const currentWord = quizQueue[0];
-
-            if (userAnswer === currentWord.target) {
-                isWaiting = true;
-                inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); inputGroup.classList.add('correct');
-                inputEl.value = currentWord.target;
-                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#10b981; font-weight:800;">${currentWord.target}</span>`);
-                
-                if (!hasFailedCurrent) currentExp += 20; 
-                
-                quizQueue.shift(); completedQuestions++;
-                updateDashboard(); 
-                setTimeout(loadQuestion, 800);
-
-            } else if (currentWord.accepts && currentWord.accepts.includes(userAnswer)) {
-                isWaiting = true;
-                inputGroup.classList.remove('wrong', 'show-answer', 'correct'); inputGroup.classList.add('synonym');
-                inputEl.value = `${userAnswer} (정답: ${currentWord.target})`;
-                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${currentWord.target}</span>`);
-                
-                if (!hasFailedCurrent) currentExp += 20;
-                
-                quizQueue.shift(); completedQuestions++;
-                updateDashboard(); 
-                setTimeout(loadQuestion, 1500);
-
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                currentExp = data.exp || 0;
+                streakDays = data.streak || 1;
+                lastDate = data.last_date || null;
             } else {
-                inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); void inputGroup.offsetWidth; 
-                inputGroup.classList.add('wrong'); inputEl.value = ''; inputEl.placeholder = '다시 시도해보세요!';
-                
-                if (!hasFailedCurrent) {
-                    hasFailedCurrent = true; totalQuestions++; retryCount++;
-                    quizQueue.push({...currentWord}); 
-                }
+                // 처음 온 유저라면 경험치 0으로 초기 세팅
+                currentExp = 0;
+                await syncUserData(); 
             }
-        }
 
-        function revealAnswer() {
-            if (quizQueue.length === 0 || isWaiting) return;
+            const today = new Date().toLocaleDateString();
+            if (lastDate !== today) {
+                let yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (lastDate === yesterday.toLocaleDateString()) {
+                    streakDays++; 
+                } else if (lastDate !== null) {
+                    streakDays = 1; 
+                }
+                lastDate = today;
+                await syncUserData();
+            }
+
+            await fetchQuizData();
+
+        } catch (error) {
+            console.error("Firestore 초기화 에러:", error);
+            sentenceEl.textContent = "데이터베이스 연결에 실패했습니다.";
+        }
+    }
+
+    // ===== 5. Firestore에 데이터 동기화 (저장) 함수 =====
+    async function syncUserData() {
+        try {
+            await setDoc(userDocRef, {
+                exp: currentExp,
+                streak: streakDays,
+                last_date: lastDate
+            }, { merge: true }); 
+        } catch (error) {
+            console.error("데이터 저장 실패:", error);
+        }
+    }
+
+    // ===== 6. 퀴즈 로직 =====
+    async function fetchQuizData() {
+        try {
+            const response = await fetch('words.json'); 
+            const data = await response.json(); 
+            
+            quizQueue = data;
+            totalQuestions = quizQueue.length;
+            
+            submitBtn.disabled = false;
+            showAnswerBtn.disabled = false;
+            loadQuestion(); 
+        } catch (error) {
+            console.error("단어 데이터 로드 실패:", error);
+            sentenceEl.textContent = "단어 데이터를 불러오는 데 실패했습니다.";
+        }
+    }
+
+    function updateDashboard() {
+        const currentLevel = Math.floor(currentExp / 200) + 1; 
+        const expInLevel = currentExp % 200; 
+        
+        document.getElementById('streak-text').textContent = `${streakDays}일차`;
+        document.getElementById('level-text').textContent = currentLevel;
+        document.getElementById('exp-text').textContent = expInLevel;
+        document.getElementById('exp-bar').style.width = `${(expInLevel / 200) * 100}%`;
+        
+        syncUserData();
+    }
+
+    function loadQuestion() {
+        isWaiting = false; hasFailedCurrent = false;
+        updateDashboard();
+
+        if (quizQueue.length === 0) { showResult(); return; }
+        const currentWord = quizQueue[0];
+        sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
+        meaningEl.innerHTML = `<span class="level-badge">Lv.${currentWord.level}</span>💡 ${currentWord.meaning}`;
+        inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group'; inputEl.disabled = false;
+        progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
+        inputEl.focus();
+    }
+
+    function checkAnswer() {
+        if (quizQueue.length === 0 || isWaiting) return;
+        const userAnswer = inputEl.value.trim();
+        if (userAnswer === "") return; 
+
+        const currentWord = quizQueue[0];
+
+        if (userAnswer === currentWord.target) {
             isWaiting = true;
-            const currentWord = quizQueue[0];
-            inputGroup.classList.remove('wrong', 'correct', 'synonym'); inputGroup.classList.add('show-answer');
-            inputEl.value = currentWord.target; inputEl.disabled = true;
-            sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${currentWord.target}</span>`);
+            inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); inputGroup.classList.add('correct');
+            inputEl.value = currentWord.target;
+            sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#10b981; font-weight:800;">${currentWord.target}</span>`);
+            
+            if (!hasFailedCurrent) currentExp += 20; 
+            
+            quizQueue.shift(); completedQuestions++;
+            updateDashboard(); 
+            setTimeout(loadQuestion, 800);
+
+        } else if (currentWord.accepts && currentWord.accepts.includes(userAnswer)) {
+            isWaiting = true;
+            inputGroup.classList.remove('wrong', 'show-answer', 'correct'); inputGroup.classList.add('synonym');
+            inputEl.value = `${userAnswer} (정답: ${currentWord.target})`;
+            sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${currentWord.target}</span>`);
+            
+            if (!hasFailedCurrent) currentExp += 20;
+            
+            quizQueue.shift(); completedQuestions++;
+            updateDashboard(); 
+            setTimeout(loadQuestion, 1500);
+
+        } else {
+            inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); void inputGroup.offsetWidth; 
+            inputGroup.classList.add('wrong'); inputEl.value = ''; inputEl.placeholder = '다시 시도해보세요!';
             
             if (!hasFailedCurrent) {
                 hasFailedCurrent = true; totalQuestions++; retryCount++;
-                quizQueue.push({...currentWord});
+                quizQueue.push({...currentWord}); 
             }
-            quizQueue.shift();
-            setTimeout(loadQuestion, 2000);
         }
+    }
 
-        function showResult() {
-            dashboard.style.display = 'none'; quizBox.style.display = 'none'; resultBox.style.display = 'block';
-            document.getElementById('final-exp').textContent = currentExp; 
-            document.getElementById('retry-count').textContent = retryCount;
+    function revealAnswer() {
+        if (quizQueue.length === 0 || isWaiting) return;
+        isWaiting = true;
+        const currentWord = quizQueue[0];
+        inputGroup.classList.remove('wrong', 'correct', 'synonym'); inputGroup.classList.add('show-answer');
+        inputEl.value = currentWord.target; inputEl.disabled = true;
+        sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${currentWord.target}</span>`);
+        
+        if (!hasFailedCurrent) {
+            hasFailedCurrent = true; totalQuestions++; retryCount++;
+            quizQueue.push({...currentWord});
         }
+        quizQueue.shift();
+        setTimeout(loadQuestion, 2000);
+    }
 
-        // 이벤트 리스너 등록
-        submitBtn.addEventListener('click', checkAnswer);
-        showAnswerBtn.addEventListener('click', revealAnswer);
-        inputEl.addEventListener('keypress', function(e) { if (e.key === 'Enter') checkAnswer(); });
+    function showResult() {
+        dashboard.style.display = 'none'; quizBox.style.display = 'none'; resultBox.style.display = 'block';
+        document.getElementById('final-exp').textContent = currentExp; 
+        document.getElementById('retry-count').textContent = retryCount;
+    }
 
-        // 앱 실행 (Firestore에서 데이터 로드 후 퀴즈 시작)
-        initApp();
-    </script>
+    // 이벤트 리스너 등록
+    submitBtn.addEventListener('click', checkAnswer);
+    showAnswerBtn.addEventListener('click', revealAnswer);
+    inputEl.addEventListener('keypress', function(e) { if (e.key === 'Enter') checkAnswer(); });
+
+</script>
 </body>
 </html>
