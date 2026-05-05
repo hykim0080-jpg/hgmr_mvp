@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>한글마루 - V7 데이터 저장</title>
+    <title>한글마루 - V7 파이어베이스 연동</title>
     <style>
         body { background-color: #f1f5f9; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .app-wrapper { width: 100%; max-width: 550px; }
@@ -43,20 +43,20 @@
 <body>
     <div class="app-wrapper">
         <div class="dashboard" id="dashboard">
-            <div>🔥 연속 학습: <span id="streak-text">1일차</span></div>
+            <div>🔥 연속 학습: <span id="streak-text">-일차</span></div>
             <div style="text-align: right;">
-                ⭐ Lv.<span id="level-text">1</span> (<span id="exp-text">0</span>/200)
+                ⭐ Lv.<span id="level-text">-</span> (<span id="exp-text">0</span>/200)
                 <div class="exp-bar-container"><div class="exp-fill" id="exp-bar"></div></div>
             </div>
         </div>
         <div class="quiz-container" id="quiz-box">
             <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-            <div class="sentence" id="sentence-text">로딩 중...</div>
+            <div class="sentence" id="sentence-text">데이터를 동기화하는 중입니다...</div>
             <div class="meaning" id="meaning-text"></div>
             <div class="input-group" id="input-group">
-                <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off">
-                <button id="submit-btn">제출</button>
-                <button id="show-answer-btn" class="btn-secondary">정답 보기</button>
+                <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" disabled>
+                <button id="submit-btn" disabled>제출</button>
+                <button id="show-answer-btn" class="btn-secondary" disabled>정답 보기</button>
             </div>
         </div>
         <div class="quiz-container result-screen" id="result-box">
@@ -69,76 +69,137 @@
         </div>
     </div>
 
-    <script>
-        // 문제 데이터
+    <!-- 파이어베이스 모듈을 사용하기 위해 type="module" 선언 -->
+    <script type="module">
+        // ===== 1. 파이어베이스 SDK 불러오기 및 초기화 =====
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDSSvJSfL0B8lRflALTZvKjcoDRsYE01Sg",
+            authDomain: "hgmr-9109e.firebaseapp.com",
+            projectId: "hgmr-9109e",
+            storageBucket: "hgmr-9109e.firebasestorage.app",
+            messagingSenderId: "212108763277",
+            appId: "1:212108763277:web:0b2fdb82863d096a5102c4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // 테스트용 유저 문서 참조 (users 컬렉션 안의 test_user 문서)
+        const userDocRef = doc(db, "users", "test_user");
+
+        // ===== 2. 전역 상태 변수 =====
+        let currentExp = 0;
+        let streakDays = 1;
+        let lastDate = null;
         let quizQueue = [];
+        let totalQuestions = 0; 
+        let completedQuestions = 0; 
+        let retryCount = 0;
+        let isWaiting = false; 
+        let hasFailedCurrent = false;
 
-        // 외부 json 파일을 불러오는 비동기 함수
-async function fetchQuizData() {
-    try {
-        // words.json 파일 요청
-        const response = await fetch('words.json'); 
-        // JSON 형태의 글자를 자바스크립트가 이해할 수 있는 배열로 변환
-        const data = await response.json(); 
-        
-        // 불러온 데이터를 큐에 넣기
-        quizQueue = data;
-        totalQuestions = quizQueue.length;
-        
-        // 데이터를 다 불러온 후에야 첫 번째 문제를 화면에 띄웁니다.
-        loadQuestion(); 
-    } catch (error) {
-        console.error("데이터 로드 실패:", error);
-        document.getElementById('sentence-text').textContent = "데이터를 불러오는 데 실패했습니다.";
-    }
-}
+        // DOM 요소
+        const sentenceEl = document.getElementById('sentence-text'); 
+        const meaningEl = document.getElementById('meaning-text');
+        const inputEl = document.getElementById('answer-input'); 
+        const submitBtn = document.getElementById('submit-btn');
+        const showAnswerBtn = document.getElementById('show-answer-btn'); 
+        const inputGroup = document.getElementById('input-group');
+        const progressEl = document.getElementById('progress'); 
+        const quizBox = document.getElementById('quiz-box');
+        const resultBox = document.getElementById('result-box'); 
+        const dashboard = document.getElementById('dashboard');
 
-        // ===== 1. 로컬 스토리지 데이터 불러오기 =====
-        let currentExp = parseInt(localStorage.getItem('hm_exp')) || 0;
-        let streakDays = parseInt(localStorage.getItem('hm_streak')) || 1;
-        let lastDate = localStorage.getItem('hm_last_date');
-        
-        // 날짜 계산을 통한 연속 학습일(Streak) 로직
-        const today = new Date().toLocaleDateString();
-        if (lastDate !== today) {
-            let yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            if (lastDate === yesterday.toLocaleDateString()) {
-                streakDays++; // 어제 접속했다면 1일 추가
-            } else if (lastDate !== null) {
-                streakDays = 1; // 하루라도 빼먹었다면 1일차로 초기화
+        // ===== 3. 앱 초기화 (Firestore 데이터 로드) =====
+        async function initApp() {
+            try {
+                // 1) Firestore에서 유저 데이터 가져오기
+                const docSnap = await getDoc(userDocRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    currentExp = data.exp || 0;
+                    streakDays = data.streak || 1;
+                    lastDate = data.last_date || null;
+                }
+
+                // 2) 날짜 계산을 통한 연속 학습일(Streak) 로직
+                const today = new Date().toLocaleDateString();
+                if (lastDate !== today) {
+                    let yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    
+                    if (lastDate === yesterday.toLocaleDateString()) {
+                        streakDays++; // 어제 접속했다면 1일 추가
+                    } else if (lastDate !== null) {
+                        streakDays = 1; // 하루라도 빼먹었다면 1일차로 초기화
+                    }
+                    lastDate = today;
+                    
+                    // 변경된 날짜와 스트릭 정보를 Firestore에 미리 업데이트
+                    await syncUserData();
+                }
+
+                // 3) 퀴즈 데이터 로드 시작
+                await fetchQuizData();
+
+            } catch (error) {
+                console.error("Firestore 초기화 에러:", error);
+                sentenceEl.textContent = "데이터베이스 연결에 실패했습니다.";
             }
-            localStorage.setItem('hm_last_date', today);
-            localStorage.setItem('hm_streak', streakDays);
         }
 
-        let totalQuestions = quizQueue.length; let completedQuestions = 0; let retryCount = 0;
-        const sentenceEl = document.getElementById('sentence-text'); const meaningEl = document.getElementById('meaning-text');
-        const inputEl = document.getElementById('answer-input'); const submitBtn = document.getElementById('submit-btn');
-        const showAnswerBtn = document.getElementById('show-answer-btn'); const inputGroup = document.getElementById('input-group');
-        const progressEl = document.getElementById('progress'); const quizBox = document.getElementById('quiz-box');
-        const resultBox = document.getElementById('result-box'); const dashboard = document.getElementById('dashboard');
+        // ===== 4. Firestore에 데이터 동기화 (저장) 함수 =====
+        async function syncUserData() {
+            try {
+                await setDoc(userDocRef, {
+                    exp: currentExp,
+                    streak: streakDays,
+                    last_date: lastDate
+                }, { merge: true }); // 기존 데이터에 덮어쓰기/병합
+            } catch (error) {
+                console.error("데이터 저장 실패:", error);
+            }
+        }
 
-        let isWaiting = false; let hasFailedCurrent = false;
+        // ===== 5. 퀴즈 로직 =====
+        async function fetchQuizData() {
+            try {
+                const response = await fetch('words.json'); 
+                const data = await response.json(); 
+                
+                quizQueue = data;
+                totalQuestions = quizQueue.length;
+                
+                // 데이터 로드가 끝나면 UI 활성화 및 문제 표시
+                submitBtn.disabled = false;
+                showAnswerBtn.disabled = false;
+                loadQuestion(); 
+            } catch (error) {
+                console.error("단어 데이터 로드 실패:", error);
+                sentenceEl.textContent = "단어 데이터를 불러오는 데 실패했습니다.";
+            }
+        }
 
-        // ===== 2. 화면에 불러온 데이터 세팅하기 =====
         function updateDashboard() {
-            const currentLevel = Math.floor(currentExp / 200) + 1; // 200마다 레벨 1 증가
-            const expInLevel = currentExp % 200; // 현재 레벨에서의 경험치 퍼센트
+            const currentLevel = Math.floor(currentExp / 200) + 1; 
+            const expInLevel = currentExp % 200; 
             
             document.getElementById('streak-text').textContent = `${streakDays}일차`;
             document.getElementById('level-text').textContent = currentLevel;
             document.getElementById('exp-text').textContent = expInLevel;
             document.getElementById('exp-bar').style.width = `${(expInLevel / 200) * 100}%`;
             
-            // 데이터 저장
-            localStorage.setItem('hm_exp', currentExp);
+            // UI가 업데이트될 때마다 Firestore에 동기화
+            syncUserData();
         }
 
         function loadQuestion() {
             isWaiting = false; hasFailedCurrent = false;
-            updateDashboard(); // 문제 로드할 때마다 UI 최신화
+            updateDashboard();
 
             if (quizQueue.length === 0) { showResult(); return; }
             const currentWord = quizQueue[0];
@@ -165,7 +226,7 @@ async function fetchQuizData() {
                 if (!hasFailedCurrent) currentExp += 20; 
                 
                 quizQueue.shift(); completedQuestions++;
-                updateDashboard(); // 경험치 증가 후 바로 저장 및 렌더링
+                updateDashboard(); 
                 setTimeout(loadQuestion, 800);
 
             } else if (currentWord.accepts && currentWord.accepts.includes(userAnswer)) {
@@ -213,11 +274,13 @@ async function fetchQuizData() {
             document.getElementById('retry-count').textContent = retryCount;
         }
 
+        // 이벤트 리스너 등록
         submitBtn.addEventListener('click', checkAnswer);
         showAnswerBtn.addEventListener('click', revealAnswer);
         inputEl.addEventListener('keypress', function(e) { if (e.key === 'Enter') checkAnswer(); });
 
-        fetchQuizData();
+        // 앱 실행 (Firestore에서 데이터 로드 후 퀴즈 시작)
+        initApp();
     </script>
 </body>
 </html>
