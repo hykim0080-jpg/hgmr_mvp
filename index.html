@@ -50,11 +50,39 @@
     
       <!-- 2. 기존 코드(퀴즈, 경험치 바 등)가 시작되기 직전에 app-screen 여는 태그를 넣는다. -->
       <div id="app-screen" style="display: none;">
-    <div class="app-wrapper">
-        <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 12px; font-size: 15px;">
-            <span id="user-info" style="font-weight: bold; margin-right: 12px; color: #475569;">로그인 정보 불러오는 중...</span>
-            <button id="logout-btn" style="padding: 6px 14px; font-size: 13px; background-color: #ef4444; border-radius: 8px;">로그아웃</button>
+       
+
+    <!-- 🌟 우측 상단 둥둥 떠있는 프로필 칩 (절대 위치) -->
+        <div id="profile-section" style="position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 10px; background: white; padding: 8px 16px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 100;">
+            <div id="edit-profile-trigger" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding-right: 12px; border-right: 2px solid #f1f5f9; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
+                <span id="display-emoji" style="font-size: 22px;">⭐</span>
+                <span id="display-nickname" style="font-weight: bold; color: #334155;">로딩중...</span>
+                <span style="font-size: 12px; color: #94a3b8;">✏️</span>
+            </div>
+            <button id="logout-btn" style="padding: 6px 12px; font-size: 13px; background-color: transparent; color: #ef4444; border: 1px solid #fee2e2; border-radius: 20px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">로그아웃</button>
         </div>
+
+        <!-- 🌟 프로필 설정 모달 팝업 (처음엔 숨겨짐) -->
+        <div id="profile-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
+            <div style="background: white; padding: 30px; border-radius: 20px; width: 280px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+                <h3 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 20px;">프로필 꾸미기</h3>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">나만의 이모티콘</label>
+                    <input type="text" id="input-emoji" maxlength="2" style="font-size: 35px; width: 70px; height: 70px; text-align: center; border: 2px solid #e2e8f0; border-radius: 16px; background: #f8fafc; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#e2e8f0'">
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">닉네임 (활동명)</label>
+                    <input type="text" id="input-nickname" placeholder="이름을 입력하세요" style="width: 85%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align: center; font-weight: bold; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#e2e8f0'">
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="close-modal-btn" style="flex: 1; padding: 12px 0; border: none; border-radius: 12px; background-color: #f1f5f9; color: #64748b; font-weight: bold; cursor: pointer;">취소</button>
+                    <button id="save-profile-btn" style="flex: 1; padding: 12px 0; border: none; border-radius: 12px; background-color: #10b981; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">저장</button>
+                </div>
+            </div>
+        </div>
+
+    <!-- 기존 app-wrapper 시작 -->
+    <div class="app-wrapper">
         <div class="dashboard" id="dashboard">
             <div>🔥 연속 학습: <span id="streak-text">-일차</span></div>
             <div style="text-align: right;">
@@ -86,7 +114,7 @@
     <!-- 파이어베이스 모듈을 사용하기 위해 type="module" 선언 -->
    <!-- 파이어베이스 모듈을 사용하기 위해 type="module" 선언 -->
    <script type="module">
-    // ===== 1. 파이어베이스 SDK 불러오기 및 초기화 (버전 11.0.0으로 완벽 통일!) =====
+    // ===== 1. 파이어베이스 SDK 불러오기 및 초기화 =====
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
@@ -104,9 +132,11 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     
-    let userDocRef; // 유저별 DB 주소를 담을 변수
+    let userDocRef; 
 
     // ===== 2. 전역 상태 변수 =====
+    let userNickname = "";
+    let userEmoji = "";
     let currentExp = 0;
     let streakDays = 1;
     let lastDate = null;
@@ -139,46 +169,21 @@
         signInAnonymously(auth).catch(err => console.error("익명 로그인 실패:", err));
     });
 
-    // 로그인 상태 감지 (여기서 앱 실행 여부를 결정!)
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            const userInfoEl = document.getElementById("user-info");
-                if (user.isAnonymous) {
-                    userInfoEl.textContent = "👻 익명 사용자";
-                } else {
-                    // 구글 로그인인 경우 이름 표시 (이름이 없으면 이메일 표시)
-                    userInfoEl.textContent = `⭐ ${user.displayName || user.email} 님`;
-                }
-            // 로그인이 확인되면 앱 화면을 띄운다.
             document.getElementById("login-screen").style.display = "none";
             document.getElementById("app-screen").style.display = "block";
-
-            // 해당 유저만의 고유 ID로 DB 공간 설정
             userDocRef = doc(db, "users", user.uid);
-
-            // 유저 정보가 세팅되었으니, 이제 퀴즈 데이터를 불러오고 앱을 시작한다!
-            initApp();
-            
+            initApp(); // 앱 초기화 실행
         } else {
-            // 로그아웃 상태이면 로그인 화면만 보여준다.
             document.getElementById("login-screen").style.display = "block";
             document.getElementById("app-screen").style.display = "none";
         }
     });
-    // 👇 새롭게 추가하는 로그아웃 버튼 동작 로직 👇
-    document.getElementById("logout-btn").addEventListener("click", () => {
-            signOut(auth).then(() => {
-                // 로그아웃이 완료되면 화면을 완전히 새로고침하여 초기 상태로 돌림
-                location.reload(); 
-            }).catch((error) => {
-                console.error("로그아웃 실패:", error);
-            });
-        });
 
     // ===== 4. 앱 초기화 (Firestore 데이터 로드) =====
     async function initApp() {
         try {
-            // 기존 코드를 그대로 유지! (userDocRef는 이제 로그인한 유저의 방을 가리킴)
             const docSnap = await getDoc(userDocRef);
             
             if (docSnap.exists()) {
@@ -186,12 +191,21 @@
                 currentExp = data.exp || 0;
                 streakDays = data.streak || 1;
                 lastDate = data.last_date || null;
+                
+                userNickname = data.nickname || (auth.currentUser.isAnonymous ? "익명 사용자" : auth.currentUser.displayName || "유저");
+                userEmoji = data.emoji || (auth.currentUser.isAnonymous ? "👻" : "⭐");
             } else {
-                // 처음 온 유저라면 경험치 0으로 초기 세팅
                 currentExp = 0;
+                userNickname = auth.currentUser.isAnonymous ? "익명 사용자" : auth.currentUser.displayName || "유저";
+                userEmoji = auth.currentUser.isAnonymous ? "👻" : "⭐";
                 await syncUserData(); 
             }
 
+            // UI에 닉네임, 이모티콘 즉시 표시
+            document.getElementById('display-nickname').textContent = userNickname;
+            document.getElementById('display-emoji').textContent = userEmoji;
+
+            // 실수로 지워졌던 날짜 계산 코드 복구
             const today = new Date().toLocaleDateString();
             if (lastDate !== today) {
                 let yesterday = new Date();
@@ -206,13 +220,14 @@
                 await syncUserData();
             }
 
+            // 단어 데이터 로드
             await fetchQuizData();
 
-        } catch (error) {
+        } catch (error) { // 여기서 try 문이 닫히고 catch가 들어갑니다.
             console.error("Firestore 초기화 에러:", error);
             sentenceEl.textContent = "데이터베이스 연결에 실패했습니다.";
         }
-    }
+    } // 여기서 initApp 함수가 완벽하게 닫힙니다.
 
     // ===== 5. Firestore에 데이터 동기화 (저장) 함수 =====
     async function syncUserData() {
@@ -220,13 +235,15 @@
             await setDoc(userDocRef, {
                 exp: currentExp,
                 streak: streakDays,
-                last_date: lastDate
+                last_date: lastDate,
+                nickname: userNickname, 
+                emoji: userEmoji        
             }, { merge: true }); 
         } catch (error) {
             console.error("데이터 저장 실패:", error);
         }
     }
-
+    
     // ===== 6. 퀴즈 로직 =====
     async function fetchQuizData() {
         try {
@@ -334,11 +351,47 @@
         document.getElementById('retry-count').textContent = retryCount;
     }
 
-    // 이벤트 리스너 등록
+    // 퀴즈 관련 이벤트 리스너 등록
     submitBtn.addEventListener('click', checkAnswer);
     showAnswerBtn.addEventListener('click', revealAnswer);
     inputEl.addEventListener('keypress', function(e) { if (e.key === 'Enter') checkAnswer(); });
 
+    // ===== 🌟 프로필 수정 및 로그아웃 로직 =====
+    document.getElementById('edit-profile-trigger').addEventListener('click', () => {
+        document.getElementById('input-nickname').value = userNickname;
+        document.getElementById('input-emoji').value = userEmoji;
+        document.getElementById('profile-modal').style.display = 'flex';
+    });
+
+    document.getElementById('close-modal-btn').addEventListener('click', () => {
+        document.getElementById('profile-modal').style.display = 'none';
+    });
+
+    document.getElementById('save-profile-btn').addEventListener('click', () => {
+        const newName = document.getElementById('input-nickname').value.trim();
+        const newEmoji = document.getElementById('input-emoji').value.trim();
+        
+        if (newName === "") {
+            alert("활동명을 1글자 이상 입력해주세요!");
+            return;
+        }
+
+        userNickname = newName;
+        userEmoji = newEmoji || "⭐"; 
+        
+        document.getElementById('display-nickname').textContent = userNickname;
+        document.getElementById('display-emoji').textContent = userEmoji;
+        syncUserData(); 
+        
+        document.getElementById('profile-modal').style.display = 'none';
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+        if(confirm("정말 로그아웃 하시겠습니까?")) {
+            signOut(auth).then(() => {
+                location.reload(); 
+            }).catch((error) => console.error("로그아웃 실패:", error));
+        }
+    });
+
 </script>
-</body>
-</html>
