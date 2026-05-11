@@ -13,7 +13,7 @@
         .quiz-container { background-color: white; padding: 40px; border-radius: 0 0 16px 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: center; position: relative; }
         .progress-bar { width: 100%; height: 6px; background-color: #e2e8f0; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
         .progress-fill { height: 100%; background-color: #10b981; width: 0%; transition: width 0.3s ease; }
-        .sentence { font-size: 22px; font-weight: bold; color: #1e293b; margin-bottom: 15px; line-height: 1.6; word-break: keep-all; min-height: 90px; }
+        .sentence { font-size: 22px; font-weight: bold; color: #1e293b; margin-bottom: 15px; line-height: 1.6; word-break: keep-all; min-height: 90px; text-align: left; }
         .meaning { font-size: 15px; color: #64748b; margin-bottom: 30px; background-color: #f8fafc; padding: 12px; border-radius: 8px; display: inline-block; line-height: 1.4; }
         .level-badge { background-color: #3b82f6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-right: 8px; vertical-align: middle; }
         .input-group { display: flex; gap: 8px; justify-content: center; }
@@ -80,7 +80,6 @@
                 </div>
             </div>
         </div>
-
     <!-- 기존 app-wrapper 시작 -->
     <div class="app-wrapper">
         <div class="dashboard" id="dashboard">
@@ -94,11 +93,17 @@
             <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
             <div class="sentence" id="sentence-text">데이터를 동기화하는 중입니다...</div>
             <div class="meaning" id="meaning-text"></div>
+            
             <div class="input-group" id="input-group">
                 <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" disabled>
                 <button id="submit-btn" disabled>제출</button>
                 <button id="show-answer-btn" class="btn-secondary" disabled>정답 보기</button>
+                
+                <button id="next-btn" style="display: none; flex: 1; background-color: #3b82f6; color: white; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; animation: fadeIn 0.2s ease;">다음 문장으로 ➔ (Enter ↵)</button>
             </div>
+
+            <div id="inline-stats-container" style="display: none; margin-top: 20px; text-align: left; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); animation: slideUp 0.3s ease;">
+                </div>
         </div>
         <div class="quiz-container result-screen" id="result-box">
             <h2>🎉 오늘의 미션 완료!</h2>
@@ -111,12 +116,11 @@
     </div>
 </div>
 
-    <!-- 파이어베이스 모듈을 사용하기 위해 type="module" 선언 -->
    <!-- 파이어베이스 모듈을 사용하기 위해 type="module" 선언 -->
    <script type="module">
     // ===== 1. 파이어베이스 SDK 불러오기 및 초기화 =====
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, increment, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -130,6 +134,11 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    enableIndexedDbPersistence(db).catch((err) => {
+        console.log("오프라인 모드 활성화 실패:", err.code);
+    });
+
     const auth = getAuth(app);
     
     let userDocRef; 
@@ -146,6 +155,7 @@
     let retryCount = 0;
     let isWaiting = false; 
     let hasFailedCurrent = false;
+    let isShowingStats = false;
 
     // DOM 요소
     const sentenceEl = document.getElementById('sentence-text'); 
@@ -243,7 +253,22 @@
             console.error("데이터 저장 실패:", error);
         }
     }
-    
+    // ===== 🌟 제출된 단어 빈도수 통계 기록 함수 =====
+    async function recordWordStat(wordTarget, userAnswer) {
+            const statRef = doc(db, "word_stats", wordTarget);
+            try {
+                // 파이어베이스 필드 이름에 마침표나 특수문자가 들어가면 에러가 나므로 필터링
+                const safeAnswer = userAnswer.replace(/[\.\#\$\/\[\]]/g, "") || "알수없음";
+                
+                await setDoc(statRef, {
+                    // 'answers' 방 안에 유저가 적은 단어 이름으로 숫자를 1 올림 (예: answers.현상 : 1)
+                    [`answers.${safeAnswer}`]: increment(1),
+                    total: increment(1) // 이 문제에 대한 전체 제출 횟수도 1 올림
+                }, { merge: true });
+            } catch (error) {
+                console.error("통계 기록 실패:", error);
+            }
+        }
     // ===== 6. 퀴즈 로직 =====
     async function fetchQuizData() {
         try {
@@ -261,6 +286,96 @@
             sentenceEl.textContent = "단어 데이터를 불러오는 데 실패했습니다.";
         }
     }
+    // ===== 🌟 문제 하단에 세련된 인라인 통계 보여주기 =====
+    async function showInlineStats(currentWordObj) {
+            isShowingStats = true;
+            const statsContainer = document.getElementById('inline-stats-container');
+            const nextBtn = document.getElementById('next-btn');
+            
+            const word = currentWordObj.target; // 진짜 정답
+            const accepts = currentWordObj.accepts || []; // 유의어 배열
+            
+            // 입력창 잠그고, 기존 버튼들 숨기기
+            inputEl.style.display = 'none';
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('show-answer-btn').style.display = 'none';
+            
+            // 통계창과 다음 버튼 나타나기
+            statsContainer.style.display = 'block';
+            nextBtn.style.display = 'block';
+            nextBtn.innerHTML = '다음 문제'; // 버튼 텍스트 변경
+            
+            statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">데이터를 불러오는 중...</div>';
+            nextBtn.focus(); 
+
+            try {
+                const statRef = doc(db, "word_stats", word);
+                const docSnap = await getDoc(statRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const answers = data.answers || {};
+                    const total = data.total || 0;
+                    
+                    // 빈도수 높은 순으로 정렬
+                    const sortedAnswers = Object.entries(answers).sort((a, b) => b[1] - a[1]);
+                    
+                    // 💡 상단 헤더 부분
+                    let html = `
+                        <div style="font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px dashed #e2e8f0;">
+                            💡 사람들은 이 문장을 어떻게 완성했을까요?
+                        </div>
+                    `;
+                    
+                    // 📊 제출된 단어 목록 그리기
+                    sortedAnswers.forEach(([submittedWord, count]) => {
+                        const rate = total > 0 ? Math.round((count / total) * 100) : 0;
+                        
+                        let badgeHtml = '';
+                        let barColor = '';
+                        let textColor = '';
+
+                        // 정답, 유의어, 오답 판별
+                        if (submittedWord === word) {
+                            badgeHtml = '<span style="font-size: 11px; background: #ecfdf5; color: #10b981; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">정답</span>';
+                            barColor = '#10b981'; // 초록색
+                            textColor = '#047857';
+                        } else if (accepts.includes(submittedWord)) {
+                            badgeHtml = '<span style="font-size: 11px; background: #eff6ff; color: #3b82f6; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">유의어</span>';
+                            barColor = '#3b82f6'; // 파란색
+                            textColor = '#1d4ed8';
+                        } else {
+                            badgeHtml = '<span style="font-size: 11px; background: #f1f5f9; color: #64748b; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">오답</span>';
+                            barColor = '#cbd5e1'; // 회색
+                            textColor = '#475569';
+                        }
+
+                        // 가로 막대 그래프 UI 조립
+                        html += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div style="width: 120px; display: flex; align-items: center;">
+                                    <span style="font-size: 15px; font-weight: bold; color: ${textColor}; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${submittedWord}</span>
+                                    ${badgeHtml}
+                                </div>
+                                <div style="font-size: 13px; font-weight: bold; color: #64748b; width: 40px; text-align: right; margin-right: 12px;">
+                                    ${rate}%
+                                </div>
+                                <div style="flex: 1; background: #f1f5f9; height: 10px; border-radius: 5px; overflow: hidden;">
+                                    <div style="width: ${rate}%; height: 100%; background: ${barColor}; border-radius: 5px; transition: width 0.8s ease-out;"></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    statsContainer.innerHTML = html;
+                } else {
+                    statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">아직 충분한 통계 데이터가 없습니다.</div>';
+                }
+            } catch (error) {
+                statsContainer.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:14px; padding: 20px 0;">통계를 불러오지 못했습니다.</div>';
+                console.error(error);
+            }
+        }
 
     function updateDashboard() {
         const currentLevel = Math.floor(currentExp / 200) + 1; 
@@ -277,12 +392,21 @@
     function loadQuestion() {
         isWaiting = false; hasFailedCurrent = false;
         updateDashboard();
+                
+        // 🌟 통계창과 다음 버튼 숨기고, 제출 버튼 다시 살리기
+        document.getElementById('inline-stats-container').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('submit-btn').style.display = 'inline-block';
+        document.getElementById('show-answer-btn').style.display = 'inline-block';
 
         if (quizQueue.length === 0) { showResult(); return; }
         const currentWord = quizQueue[0];
         sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
         meaningEl.innerHTML = `<span class="level-badge">Lv.${currentWord.level}</span>💡 ${currentWord.meaning}`;
-        inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group'; inputEl.disabled = false;
+        inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group';
+        
+        inputEl.disabled = false;
+        inputEl.style.display = 'inline-block';
         progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
         inputEl.focus();
     }
@@ -294,6 +418,8 @@
 
         const currentWord = quizQueue[0];
 
+        recordWordStat(currentWord.target, userAnswer);
+
         if (userAnswer === currentWord.target) {
             isWaiting = true;
             inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); inputGroup.classList.add('correct');
@@ -304,7 +430,7 @@
             
             quizQueue.shift(); completedQuestions++;
             updateDashboard(); 
-            setTimeout(loadQuestion, 800);
+            showInlineStats(currentWord);
 
         } else if (currentWord.accepts && currentWord.accepts.includes(userAnswer)) {
             isWaiting = true;
@@ -316,7 +442,7 @@
             
             quizQueue.shift(); completedQuestions++;
             updateDashboard(); 
-            setTimeout(loadQuestion, 1500);
+            showInlineStats(currentWord);
 
         } else {
             inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); void inputGroup.offsetWidth; 
@@ -342,7 +468,7 @@
             quizQueue.push({...currentWord});
         }
         quizQueue.shift();
-        setTimeout(loadQuestion, 2000);
+        showInlineStats(currentWord);
     }
 
     function showResult() {
@@ -354,7 +480,16 @@
     // 퀴즈 관련 이벤트 리스너 등록
     submitBtn.addEventListener('click', checkAnswer);
     showAnswerBtn.addEventListener('click', revealAnswer);
+
+    //다음 버튼 클릭 시 다음 문제 로드
+    document.getElementById('next-btn').addEventListener('click', () => {
+        loadQuestion();
+    });
+
     inputEl.addEventListener('keypress', function(e) { if (e.key === 'Enter') checkAnswer(); });
+
+    
+
 
     // ===== 🌟 프로필 수정 및 로그아웃 로직 =====
     document.getElementById('edit-profile-trigger').addEventListener('click', () => {
@@ -393,5 +528,12 @@
             }).catch((error) => console.error("로그아웃 실패:", error));
         }
     });
-
+    // ===== 🌟 오프라인 지원 (서비스 워커 등록) =====
+    if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((registration) => console.log('서비스 워커 등록 성공!'))
+                    .catch((err) => console.log('서비스 워커 등록 실패:', err));
+            });
+        }
 </script>
