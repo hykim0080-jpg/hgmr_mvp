@@ -92,7 +92,6 @@
                     <div class="exp-bar-container"><div class="exp-fill" id="exp-bar"></div></div>
                 </div>
             </div>
-            
             <div class="quiz-container" id="quiz-box">
                 <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
                 
@@ -100,19 +99,18 @@
                     <div class="sentence" id="sentence-text">데이터를 동기화하는 중입니다...</div>
                     <div class="meaning" id="meaning-text"></div>
                 </div>
+
+                <div id="inline-stats-container" style="display: none; margin-bottom: 25px; text-align: left; background: #f8fafc; padding: 24px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); animation: slideUp 0.3s ease;">
+                </div>
                 
-                <div class="input-group" id="input-group">
-                    <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" disabled>
+                <div class="input-group" id="input-group" style="display: flex; gap: 12px; align-items: stretch;">
+                    <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" disabled style="flex: none; width: 50%; transition: all 0.3s ease;">
                     <button id="submit-btn" disabled>제출</button>
                     <button id="show-answer-btn" class="btn-secondary" disabled>정답 보기</button>
+                    
+                    <button id="next-btn" style="display: none; flex: 1; background-color: #3b82f6; color: white; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; white-space: nowrap; animation: fadeIn 0.2s ease;">다음 ➔</button>
                 </div>
-
-                <div id="inline-stats-container" style="display: none; margin-top: 25px; text-align: left; background: #f8fafc; padding: 24px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); animation: slideUp 0.3s ease;">
-                    </div>
-                
-                <button id="next-btn" style="display: none; width: 100%; margin-top: 15px; background-color: #3b82f6; color: white; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; animation: slideUp 0.3s ease;">다음 문장으로 ➔</button>
             </div>
-
             <div class="quiz-container result-screen" id="result-box">
                 <h2>🎉 오늘의 미션 완료!</h2>
                 <div class="stats">
@@ -207,8 +205,17 @@
             const statRef = doc(db, "word_stats", wordTarget);
             try {
                 const safeAnswer = userAnswer.replace(/[\.\#\$\/\[\]]/g, "") || "알수없음";
-                await setDoc(statRef, { [`answers.${safeAnswer}`]: increment(1), total: increment(1) }, { merge: true });
-            } catch (error) {}
+                
+                await setDoc(statRef, { 
+                    answers: {
+                        [safeAnswer]: increment(1) // 👈 정확하게 answers 폴더 안으로 넣도록 수정
+                    }, 
+                    total: increment(1) 
+                }, { merge: true });
+                
+            } catch (error) {
+                console.error("통계 저장 실패:", error);
+            }
         }
 
         async function fetchQuizData() {
@@ -233,8 +240,19 @@
             updateDashboard();
                     
             document.getElementById('inline-stats-container').style.display = 'none';
-            document.getElementById('next-btn').style.display = 'none';
-            inputGroup.style.display = 'flex'; 
+            
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            const showAnswerBtn = document.getElementById('show-answer-btn');
+            
+            // UI 초기화: 다음 버튼 숨기고 기존 버튼 살리기
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'inline-block';
+            showAnswerBtn.style.display = 'inline-block';
+            
+            // 입력창 비율 원래대로 (50% 넓이)
+            inputEl.style.flex = 'none';
+            inputEl.style.width = '50%';
 
             if (quizQueue.length === 0) { 
                 dashboard.style.display = 'none'; document.getElementById('quiz-box').style.display = 'none'; 
@@ -254,19 +272,29 @@
         }
 
         // 🌟 수정된 통계 보여주기 함수 (확실한 테두리 패널 느낌 + 헤더 표기)
+        // 🌟 수정된 통계 보여주기 함수
+        // 🌟 수정된 통계 보여주기 함수 (가로 배치 적용)
         async function showInlineStats(currentWordObj) {
             isShowingStats = true;
             const statsContainer = document.getElementById('inline-stats-container');
             const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            const showAnswerBtn = document.getElementById('show-answer-btn');
             const word = currentWordObj.target; const accepts = currentWordObj.accepts || []; 
             
-            inputGroup.style.display = 'none';
+            // 🌟 버튼 전환: 제출/정답 숨기고 다음 버튼 띄우기
+            submitBtn.style.display = 'none';
+            showAnswerBtn.style.display = 'none';
             
-            statsContainer.style.display = 'block';
+            // 🌟 가로 배치: 입력창(2) : 다음버튼(1) 비율
+            inputEl.style.width = 'auto';
+            inputEl.style.flex = '2';
             nextBtn.style.display = 'block';
-            nextBtn.innerHTML = '다음 문장으로 ➔'; 
-            
-            statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">통계 데이터를 불러오는 중...</div>';
+            nextBtn.style.flex = '1';
+            inputEl.disabled = true;
+
+            // 통계창 표시 (입력창 위에 나타남)
+            statsContainer.style.display = 'block';
             nextBtn.focus(); 
 
             try {
@@ -276,10 +304,10 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     const answers = data.answers || {};
-                    const total = data.total || 0;
+                    // 실제 데이터 기반 total 계산
+                    const total = Object.values(answers).reduce((sum, count) => sum + count, 0);
                     const sortedAnswers = Object.entries(answers).sort((a, b) => b[1] - a[1]);
                     
-                    // 💡 [수정] 상단 헤더 부분 및 '표현의 결/비율' 라벨 명확하게 추가!
                     let html = `
                         <div style="font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 15px;">
                             💡 사람들은 이 문장을 어떻게 완성했을까요?
@@ -293,7 +321,6 @@
                     sortedAnswers.forEach(([submittedWord, count]) => {
                         const rate = total > 0 ? Math.round((count / total) * 100) : 0;
                         let badgeHtml = ''; let barColor = ''; let textColor = '';
-
                         if (submittedWord === word) {
                             badgeHtml = '<span style="font-size: 11px; background: #d1fae5; color: #047857; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">정답</span>';
                             barColor = '#10b981'; textColor = '#047857';
@@ -304,8 +331,6 @@
                             badgeHtml = '<span style="font-size: 11px; background: #e2e8f0; color: #475569; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">오답</span>';
                             barColor = '#94a3b8'; textColor = '#475569';
                         }
-
-                        // [수정] 막대그래프 배경을 흰색으로 하여 회색 패널 위에서 돋보이게 처리
                         html += `
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                                 <div style="width: 140px; display: flex; align-items: center;">
@@ -326,40 +351,71 @@
                     statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">아직 통계 데이터가 없습니다.</div>';
                 }
             } catch (error) {
+                console.error("🔥 통계 로드 실패:", error);
                 statsContainer.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:14px; padding: 20px 0;">통계를 불러오지 못했습니다.</div>';
             }
         }
 
-        function checkAnswer() {
+        // 🌟 async를 붙여서 '기다림(await)' 기능을 쓸 수 있게 만듭니다.
+        // 🌟 정답 및 유의어 판별 로직 (피드백 강화 버전)
+        async function checkAnswer() {
             if (quizQueue.length === 0 || isWaiting) return;
             const userAnswer = inputEl.value.trim();
             if (userAnswer === "") return; 
 
+            isWaiting = true; 
             const currentWord = quizQueue[0];
-            recordWordStat(currentWord.target, userAnswer);
+            
+            // 데이터 저장 대기
+            await recordWordStat(currentWord.target, userAnswer);
 
-            if (userAnswer === currentWord.target || (currentWord.accepts && currentWord.accepts.includes(userAnswer))) {
-                isWaiting = true;
-                const isCorrect = userAnswer === currentWord.target;
-                inputGroup.classList.remove('wrong', 'show-answer'); 
-                inputGroup.classList.add(isCorrect ? 'correct' : 'synonym');
+            // 1. 완전 정답인 경우
+            if (userAnswer === currentWord.target) {
+                inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); 
+                inputGroup.classList.add('correct');
                 
-                inputEl.value = isCorrect ? currentWord.target : `${userAnswer} (정답: ${currentWord.target})`;
-                const color = isCorrect ? '#10b981' : '#3b82f6';
-                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:${color}; font-weight:800;">${currentWord.target}</span>`);
+                inputEl.value = currentWord.target;
+                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#10b981; font-weight:800;">${currentWord.target}</span>`);
                 
                 if (!hasFailedCurrent) currentExp += 20; 
                 quizQueue.shift(); completedQuestions++;
                 updateDashboard(); 
                 showInlineStats(currentWord);
 
-            } else {
-                inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); void inputGroup.offsetWidth; 
-                inputGroup.classList.add('wrong'); inputEl.value = ''; inputEl.placeholder = '다시 시도해보세요!';
+            } 
+            // 2. 유의어인 경우 (사용자가 입력한 답과 의도한 답을 함께 표시)
+            else if (currentWord.accepts && currentWord.accepts.includes(userAnswer)) {
+                inputGroup.classList.remove('wrong', 'show-answer', 'correct'); 
+                inputGroup.classList.add('synonym');
+                
+                // 🌟 입력창에 "입력답 (정답: 의도한답)" 형식으로 표시하고 알림 메시지 제공
+                inputEl.value = `${userAnswer} (정답: ${currentWord.target})`;
+                inputEl.placeholder = "유의어이므로 정답 처리되었습니다!"; 
+                
+                // 유의어는 파란색 계열로 표시
+                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${currentWord.target}</span>`);
+                
+                if (!hasFailedCurrent) currentExp += 20;
+                quizQueue.shift(); completedQuestions++;
+                updateDashboard(); 
+                showInlineStats(currentWord);
+
+            } 
+            // 3. 오답인 경우
+            else {
+                inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); 
+                void inputGroup.offsetWidth; // 애니메이션 리셋을 위한 트릭
+                inputGroup.classList.add('wrong'); 
+                inputEl.value = ''; 
+                inputEl.placeholder = '다시 시도해보세요!';
+                
                 if (!hasFailedCurrent) {
-                    hasFailedCurrent = true; totalQuestions++; retryCount++;
+                    hasFailedCurrent = true; 
+                    totalQuestions++; 
+                    retryCount++;
                     quizQueue.push({...currentWord}); 
                 }
+                isWaiting = false; // 다시 입력할 수 있도록 잠금 해제
             }
         }
 
@@ -396,10 +452,11 @@
         document.getElementById("logout-btn").addEventListener("click", () => {
             if(confirm("로그아웃 하시겠습니까?")) signOut(auth).then(() => location.reload());
         });
-
+        /*
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(console.error));
         }
+        */
     </script>
 </body>
 </html>
