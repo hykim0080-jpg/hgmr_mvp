@@ -54,7 +54,18 @@
         <br><br>
         <button id="anon-login-btn" style="background-color: #94a3b8;">로그인 없이 시작하기</button>
     </div>
-    
+    <div id="setup-screen" style="display: none; text-align: center; margin-top: 50px;">
+        <h2 style="color: #1e293b;">오늘 몇 단어를 학습할까요?</h2>
+        <div style="margin: 30px 0; display: flex; justify-content: center; gap: 15px;">
+            <button class="target-btn" onclick="startSession(10)">10개</button>
+            <button class="target-btn" onclick="startSession(20)">20개</button>
+            <button class="target-btn" onclick="startSession(30)">30개</button>
+        </div>
+        <style>
+            .target-btn { padding: 20px 40px; font-size: 18px; background: white; border: 2px solid #e2e8f0; border-radius: 16px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+            .target-btn:hover { border-color: #10b981; color: #10b981; transform: translateY(-2px); }
+        </style>
+    </div>
     <div id="app-screen" style="display: none;">
         
         <div id="profile-section" style="position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 10px; background: white; padding: 8px 16px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 100;">
@@ -167,33 +178,92 @@
             }
         });
 
+        let dailyTarget = 0;
+
         async function initApp() {
             try {
                 const docSnap = await getDoc(userDocRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    currentExp = data.exp || 0; streakDays = data.streak || 1; lastDate = data.last_date || null;
-                    userNickname = data.nickname || (auth.currentUser.isAnonymous ? "익명 사용자" : auth.currentUser.displayName || "유저");
-                    userEmoji = data.emoji || (auth.currentUser.isAnonymous ? "👻" : "⭐");
-                } else {
-                    currentExp = 0;
-                    userNickname = auth.currentUser.isAnonymous ? "익명 사용자" : auth.currentUser.displayName || "유저";
-                    userEmoji = auth.currentUser.isAnonymous ? "👻" : "⭐";
-                    await syncUserData(); 
-                }
-
+                const data = docSnap.exists() ? docSnap.data() : {};
+                
+                // 기본 유저 정보 로드
+                currentExp = data.exp || 0;
+                streakDays = data.streak || 1;
+                userNickname = data.nickname || (auth.currentUser.isAnonymous ? "익명 사용자" : auth.currentUser.displayName);
+                userEmoji = data.emoji || "⭐";
+                
                 document.getElementById('display-nickname').textContent = userNickname;
                 document.getElementById('display-emoji').textContent = userEmoji;
 
-                const today = new Date().toLocaleDateString();
-                if (lastDate !== today) {
-                    let yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-                    if (lastDate === yesterday.toLocaleDateString()) streakDays++; 
-                    else if (lastDate !== null) streakDays = 1; 
-                    lastDate = today; await syncUserData();
+                // 🌟 기존 학습 진행도가 있는지 확인
+                if (data.current_session && data.current_session.quizQueue.length > 0) {
+                    if (confirm("이전에 학습하던 내용이 있습니다. 이어서 하시겠습니까?")) {
+                        quizQueue = data.current_session.quizQueue;
+                        dailyTarget = data.current_session.dailyTarget;
+                        completedQuestions = data.current_session.completedQuestions;
+                        totalQuestions = dailyTarget;
+                        
+                        document.getElementById('setup-screen').style.display = 'none';
+                        document.getElementById('app-screen').style.display = 'block';
+                        loadQuestion();
+                        return;
+                    }
                 }
-                await fetchQuizData();
-            } catch (error) { sentenceEl.textContent = "연결 실패"; }
+
+                // 진행도가 없거나 새로 시작할 경우 목표 설정 화면 표시
+                document.getElementById('setup-screen').style.display = 'block';
+                document.getElementById('app-screen').style.display = 'none';
+
+            } catch (error) { console.error(error); }
+        }
+
+        // 🌟 배열을 무작위로 섞어주는 마법의 함수 (Fisher-Yates Shuffle) - 이 함수는 그대로 둡니다.
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 🌟 세션 시작: 레벨 무시하고 완전 랜덤 추출
+        async function startSession(target) {
+            dailyTarget = target;
+            completedQuestions = 0;
+            totalQuestions = target; // 진행률 바 계산을 위한 총 목표치
+
+            try {
+                const response = await fetch('words.json');
+                const rawData = await response.json();
+                
+                // 🌟 핵심 변경: 복잡한 레벨 정렬을 없애고, 
+                // 전체 단어를 통째로 섞은 뒤 오늘 목표 개수(target)만큼만 딱 잘라옵니다.
+                quizQueue = shuffleArray(rawData).slice(0, target);
+
+                // 화면 전환
+                document.getElementById('setup-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                
+                // 파이어베이스에 새로운 세션 저장 후 첫 문제 로드
+                await syncProgress(); 
+                loadQuestion();
+                
+            } catch (error) {
+                console.error("단어 데이터를 불러오는데 실패했습니다:", error);
+                alert("단어 데이터를 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.");
+            }
+        }
+        window.startSession = startSession;
+
+        // 🌟 파이어베이스에 현재 진행도 실시간 저장
+        async function syncProgress() {
+            await setDoc(userDocRef, {
+                exp: currentExp,
+                current_session: {
+                    quizQueue: quizQueue,
+                    dailyTarget: dailyTarget,
+                    completedQuestions: completedQuestions
+                }
+            }, { merge: true });
         }
 
         async function syncUserData() {
@@ -218,13 +288,6 @@
             }
         }
 
-        async function fetchQuizData() {
-            try {
-                const response = await fetch('words.json'); quizQueue = await response.json(); 
-                totalQuestions = quizQueue.length;
-                loadQuestion(); 
-            } catch (error) { sentenceEl.textContent = "데이터 로드 실패"; }
-        }
 
         function updateDashboard() {
             const currentLevel = Math.floor(currentExp / 200) + 1; const expInLevel = currentExp % 200; 
@@ -255,6 +318,7 @@
             inputEl.style.width = '50%';
 
             if (quizQueue.length === 0) { 
+                setDoc(userDocRef, {current_session: null}, {merge: true});
                 dashboard.style.display = 'none'; document.getElementById('quiz-box').style.display = 'none'; 
                 document.getElementById('result-box').style.display = 'block';
                 document.getElementById('final-exp').textContent = currentExp; document.getElementById('retry-count').textContent = retryCount;
@@ -266,13 +330,13 @@
             meaningEl.innerHTML = `<span class="level-badge">Lv.${currentWord.level}</span>💡 ${currentWord.meaning}`;
             inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group';
             
+            const progress = (completedQuestions / dailyTarget) * 100;
             inputEl.disabled = false; submitBtn.disabled = false; showAnswerBtn.disabled = false;
             progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
             inputEl.focus();
         }
 
-        // 🌟 수정된 통계 보여주기 함수 (확실한 테두리 패널 느낌 + 헤더 표기)
-        // 🌟 수정된 통계 보여주기 함수
+        
         // 🌟 수정된 통계 보여주기 함수 (가로 배치 적용)
         async function showInlineStats(currentWordObj) {
             isShowingStats = true;
@@ -306,7 +370,7 @@
                     const answers = data.answers || {};
                     // 실제 데이터 기반 total 계산
                     const total = Object.values(answers).reduce((sum, count) => sum + count, 0);
-                    const sortedAnswers = Object.entries(answers).sort((a, b) => b[1] - a[1]);
+                    const sortedAnswers = Object.entries(answers).sort((a, b) => b[1] - a[1]).slice(0,5);
                     
                     let html = `
                         <div style="font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 15px;">
@@ -354,6 +418,19 @@
                 console.error("🔥 통계 로드 실패:", error);
                 statsContainer.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:14px; padding: 20px 0;">통계를 불러오지 못했습니다.</div>';
             }
+        }
+
+        function handleReinsertion(wordObj) {
+            // 🌟 3에서 6 사이의 랜덤한 간격 결정
+            const minGap = 3;
+            const maxGap = 6;
+            const gap = Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
+            
+            // 현재 남은 문제 수보다 간격이 길면 맨 마지막에 넣음
+            const insertIndex = Math.min(quizQueue.length, gap);
+            quizQueue.splice(insertIndex, 0, {...wordObj});
+            
+            syncProgress(); // 복습 예약된 큐 상태 저장
         }
 
         // 🌟 async를 붙여서 '기다림(await)' 기능을 쓸 수 있게 만듭니다.
@@ -411,9 +488,8 @@
                 
                 if (!hasFailedCurrent) {
                     hasFailedCurrent = true; 
-                    totalQuestions++; 
                     retryCount++;
-                    quizQueue.push({...currentWord}); 
+                    handleReinsertion(currentWord);
                 }
                 isWaiting = false; // 다시 입력할 수 있도록 잠금 해제
             }
@@ -426,7 +502,11 @@
             inputEl.value = currentWord.target; inputEl.disabled = true;
             sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${currentWord.target}</span>`);
             
-            if (!hasFailedCurrent) { hasFailedCurrent = true; totalQuestions++; retryCount++; quizQueue.push({...currentWord}); }
+            if (!hasFailedCurrent) { 
+                hasFailedCurrent = true;  
+                retryCount++; 
+                handleReinsertion(currentWord);
+            }
             quizQueue.shift();
             showInlineStats(currentWord);
         }
