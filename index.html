@@ -3,9 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <title>한글마루</title>
     <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
         body {
             background-color: #f1f5f9;
             font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
@@ -14,6 +20,8 @@
             align-items: center;
             height: 100vh;
             margin: 0;
+            overscroll-behavior: none;
+            /* 고무줄 바운스 현상 방지 */
         }
 
         .app-wrapper {
@@ -304,7 +312,7 @@
     <div id="app-screen" style="display: none;">
 
         <div id="profile-section"
-            style="position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 10px; background: white; padding: 8px 16px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 100;">
+            style="position: absolute; top: calc(20px + env(safe-area-inset-top)); right: calc(20px + env(safe-area-inset-right)); display: flex; align-items: center; gap: 10px; background: white; padding: 8px 16px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 100;">
             <div id="edit-profile-trigger"
                 style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding-right: 12px; border-right: 2px solid #f1f5f9; transition: opacity 0.2s;"
                 onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
@@ -468,64 +476,60 @@
                     </p>
                 </div>
 
-                <!-- 📊 모바일 앱 스타일 대시보드 성과 피드 -->
+                <!-- 모바일 앱 스타일 대시보드 성과 피드 -->
                 <div
-                    style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 22px 18px; border-radius: 24px; text-align: left; margin-bottom: 28px; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.18); border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden;">
+                    style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); color: #1e293b; padding: 22px 18px; border-radius: 24px; text-align: left; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04); border: 1px solid #cbd5e1; position: relative; overflow: hidden;">
                     <div
-                        style="position: absolute; right: -15px; bottom: -15px; font-size: 80px; opacity: 0.04; user-select: none;">
-                        📈</div>
-                    <div
-                        style="font-size: 13px; opacity: 0.8; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
-                        <span>📊 학습 분석 요약 피드</span>
+                        style="font-size: 13px; color: #475569; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
+                        <span>학습 분석 요약 피드</span>
                     </div>
 
                     <!-- 2x2 모바일 통계 그리드 -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
                         <div
-                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px;">
+                            style="background: white; border: 1px solid #cbd5e1; padding: 12px 14px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
-                                style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">🔥
-                                연속 학습</span>
-                            <strong style="font-size: 18px; color: #f59e0b; font-weight: 800;"
+                                style="font-size: 11px; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">연속
+                                학습</span>
+                            <strong style="font-size: 18px; color: #d97706; font-weight: 800;"
                                 id="home-streak-text">-일차</strong>
                         </div>
                         <div
-                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px;">
+                            style="background: white; border: 1px solid #cbd5e1; padding: 12px 14px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
-                                style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">✅
-                                학습 어휘</span>
-                            <strong style="font-size: 18px; color: #10b981; font-weight: 800;"
+                                style="font-size: 11px; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">학습
+                                어휘</span>
+                            <strong style="font-size: 18px; color: #059669; font-weight: 800;"
                                 id="home-words-text">0개</strong>
                         </div>
                         <div
-                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px;">
+                            style="background: white; border: 1px solid #cbd5e1; padding: 12px 14px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
-                                style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">🎯
-                                평균 정답률</span>
-                            <strong style="font-size: 18px; color: #3b82f6; font-weight: 800;"
+                                style="font-size: 11px; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">평균
+                                정답률</span>
+                            <strong style="font-size: 18px; color: #2563eb; font-weight: 800;"
                                 id="home-accuracy-text">100%</strong>
                         </div>
                         <div id="home-badges-card"
-                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s;"
-                            onmouseover="this.style.background='rgba(255,255,255,0.1)'"
-                            onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                            style="background: white; border: 1px solid #cbd5e1; padding: 12px 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.01);"
+                            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">
                             <span
-                                style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">🏆
-                                업적 달성</span>
-                            <strong style="font-size: 18px; color: #f59e0b; font-weight: 800;"
+                                style="font-size: 11px; color: #64748b; font-weight: bold; display: block; margin-bottom: 4px;">업적
+                                달성</span>
+                            <strong style="font-size: 18px; color: #d97706; font-weight: 800;"
                                 id="home-badges-text">0개</strong>
                         </div>
                     </div>
 
                     <!-- 성과 카드의 레벨 바 -->
-                    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 14px;">
+                    <div style="border-top: 1px solid #cbd5e1; padding-top: 14px;">
                         <div
-                            style="display: flex; justify-content: space-between; font-size: 11px; opacity: 0.85; font-weight: 800; margin-bottom: 6px;">
+                            style="display: flex; justify-content: space-between; font-size: 11px; color: #475569; font-weight: 800; margin-bottom: 6px;">
                             <span>다음 레벨 진척도</span>
                             <span><span id="home-exp-text">0</span> / 200 EXP</span>
                         </div>
                         <div
-                            style="width: 100%; height: 6px; background-color: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden;">
+                            style="width: 100%; height: 6px; background-color: #cbd5e1; border-radius: 3px; overflow: hidden;">
                             <div class="exp-fill" id="home-exp-bar"
                                 style="width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.5s ease;">
                             </div>
@@ -636,6 +640,16 @@
                 document.getElementById("app-screen").style.display = "none";
             }
         });
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
 
         let dailyTarget = 0;
         let targetWordCount = 30;
@@ -795,7 +809,8 @@
         async function recordWordStat(wordTarget, userAnswer) {
             const statRef = doc(db, "word_stats", wordTarget);
             try {
-                const safeAnswer = userAnswer.replace(/[\.\#\$\/\[\]]/g, "") || "알수없음";
+                const cleanedAnswer = (userAnswer || "").trim().substring(0, 30);
+                const safeAnswer = cleanedAnswer.replace(/[\.\#\$\/\[\]]/g, "") || "알수없음";
 
                 await setDoc(statRef, {
                     answers: {
@@ -1101,7 +1116,7 @@
                         html += `
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                                 <div style="width: 140px; display: flex; align-items: center;">
-                                    <span style="font-size: 15px; font-weight: bold; color: ${textColor}; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${submittedWord}</span>
+                                    <span style="font-size: 15px; font-weight: bold; color: ${textColor}; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(submittedWord)}</span>
                                     ${badgeHtml}
                                 </div>
                                 <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end;">

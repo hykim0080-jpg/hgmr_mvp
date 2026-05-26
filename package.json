@@ -1,0 +1,28 @@
+{
+  "name": "hgmr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "mkdir -p www && cp index.html app.js words.json new_words_draft.json service-worker.js www/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hykim0080-jpg/hgmr_mvp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hykim0080-jpg/hgmr_mvp/issues"
+  },
+  "homepage": "https://github.com/hykim0080-jpg/hgmr_mvp#readme",
+  "devDependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4"
+  }
+}
