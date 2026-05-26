@@ -12,25 +12,135 @@
             user-select: none;
         }
 
-        body {
-            background-color: #f1f5f9;
+        html, body {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            height: -webkit-fill-available;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
             font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            overscroll-behavior: none;
+            overflow: hidden;
+        }
+
+        body {
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overscroll-behavior: none;
-            /* 고무줄 바운스 현상 방지 */
+            align-items: stretch;
+            background-color: #f8fafc;
         }
 
         .app-wrapper {
             width: 100%;
             max-width: 550px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8fafc;
+            position: relative;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* 데스크톱 웹 환경에서 화면 중앙에 스마트폰 기기 프레임 형태로 보이도록 설정 */
+        @media (min-width: 560px) and (min-height: 650px) {
+            body {
+                background-color: #f8fafc;
+            }
+
+            #app-screen {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            /* 상단 헤더의 가로 100% 위치 그대로 보존 */
+            #app-screen > header {
+                width: 100% !important;
+                max-width: 100% !important;
+                flex-shrink: 0;
+                background: white;
+            }
+
+            /* app-wrapper를 화면 한가운데에 카드 형태로 배치하되, 헤더 바로 아래 밀착되도록 설정 */
+            .app-wrapper {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start; /* 세로 위쪽(헤더 바로 아래)에 밀착 */
+                max-width: 100%; /* 웹 브라우저 전체 너비 사용 */
+                height: auto;
+                background-color: #f8fafc;
+                padding: 10px 20px 20px 20px; /* 상단 여백을 10px로 최소화하여 밀착 */
+                box-sizing: border-box;
+            }
+
+            /* 메인 카드 컴포넌트 */
+            .quiz-container {
+                width: 100%;
+                max-width: 480px; /* 전형적인 모바일 웹뷰 가로폭 */
+                height: auto;
+                max-height: calc(100vh - 100px); /* 헤더 바로 아래 밀착되므로 가용 높이 확대하여 스크롤 완전 방지 */
+                margin: 0 auto !important; /* 중앙 정렬 */
+                padding: 30px 24px !important;
+                border-radius: 28px;
+                box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08); /* 고급스러운 부드러운 그림자 */
+                border: 1px solid #e2e8f0;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                overflow: hidden; /* 스크롤바 방지 */
+            }
+
+            /* 카드 안의 큰 텍스트들 높이나 여백 미세 조절하여 데스크톱 뷰포트 내 스크롤 최소화 */
+            .sentence {
+                font-size: 20px; /* 데스크톱에서 약간 슬림하게 */
+                margin-bottom: 12px;
+                min-height: auto;
+            }
+
+            .meaning {
+                font-size: 14px;
+                margin-bottom: 20px;
+                padding: 10px;
+            }
+
+            .progress-bar {
+                margin-bottom: 20px;
+            }
+        }
+
+        #login-screen, #setup-screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: calc(24px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+            box-sizing: border-box;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        #app-screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-sizing: border-box;
+            width: 100%;
+            background-color: #f8fafc;
         }
 
         .dashboard {
-            display: flex;
+            display: none !important;
             justify-content: space-between;
             background-color: #1e293b;
             color: white;
@@ -58,9 +168,17 @@
 
         .quiz-container {
             background-color: white;
-            padding: 40px;
-            border-radius: 0 0 16px 16px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            margin: 16px calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+            padding: 24px 20px;
+            border-radius: 24px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+            border: 1px solid #e2e8f0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+            box-sizing: border-box;
             position: relative;
         }
 
@@ -100,8 +218,10 @@
             padding: 12px;
             border-radius: 8px;
             display: inline-block;
-            line-height: 1.4;
+            line-height: 1.6;
             text-align: left;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .level-badge {
@@ -277,13 +397,13 @@
 </head>
 
 <body>
-    <div id="login-screen" style="text-align: center; margin-top: 50px;">
+    <div id="login-screen">
         <h1 style="color: #1e293b;">한글마루</h1>
         <button id="google-login-btn" style="background-color: #3b82f6;">구글 계정으로 시작하기</button>
         <br><br>
         <button id="anon-login-btn" style="background-color: #94a3b8;">로그인 없이 시작하기</button>
     </div>
-    <div id="setup-screen" style="display: none; text-align: center; margin-top: 50px;">
+    <div id="setup-screen" style="display: none;">
         <h2 style="color: #1e293b;">오늘 몇 단어를 학습할까요?</h2>
         <div style="margin: 30px 0; display: flex; justify-content: center; gap: 15px;">
             <button class="target-btn" onclick="startSession(10)">10개</button>
@@ -311,20 +431,21 @@
     </div>
     <div id="app-screen" style="display: none;">
 
-        <div id="profile-section"
-            style="position: absolute; top: calc(20px + env(safe-area-inset-top)); right: calc(20px + env(safe-area-inset-right)); display: flex; align-items: center; gap: 10px; background: white; padding: 8px 16px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 100;">
-            <div id="edit-profile-trigger"
-                style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding-right: 12px; border-right: 2px solid #f1f5f9; transition: opacity 0.2s;"
-                onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
-                <span id="display-emoji" style="font-size: 22px;">⭐</span>
-                <span id="display-nickname" style="font-weight: bold; color: #334155;">로딩중...</span>
-                <span style="font-size: 12px; color: #94a3b8;">✏️</span>
+        <!-- 🌟 상단 네비게이션 헤더 바 (iOS Safe Area 지원) -->
+        <header style="display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top)) 20px 12px 20px; background: white; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 100; box-sizing: border-box; width: 100%;">
+            <div style="font-size: 20px; font-weight: 900; background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px;">한글마루</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div id="edit-profile-trigger" style="cursor: pointer; display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0; transition: all 0.2s;"
+                    onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
+                    <span id="display-emoji" style="font-size: 16px;">⭐</span>
+                    <span id="display-nickname" style="font-weight: bold; color: #334155; font-size: 13px;">로딩중...</span>
+                    <span style="font-size: 11px; color: #94a3b8;">✏️</span>
+                </div>
+                <button id="logout-btn" style="padding: 6px 12px; font-size: 12px; background-color: transparent; color: #ef4444; border: 1px solid #fee2e2; border-radius: 20px; cursor: pointer; font-weight: bold; height: auto; line-height: 1.2; transition: all 0.2s;"
+                    onmouseover="this.style.background='#fef2f2'"
+                    onmouseout="this.style.background='transparent'">로그아웃</button>
             </div>
-            <button id="logout-btn"
-                style="padding: 6px 12px; font-size: 13px; background-color: transparent; color: #ef4444; border: 1px solid #fee2e2; border-radius: 20px; cursor: pointer; font-weight: bold; transition: background 0.2s;"
-                onmouseover="this.style.background='#fef2f2'"
-                onmouseout="this.style.background='transparent'">로그아웃</button>
-        </div>
+        </header>
 
         <div id="profile-modal"
             style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
@@ -569,9 +690,9 @@
                     style="display: none; margin-bottom: 25px; text-align: left; background: #f8fafc; padding: 24px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); animation: slideUp 0.3s ease;">
                 </div>
 
-                <div class="input-group" id="input-group" style="display: flex; gap: 12px; align-items: stretch;">
+                <div class="input-group" id="input-group" style="display: flex; gap: 12px; align-items: stretch; width: 100%; box-sizing: border-box;">
                     <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" disabled
-                        style="flex: none; width: 50%; transition: all 0.3s ease;">
+                        style="flex: 1; min-width: 0; transition: all 0.3s ease;">
                     <button id="submit-btn" disabled>제출</button>
                     <button id="show-answer-btn" class="btn-secondary" disabled>정답 보기</button>
 
@@ -594,7 +715,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, increment, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getAuth, initializeAuth, indexedDBLocalPersistence, GoogleAuthProvider, signInWithPopup, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDSSvJSfL0B8lRflALTZvKjcoDRsYE01Sg",
@@ -609,7 +730,16 @@
         const db = getFirestore(app);
 
         enableIndexedDbPersistence(db).catch((err) => console.log("오프라인 모드 실패:", err.code));
-        const auth = getAuth(app);
+        let auth;
+        try {
+            auth = initializeAuth(app, {
+                persistence: indexedDBLocalPersistence
+            });
+            console.log("Firebase Auth IndexedDB로 초기화 성공!");
+        } catch (error) {
+            auth = getAuth(app);
+            console.log("Firebase Auth 기존 인스턴스 획득:", auth);
+        }
 
         let userDocRef;
         let userNickname = ""; let userEmoji = ""; let currentExp = 0; let streakDays = 1; let lastDate = null;
@@ -626,17 +756,34 @@
         const showAnswerBtn = document.getElementById('show-answer-btn'); const inputGroup = document.getElementById('input-group');
         const progressEl = document.getElementById('progress'); const dashboard = document.getElementById('dashboard');
 
-        document.getElementById("google-login-btn").addEventListener("click", () => signInWithPopup(auth, new GoogleAuthProvider()));
-        document.getElementById("anon-login-btn").addEventListener("click", () => signInAnonymously(auth));
+        document.getElementById("google-login-btn").addEventListener("click", () => {
+            console.log("구글 로그인 버튼 클릭됨!");
+            alert("구글 로그인 버튼 클릭됨!");
+            signInWithPopup(auth, new GoogleAuthProvider())
+                .catch((error) => {
+                    console.error("구글 로그인 에러:", error);
+                    alert("구글 로그인 실패: " + error.message);
+                });
+        });
+        document.getElementById("anon-login-btn").addEventListener("click", () => {
+            console.log("익명 로그인 버튼 클릭됨!");
+            alert("익명 로그인 버튼 클릭됨!");
+            signInAnonymously(auth)
+                .then((cred) => console.log("익명 로그인 성공:", cred.user.uid))
+                .catch((error) => {
+                    console.error("익명 로그인 에러:", error);
+                    alert("익명 로그인 실패: " + error.message);
+                });
+        });
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById("login-screen").style.display = "none";
-                document.getElementById("app-screen").style.display = "block";
+                document.getElementById("app-screen").style.display = "flex";
                 userDocRef = doc(db, "users", user.uid);
                 initApp();
             } else {
-                document.getElementById("login-screen").style.display = "block";
+                document.getElementById("login-screen").style.display = "flex";
                 document.getElementById("app-screen").style.display = "none";
             }
         });
@@ -705,7 +852,7 @@
                         totalQuestions = dailyTarget;
 
                         document.getElementById('setup-screen').style.display = 'none';
-                        document.getElementById('app-screen').style.display = 'block';
+                        document.getElementById('app-screen').style.display = 'flex';
                         document.getElementById('home-box').style.display = 'none';
                         document.getElementById('dashboard').style.display = 'flex';
                         await loadQuestion();
@@ -716,7 +863,10 @@
                 // 진행도가 없거나 새로 시작할 경우 홈 화면 표시
                 showHomeScreen();
 
-            } catch (error) { console.error(error); }
+            } catch (error) { 
+                console.error("앱 초기화 에러:", error); 
+                alert("앱 초기화 중 오류가 발생했습니다: " + error.message); 
+            }
         }
 
         // 날짜 간격 계산을 위한 헬퍼 함수
@@ -774,7 +924,7 @@
                 // 화면 전환
                 document.getElementById('setup-screen').style.display = 'none';
                 document.getElementById('home-box').style.display = 'none';
-                document.getElementById('app-screen').style.display = 'block';
+                document.getElementById('app-screen').style.display = 'flex';
                 document.getElementById('dashboard').style.display = 'flex';
 
                 // 파이어베이스에 새로운 세션 저장 후 첫 문제 로드
@@ -844,7 +994,7 @@
 
         function showHomeScreen() {
             document.getElementById('setup-screen').style.display = 'none';
-            document.getElementById('app-screen').style.display = 'block';
+            document.getElementById('app-screen').style.display = 'flex';
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('quiz-box').style.display = 'none';
             document.getElementById('result-box').style.display = 'none';
@@ -975,9 +1125,9 @@
             submitBtn.style.display = 'inline-block';
             showAnswerBtn.style.display = 'inline-block';
 
-            // 입력창 비율 원래대로 (50% 넓이)
-            inputEl.style.flex = 'none';
-            inputEl.style.width = '50%';
+            // 입력창 비율 원래대로 (가로 풀 사이즈 자동 반응)
+            inputEl.style.flex = '1';
+            inputEl.style.width = 'auto';
 
             if (quizQueue.length === 0) {
                 // 1. 연속 학습일(스트릭) 및 마지막 학습일 계산
@@ -1045,7 +1195,22 @@
             const currentWord = quizQueue[0];
             hasFailedCurrent = currentWord.failed ? true : false;
             sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
-            meaningEl.innerHTML = `<span class="level-badge">Lv.${currentWord.level}</span>💡 ${currentWord.meaning}`;
+            
+            // 🌟 뜻풀이(Meaning) 유동형 자동 폰트 스케일러 (Dynamic Meaning Font Scaler)
+            // 뜻풀이 글자 수에 따라 폰트 크기와 줄간격을 유동적으로 조절하여 가독성을 높입니다.
+            const meaningLength = currentWord.meaning.length;
+            if (meaningLength > 40) {
+                meaningEl.style.fontSize = "13px";
+                meaningEl.style.lineHeight = "1.6";
+            } else if (meaningLength > 25) {
+                meaningEl.style.fontSize = "14px";
+                meaningEl.style.lineHeight = "1.6";
+            } else {
+                meaningEl.style.fontSize = "15px";
+                meaningEl.style.lineHeight = "1.7";
+            }
+
+            meaningEl.innerHTML = `<span class="level-badge">Lv.${currentWord.level}</span>${currentWord.meaning}`;
             inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group';
 
             const progress = (completedQuestions / dailyTarget) * 100;
@@ -1092,7 +1257,7 @@
 
                     let html = `
                         <div style="font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 15px;">
-                            💡 사람들은 이 문장을 어떻게 완성했을까요?
+                            사람들은 이 문장을 어떻게 완성했을까요?
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8; font-weight: bold; border-bottom: 2px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 15px;">
                             <span style="margin-left: 5px;">표현</span>
@@ -1260,6 +1425,20 @@
         document.getElementById('next-btn').addEventListener('click', loadQuestion);
         document.getElementById('start-study-btn').addEventListener('click', () => startSession(targetWordCount));
         inputEl.addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAnswer(); });
+        inputEl.addEventListener('focus', () => {
+            // iOS WebKit 환경에서 키보드가 나타날 때 전체 뷰포트가 스크롤되어 상단 헤더가 Notch 뒤로 밀려나는 현상을 완전히 방지합니다.
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.body.scrollTop = 0;
+            }, 80);
+        });
+
+        // 윈도우 스크롤 강제 고정 (WebKit 키보드 밀림 무력화)
+        window.addEventListener('scroll', () => {
+            if (window.scrollY !== 0 || window.scrollX !== 0) {
+                window.scrollTo(0, 0);
+            }
+        }, { passive: true });
 
         document.getElementById('edit-profile-trigger').addEventListener('click', () => {
             document.getElementById('input-nickname').value = userNickname;
