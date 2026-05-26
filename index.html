@@ -1,71 +1,273 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>한글마루</title>
     <style>
-        body { background-color: #f1f5f9; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .app-wrapper { width: 100%; max-width: 550px; }
-        
-        .dashboard { display: flex; justify-content: space-between; background-color: #1e293b; color: white; padding: 15px 25px; border-radius: 16px 16px 0 0; font-weight: bold; font-size: 14px; }
-        .exp-bar-container { width: 100px; height: 8px; background-color: #475569; border-radius: 4px; margin-top: 5px; overflow: hidden; }
-        .exp-fill { height: 100%; background-color: #f59e0b; width: 0%; transition: width 0.5s ease; }
-        
-        .quiz-container { background-color: white; padding: 40px; border-radius: 0 0 16px 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); position: relative; }
-        .progress-bar { width: 100%; height: 6px; background-color: #e2e8f0; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
-        .progress-fill { height: 100%; background-color: #10b981; width: 0%; transition: width 0.3s ease; }
-        
-        /* 문장 및 의미 왼쪽 정렬 */
-        .sentence { font-size: 22px; font-weight: bold; color: #1e293b; margin-bottom: 15px; line-height: 1.6; word-break: keep-all; min-height: 90px; text-align: left; }
-        .meaning { font-size: 15px; color: #64748b; margin-bottom: 30px; background-color: #f8fafc; padding: 12px; border-radius: 8px; display: inline-block; line-height: 1.4; text-align: left; }
-        .level-badge { background-color: #3b82f6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-right: 8px; vertical-align: middle; }
-        
-        .input-group { display: flex; gap: 8px; justify-content: center; }
-        input[type="text"] { padding: 15px 20px; font-size: 18px; border: 2px solid #cbd5e1; border-radius: 12px; width: 50%; text-align: center; outline: none; transition: all 0.2s; font-weight: bold; }
-        input[type="text"]:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
-        button { padding: 15px 20px; font-size: 16px; font-weight: bold; color: white; background-color: #10b981; border: none; border-radius: 12px; cursor: pointer; transition: background-color 0.2s; white-space: nowrap; }
-        button:hover { background-color: #059669; }
-        button.btn-secondary { background-color: #94a3b8; }
-        button.btn-secondary:hover { background-color: #64748b; }
-        
-        .correct input { border-color: #10b981; background-color: #ecfdf5; color: #047857; }
-        .synonym input { border-color: #3b82f6; background-color: #eff6ff; color: #1d4ed8; }
-        .wrong input { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        .show-answer input { border-color: #ef4444; background-color: #fef2f2; color: #b91c1c; }
-        
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
+        body {
+            background-color: #f1f5f9;
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-        
-        .result-screen { display: none; text-align: center; }
-        .result-screen h2 { color: #10b981; margin-bottom: 10px; }
-        .result-screen .stats { font-size: 18px; color: #475569; margin-bottom: 30px; line-height: 1.6; }
+
+        .app-wrapper {
+            width: 100%;
+            max-width: 550px;
+        }
+
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+            background-color: #1e293b;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 16px 16px 0 0;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .exp-bar-container {
+            width: 100px;
+            height: 8px;
+            background-color: #475569;
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .exp-fill {
+            height: 100%;
+            background-color: #f59e0b;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .quiz-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #10b981;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* 문장 및 의미 왼쪽 정렬 */
+        .sentence {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            word-break: keep-all;
+            min-height: 90px;
+            text-align: left;
+        }
+
+        .meaning {
+            font-size: 15px;
+            color: #64748b;
+            margin-bottom: 30px;
+            background-color: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            display: inline-block;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .level-badge {
+            background-color: #3b82f6;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        input[type="text"] {
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            width: 50%;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        input[type="text"]:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        button {
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #10b981;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background-color: #059669;
+        }
+
+        button.btn-secondary {
+            background-color: #94a3b8;
+        }
+
+        button.btn-secondary:hover {
+            background-color: #64748b;
+        }
+
+        .correct input {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+            color: #047857;
+        }
+
+        .synonym input {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .wrong input {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+            animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        .show-answer input {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+            color: #b91c1c;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .result-screen h2 {
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+
+        .result-screen .stats {
+            font-size: 18px;
+            color: #475569;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
 
         @keyframes breathe {
-            0% { transform: scale(1); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); }
-            50% { transform: scale(1.04); box-shadow: 0 15px 40px rgba(59, 130, 246, 0.35); }
-            100% { transform: scale(1); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); }
+            0% {
+                transform: scale(1);
+                box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+            }
+
+            50% {
+                transform: scale(1.04);
+                box-shadow: 0 15px 40px rgba(59, 130, 246, 0.35);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+            }
         }
+
         .avatar-glow {
             animation: breathe 4s ease-in-out infinite;
         }
+
         .badge-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .badge-card:hover {
             transform: translateY(-4px) scale(1.05);
         }
+
         .locked-badge {
             filter: grayscale(100%);
             opacity: 0.4;
         }
     </style>
 </head>
+
 <body>
     <div id="login-screen" style="text-align: center; margin-top: 50px;">
         <h1 style="color: #1e293b;">한글마루</h1>
@@ -81,68 +283,114 @@
             <button class="target-btn" onclick="startSession(30)">30개</button>
         </div>
         <style>
-            .target-btn { padding: 20px 40px; font-size: 18px; background: white; border: 2px solid #e2e8f0; border-radius: 16px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
-            .target-btn:hover { border-color: #10b981; color: #10b981; transform: translateY(-2px); }
+            .target-btn {
+                padding: 20px 40px;
+                font-size: 18px;
+                background: white;
+                border: 2px solid #e2e8f0;
+                border-radius: 16px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: all 0.2s;
+            }
+
+            .target-btn:hover {
+                border-color: #10b981;
+                color: #10b981;
+                transform: translateY(-2px);
+            }
         </style>
     </div>
     <div id="app-screen" style="display: none;">
-        
-        <div id="profile-section" style="position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 10px; background: white; padding: 8px 16px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 100;">
-            <div id="edit-profile-trigger" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding-right: 12px; border-right: 2px solid #f1f5f9; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
+
+        <div id="profile-section"
+            style="position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 10px; background: white; padding: 8px 16px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); z-index: 100;">
+            <div id="edit-profile-trigger"
+                style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding-right: 12px; border-right: 2px solid #f1f5f9; transition: opacity 0.2s;"
+                onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
                 <span id="display-emoji" style="font-size: 22px;">⭐</span>
                 <span id="display-nickname" style="font-weight: bold; color: #334155;">로딩중...</span>
                 <span style="font-size: 12px; color: #94a3b8;">✏️</span>
             </div>
-            <button id="logout-btn" style="padding: 6px 12px; font-size: 13px; background-color: transparent; color: #ef4444; border: 1px solid #fee2e2; border-radius: 20px; cursor: pointer; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">로그아웃</button>
+            <button id="logout-btn"
+                style="padding: 6px 12px; font-size: 13px; background-color: transparent; color: #ef4444; border: 1px solid #fee2e2; border-radius: 20px; cursor: pointer; font-weight: bold; transition: background 0.2s;"
+                onmouseover="this.style.background='#fef2f2'"
+                onmouseout="this.style.background='transparent'">로그아웃</button>
         </div>
 
-        <div id="profile-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
-            <div style="background: white; padding: 30px; border-radius: 20px; width: 280px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+        <div id="profile-modal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
+            <div
+                style="background: white; padding: 30px; border-radius: 20px; width: 280px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
                 <h3 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 20px;">프로필 및 학습 설정</h3>
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">나만의 이모티콘</label>
-                    <input type="text" id="input-emoji" maxlength="2" style="font-size: 35px; width: 70px; height: 70px; text-align: center; border: 2px solid #e2e8f0; border-radius: 16px; background: #f8fafc; outline: none;">
+                    <label
+                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">나만의
+                        이모티콘</label>
+                    <input type="text" id="input-emoji" maxlength="2"
+                        style="font-size: 35px; width: 70px; height: 70px; text-align: center; border: 2px solid #e2e8f0; border-radius: 16px; background: #f8fafc; outline: none;">
                 </div>
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">닉네임 (활동명)</label>
-                    <input type="text" id="input-nickname" placeholder="이름을 입력하세요" style="width: 85%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align: center; font-weight: bold; outline: none;">
+                    <label
+                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">닉네임
+                        (활동명)</label>
+                    <input type="text" id="input-nickname" placeholder="이름을 입력하세요"
+                        style="width: 85%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align: center; font-weight: bold; outline: none;">
                 </div>
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">나의 칭호 설정</label>
-                    <select id="input-title" style="width: 85%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align-last: center; font-weight: bold; outline: none; background: white; cursor: pointer;">
+                    <label
+                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">나의
+                        칭호 설정</label>
+                    <select id="input-title"
+                        style="width: 85%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align-last: center; font-weight: bold; outline: none; background: white; cursor: pointer;">
                         <!-- JS에서 동적으로 해제된 칭호 옵션 추가 -->
                     </select>
                 </div>
                 <div style="margin-bottom: 25px;">
-                    <label style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">1회 학습 단어 수</label>
-                    <select id="input-target-count" style="width: 85%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align-last: center; font-weight: bold; outline: none; background: white; cursor: pointer;">
+                    <label
+                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">1회
+                        학습 단어 수</label>
+                    <select id="input-target-count"
+                        style="width: 85%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align-last: center; font-weight: bold; outline: none; background: white; cursor: pointer;">
                         <option value="10">10개</option>
                         <option value="20">20개</option>
                         <option value="30">30개</option>
                         <option value="40">40개</option>
                         <option value="50">50개</option>
                     </select>
-                    <span style="display: block; font-size: 11px; color: #94a3b8; margin-top: 6px;">※ 다음 학습 세션부터 적용됩니다.</span>
+                    <span style="display: block; font-size: 11px; color: #94a3b8; margin-top: 6px;">※ 다음 학습 세션부터
+                        적용됩니다.</span>
                 </div>
                 <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button id="close-modal-btn" style="flex: 1; padding: 12px 0; background-color: #f1f5f9; color: #64748b; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">취소</button>
-                    <button id="save-profile-btn" style="flex: 1; padding: 12px 0; background-color: #10b981; color: white; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">저장</button>
+                    <button id="close-modal-btn"
+                        style="flex: 1; padding: 12px 0; background-color: #f1f5f9; color: #64748b; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">취소</button>
+                    <button id="save-profile-btn"
+                        style="flex: 1; padding: 12px 0; background-color: #10b981; color: white; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">저장</button>
                 </div>
                 <!-- 🏠 홈으로 돌아가기 버튼 (퀴즈 진행 중에만 노출됨) -->
-                <div id="modal-home-container" style="display: none; margin-top: 12px; border-top: 2px solid #f1f5f9; padding-top: 12px;">
-                    <button id="modal-home-btn" style="width: 100%; padding: 12px 0; background-color: #3b82f6; color: white; border:none; border-radius:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">🏠 홈으로 이동</button>
+                <div id="modal-home-container"
+                    style="display: none; margin-top: 12px; border-top: 2px solid #f1f5f9; padding-top: 12px;">
+                    <button id="modal-home-btn"
+                        style="width: 100%; padding: 12px 0; background-color: #3b82f6; color: white; border:none; border-radius:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">🏠
+                        홈으로 이동</button>
                 </div>
             </div>
         </div>
 
         <!-- 🌟 독립형 학습 업적 팝업 모달 -->
-        <div id="achievement-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
-            <div style="background: white; padding: 30px; border-radius: 24px; width: 320px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.25s ease;">
-                <h3 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">🏅 학습 업적 현황</h3>
-                
-                <div id="modal-badge-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; text-align: left; max-height: 350px; overflow-y: auto; padding-right: 4px;">
+        <div id="achievement-modal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
+            <div
+                style="background: white; padding: 30px; border-radius: 24px; width: 320px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.25s ease;">
+                <h3
+                    style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    🏅 학습 업적 현황</h3>
+
+                <div id="modal-badge-list"
+                    style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; text-align: left; max-height: 350px; overflow-y: auto; padding-right: 4px;">
                     <!-- 🌱 새싹 학습자 -->
-                    <div class="badge-card locked-badge" id="modal-badge-sprout" style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0;">
+                    <div class="badge-card locked-badge" id="modal-badge-sprout"
+                        style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0;">
                         <span style="font-size: 28px;">🌱</span>
                         <div>
                             <strong style="font-size: 13px; color: #1e293b; display: block;">🌱 새싹 학습자</strong>
@@ -150,7 +398,8 @@
                         </div>
                     </div>
                     <!-- 📚 어휘 수집가 -->
-                    <div class="badge-card locked-badge" id="modal-badge-collector" style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0;">
+                    <div class="badge-card locked-badge" id="modal-badge-collector"
+                        style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0;">
                         <span style="font-size: 28px;">📚</span>
                         <div>
                             <strong style="font-size: 13px; color: #1e293b; display: block;">📚 어휘 수집가</strong>
@@ -158,7 +407,8 @@
                         </div>
                     </div>
                     <!-- 👑 세종의 후예 -->
-                    <div class="badge-card locked-badge" id="modal-badge-conqueror" style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0;">
+                    <div class="badge-card locked-badge" id="modal-badge-conqueror"
+                        style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0;">
                         <span style="font-size: 28px;">👑</span>
                         <div>
                             <strong style="font-size: 13px; color: #1e293b; display: block;">👑 세종의 후예</strong>
@@ -166,7 +416,8 @@
                         </div>
                     </div>
                     <!-- 🔥 작심삼일 극복 -->
-                    <div class="badge-card locked-badge" id="modal-badge-streak" style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0;">
+                    <div class="badge-card locked-badge" id="modal-badge-streak"
+                        style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0;">
                         <span style="font-size: 28px;">🔥</span>
                         <div>
                             <strong style="font-size: 13px; color: #1e293b; display: block;">🔥 작심삼일 극복</strong>
@@ -174,7 +425,8 @@
                         </div>
                     </div>
                     <!-- 🏆 한글 마스터 -->
-                    <div class="badge-card locked-badge" id="modal-badge-master" style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0;">
+                    <div class="badge-card locked-badge" id="modal-badge-master"
+                        style="display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 12px 16px; border-radius: 16px; border: 2px solid #e2e8f0;">
                         <span style="font-size: 28px;">🏆</span>
                         <div>
                             <strong style="font-size: 13px; color: #1e293b; display: block;">🏆 한글 마스터</strong>
@@ -182,71 +434,110 @@
                         </div>
                     </div>
                 </div>
-                
-                <button id="close-achievement-btn" style="width: 100%; padding: 14px 0; background-color: #10b981; color: white; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">확인</button>
+
+                <button id="close-achievement-btn"
+                    style="width: 100%; padding: 14px 0; background-color: #10b981; color: white; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">확인</button>
             </div>
         </div>
 
         <div class="app-wrapper">
             <!-- 🌟 모바일 앱 스타일 프로필 중심 홈 화면 (Home View) -->
-            <div class="quiz-container" id="home-box" style="display: none; text-align: center; border-radius: 24px; box-shadow: 0 20px 45px rgba(0,0,0,0.08); animation: slideUp 0.3s ease; margin-bottom: 20px; padding: 35px 25px;">
-                
+            <div class="quiz-container" id="home-box"
+                style="display: none; text-align: center; border-radius: 24px; box-shadow: 0 20px 45px rgba(0,0,0,0.08); animation: slideUp 0.3s ease; margin-bottom: 20px; padding: 35px 25px;">
+
                 <!-- 아바타 히어로 영역 -->
-                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; position: relative;">
-                    <div class="avatar-glow" style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); display: flex; justify-content: center; align-items: center; border: 4px solid white; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2); position: relative;">
+                <div
+                    style="display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; position: relative;">
+                    <div class="avatar-glow"
+                        style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); display: flex; justify-content: center; align-items: center; border: 4px solid white; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2); position: relative;">
                         <span id="home-emoji" style="font-size: 52px; user-select: none;">⭐</span>
-                        <div id="home-level-badge" style="position: absolute; bottom: -8px; background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25); white-space: nowrap;">Lv.-</div>
+                        <div id="home-level-badge"
+                            style="position: absolute; bottom: -8px; background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25); white-space: nowrap;">
+                            Lv.-</div>
                     </div>
                 </div>
 
                 <!-- 닉네임 및 레벨 타이틀 -->
                 <div style="margin-bottom: 25px;">
-                    <span id="home-level-title" style="color: #6366f1; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; display: block; margin-bottom: 4px;">한글 새싹</span>
-                    <h2 style="color: #1e293b; margin: 0 0 6px 0; font-weight: 800; font-size: 24px;"><span id="home-nickname">사용자</span>님</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0; font-weight: 500;">오늘도 한글마루에서 지혜를 모아볼까요? 📖</p>
+                    <span id="home-level-title"
+                        style="color: #6366f1; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; display: block; margin-bottom: 4px;">한글
+                        새싹</span>
+                    <h2 style="color: #1e293b; margin: 0 0 6px 0; font-weight: 800; font-size: 24px;"><span
+                            id="home-nickname">사용자</span>님</h2>
+                    <p style="color: #64748b; font-size: 13px; margin: 0; font-weight: 500;">오늘도 한글마루에서 지혜를 모아볼까요? 📖
+                    </p>
                 </div>
 
                 <!-- 📊 모바일 앱 스타일 대시보드 성과 피드 -->
-                <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 22px 18px; border-radius: 24px; text-align: left; margin-bottom: 28px; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.18); border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden;">
-                    <div style="position: absolute; right: -15px; bottom: -15px; font-size: 80px; opacity: 0.04; user-select: none;">📈</div>
-                    <div style="font-size: 13px; opacity: 0.8; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
+                <div
+                    style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 22px 18px; border-radius: 24px; text-align: left; margin-bottom: 28px; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.18); border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden;">
+                    <div
+                        style="position: absolute; right: -15px; bottom: -15px; font-size: 80px; opacity: 0.04; user-select: none;">
+                        📈</div>
+                    <div
+                        style="font-size: 13px; opacity: 0.8; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
                         <span>📊 학습 분석 요약 피드</span>
                     </div>
-                    
+
                     <!-- 2x2 모바일 통계 그리드 -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
-                        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px;">
-                            <span style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">🔥 연속 학습</span>
-                            <strong style="font-size: 18px; color: #f59e0b; font-weight: 800;" id="home-streak-text">-일차</strong>
+                        <div
+                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px;">
+                            <span
+                                style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">🔥
+                                연속 학습</span>
+                            <strong style="font-size: 18px; color: #f59e0b; font-weight: 800;"
+                                id="home-streak-text">-일차</strong>
                         </div>
-                        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px;">
-                            <span style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">✅ 학습 어휘</span>
-                            <strong style="font-size: 18px; color: #10b981; font-weight: 800;" id="home-words-text">0개</strong>
+                        <div
+                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px;">
+                            <span
+                                style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">✅
+                                학습 어휘</span>
+                            <strong style="font-size: 18px; color: #10b981; font-weight: 800;"
+                                id="home-words-text">0개</strong>
                         </div>
-                        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px;">
-                            <span style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">🎯 평균 정답률</span>
-                            <strong style="font-size: 18px; color: #3b82f6; font-weight: 800;" id="home-accuracy-text">100%</strong>
+                        <div
+                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px;">
+                            <span
+                                style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">🎯
+                                평균 정답률</span>
+                            <strong style="font-size: 18px; color: #3b82f6; font-weight: 800;"
+                                id="home-accuracy-text">100%</strong>
                         </div>
-                        <div id="home-badges-card" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-                            <span style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">🏆 업적 달성</span>
-                            <strong style="font-size: 18px; color: #f59e0b; font-weight: 800;" id="home-badges-text">0개</strong>
+                        <div id="home-badges-card"
+                            style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+                            onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                            <span
+                                style="font-size: 11px; opacity: 0.7; font-weight: bold; display: block; margin-bottom: 4px;">🏆
+                                업적 달성</span>
+                            <strong style="font-size: 18px; color: #f59e0b; font-weight: 800;"
+                                id="home-badges-text">0개</strong>
                         </div>
                     </div>
 
                     <!-- 성과 카드의 레벨 바 -->
                     <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 14px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; opacity: 0.85; font-weight: 800; margin-bottom: 6px;">
+                        <div
+                            style="display: flex; justify-content: space-between; font-size: 11px; opacity: 0.85; font-weight: 800; margin-bottom: 6px;">
                             <span>다음 레벨 진척도</span>
                             <span><span id="home-exp-text">0</span> / 200 EXP</span>
                         </div>
-                        <div style="width: 100%; height: 6px; background-color: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden;">
-                            <div class="exp-fill" id="home-exp-bar" style="width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.5s ease;"></div>
+                        <div
+                            style="width: 100%; height: 6px; background-color: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden;">
+                            <div class="exp-fill" id="home-exp-bar"
+                                style="width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.5s ease;">
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 오늘의 학습 시작하기 버튼 -->
-                <button id="start-study-btn" style="width: 100%; padding: 18px; font-size: 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 16px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <button id="start-study-btn"
+                    style="width: 100%; padding: 18px; font-size: 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 16px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
                     <span>오늘의 학습 시작하기 (<span id="home-target-count-text">30</span>개)</span> ➔
                 </button>
             </div>
@@ -255,26 +546,34 @@
                 <div>🔥 연속 학습: <span id="streak-text">-일차</span></div>
                 <div style="text-align: right;">
                     ⭐ Lv.<span id="level-text">-</span> (<span id="exp-text">0</span>/200)
-                    <div class="exp-bar-container"><div class="exp-fill" id="exp-bar"></div></div>
+                    <div class="exp-bar-container">
+                        <div class="exp-fill" id="exp-bar"></div>
+                    </div>
                 </div>
             </div>
             <div class="quiz-container" id="quiz-box">
-                <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+
                 <div style="text-align: left;">
                     <div class="sentence" id="sentence-text">데이터를 동기화하는 중입니다...</div>
                     <div class="meaning" id="meaning-text"></div>
                 </div>
 
-                <div id="inline-stats-container" style="display: none; margin-bottom: 25px; text-align: left; background: #f8fafc; padding: 24px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); animation: slideUp 0.3s ease;">
+                <div id="inline-stats-container"
+                    style="display: none; margin-bottom: 25px; text-align: left; background: #f8fafc; padding: 24px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); animation: slideUp 0.3s ease;">
                 </div>
-                
+
                 <div class="input-group" id="input-group" style="display: flex; gap: 12px; align-items: stretch;">
-                    <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" disabled style="flex: none; width: 50%; transition: all 0.3s ease;">
+                    <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" disabled
+                        style="flex: none; width: 50%; transition: all 0.3s ease;">
                     <button id="submit-btn" disabled>제출</button>
                     <button id="show-answer-btn" class="btn-secondary" disabled>정답 보기</button>
-                    
-                    <button id="next-btn" style="display: none; flex: 1; background-color: #3b82f6; color: white; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; white-space: nowrap; animation: fadeIn 0.2s ease;">다음 ➔</button>
+
+                    <button id="next-btn"
+                        style="display: none; flex: 1; background-color: #3b82f6; color: white; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; white-space: nowrap; animation: fadeIn 0.2s ease;">다음
+                        ➔</button>
                 </div>
             </div>
             <div class="quiz-container result-screen" id="result-box">
@@ -307,8 +606,8 @@
 
         enableIndexedDbPersistence(db).catch((err) => console.log("오프라인 모드 실패:", err.code));
         const auth = getAuth(app);
-        
-        let userDocRef; 
+
+        let userDocRef;
         let userNickname = ""; let userEmoji = ""; let currentExp = 0; let streakDays = 1; let lastDate = null;
         let quizQueue = []; let totalQuestions = 0; let completedQuestions = 0; let retryCount = 0;
         let isWaiting = false; let hasFailedCurrent = false; let isShowingStats = false;
@@ -316,6 +615,7 @@
         let totalCorrectFirstTry = 0;
         let sessionCorrectFirstTry = 0;
         let equippedTitle = "🐣 아기 병아리";
+        let learnedWords = {};
 
         const sentenceEl = document.getElementById('sentence-text'); const meaningEl = document.getElementById('meaning-text');
         const inputEl = document.getElementById('answer-input'); const submitBtn = document.getElementById('submit-btn');
@@ -330,7 +630,7 @@
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("app-screen").style.display = "block";
                 userDocRef = doc(db, "users", user.uid);
-                initApp(); 
+                initApp();
             } else {
                 document.getElementById("login-screen").style.display = "block";
                 document.getElementById("app-screen").style.display = "none";
@@ -344,18 +644,19 @@
             try {
                 const docSnap = await getDoc(userDocRef);
                 const data = docSnap.exists() ? docSnap.data() : {};
-                
-                // 기본 유저 정보 로드
-                currentExp = data.exp || 0;
-                streakDays = data.streak || 1;
+
+                // 기본 유저 정보 로드 (안전한 정수형 강제 캐스팅)
+                currentExp = parseInt(data.exp) || 0;
+                streakDays = parseInt(data.streak) || 1;
                 lastDate = data.last_date || null;
                 userNickname = data.nickname || (auth.currentUser.isAnonymous ? "익명 사용자" : auth.currentUser.displayName);
                 userEmoji = data.emoji || "⭐";
-                targetWordCount = data.targetWordCount || 30;
-                totalLearnedWords = data.totalLearnedWords || 0;
-                totalCorrectFirstTry = data.totalCorrectFirstTry || 0;
+                targetWordCount = parseInt(data.targetWordCount) || 30;
+                totalLearnedWords = parseInt(data.totalLearnedWords) || 0;
+                totalCorrectFirstTry = parseInt(data.totalCorrectFirstTry) || 0;
                 equippedTitle = data.equippedTitle || "🐣 아기 병아리";
-                
+                learnedWords = data.learnedWords || {};
+
                 document.getElementById('display-nickname').textContent = userNickname;
                 document.getElementById('display-emoji').textContent = userEmoji;
 
@@ -384,10 +685,11 @@
                 if (data.current_session && data.current_session.quizQueue.length > 0) {
                     if (confirm("이전에 학습하던 내용이 있습니다. 이어서 하시겠습니까?")) {
                         quizQueue = data.current_session.quizQueue;
-                        dailyTarget = data.current_session.dailyTarget;
-                        completedQuestions = data.current_session.completedQuestions;
+                        dailyTarget = parseInt(data.current_session.dailyTarget) || 30;
+                        completedQuestions = parseInt(data.current_session.completedQuestions) || 0;
+                        sessionCorrectFirstTry = parseInt(data.current_session.sessionCorrectFirstTry) || 0; // 이어서 풀기 시 첫 시도 정답 복원
                         totalQuestions = dailyTarget;
-                        
+
                         document.getElementById('setup-screen').style.display = 'none';
                         document.getElementById('app-screen').style.display = 'block';
                         document.getElementById('home-box').style.display = 'none';
@@ -401,6 +703,16 @@
                 showHomeScreen();
 
             } catch (error) { console.error(error); }
+        }
+
+        // 날짜 간격 계산을 위한 헬퍼 함수
+        function getDaysDifference(dateStr1, dateStr2) {
+            if (!dateStr1 || !dateStr2) return 999;
+            const d1 = new Date(dateStr1);
+            const d2 = new Date(dateStr2);
+            const diffTime = Math.abs(d2 - d1);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
         }
 
         // 🌟 배열을 무작위로 섞어주는 마법의 함수 (Fisher-Yates Shuffle) - 이 함수는 그대로 둡니다.
@@ -422,21 +734,39 @@
             try {
                 const response = await fetch('words.json');
                 const rawData = await response.json();
-                
-                // 🌟 핵심 변경: 복잡한 레벨 정렬을 없애고, 
-                // 전체 단어를 통째로 섞은 뒤 오늘 목표 개수(target)만큼만 딱 잘라옵니다.
-                quizQueue = shuffleArray(rawData).slice(0, target);
+
+                // 🌟 핵심 변경: 복잡한 레벨 정렬을 없애고,
+                // 최근 3일 이내에 이미 정답을 맞춘 단어는 퀴즈 후보군에서 필터링하여 한동안 나오지 않게 합니다.
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const todayStr = `${yyyy}-${mm}-${dd}`;
+
+                let candidateWords = rawData.filter(word => {
+                    const lastLearnedDate = learnedWords[word.target];
+                    if (!lastLearnedDate) return true; // 맞춘 기록이 없으면 출제 대상
+                    const daysDiff = getDaysDifference(lastLearnedDate, todayStr);
+                    return daysDiff > 3; // 맞춘 지 3일이 초과된 단어만 출제 (3일 이내 맞춘 단어는 배제)
+                });
+
+                // 만약 최근 맞춘 단어를 걸러낸 후보군이 오늘 목표 문제 수보다 적다면, 기준을 해제하여 전체 단어로 보충합니다.
+                if (candidateWords.length < target) {
+                    candidateWords = rawData;
+                }
+
+                quizQueue = shuffleArray(candidateWords).slice(0, target);
 
                 // 화면 전환
                 document.getElementById('setup-screen').style.display = 'none';
                 document.getElementById('home-box').style.display = 'none';
                 document.getElementById('app-screen').style.display = 'block';
                 document.getElementById('dashboard').style.display = 'flex';
-                
+
                 // 파이어베이스에 새로운 세션 저장 후 첫 문제 로드
-                await syncProgress(); 
+                await syncProgress();
                 await loadQuestion();
-                
+
             } catch (error) {
                 console.error("단어 데이터를 불러오는데 실패했습니다:", error);
                 alert("단어 데이터를 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.");
@@ -451,28 +781,29 @@
                 current_session: {
                     quizQueue: quizQueue,
                     dailyTarget: dailyTarget,
-                    completedQuestions: completedQuestions
+                    completedQuestions: completedQuestions,
+                    sessionCorrectFirstTry: sessionCorrectFirstTry
                 }
             }, { merge: true });
         }
 
         async function syncUserData() {
-            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, targetWordCount: targetWordCount, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, equippedTitle: equippedTitle }, { merge: true }); } 
-            catch (error) {}
+            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, targetWordCount: targetWordCount, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, equippedTitle: equippedTitle, learnedWords: learnedWords }, { merge: true }); }
+            catch (error) { }
         }
 
         async function recordWordStat(wordTarget, userAnswer) {
             const statRef = doc(db, "word_stats", wordTarget);
             try {
                 const safeAnswer = userAnswer.replace(/[\.\#\$\/\[\]]/g, "") || "알수없음";
-                
-                await setDoc(statRef, { 
+
+                await setDoc(statRef, {
                     answers: {
                         [safeAnswer]: increment(1) // 👈 정확하게 answers 폴더 안으로 넣도록 수정
-                    }, 
-                    total: increment(1) 
+                    },
+                    total: increment(1)
                 }, { merge: true });
-                
+
             } catch (error) {
                 console.error("통계 저장 실패:", error);
             }
@@ -480,7 +811,7 @@
 
 
         async function updateDashboard() {
-            const currentLevel = Math.floor(currentExp / 200) + 1; const expInLevel = currentExp % 200; 
+            const currentLevel = Math.floor(currentExp / 200) + 1; const expInLevel = currentExp % 200;
             document.getElementById('streak-text').textContent = `${streakDays}일차`;
             document.getElementById('level-text').textContent = currentLevel;
             document.getElementById('exp-text').textContent = expInLevel;
@@ -502,27 +833,39 @@
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('quiz-box').style.display = 'none';
             document.getElementById('result-box').style.display = 'none';
-            
+
             // 데이터 연동
             document.getElementById('home-nickname').textContent = userNickname;
             document.getElementById('home-emoji').textContent = userEmoji;
             document.getElementById('home-streak-text').textContent = `${streakDays}일차`;
             document.getElementById('home-words-text').textContent = `${totalLearnedWords}개`;
-            
+
             const currentLevel = Math.floor(currentExp / 200) + 1;
             const expInLevel = currentExp % 200;
-            
+
             document.getElementById('home-level-badge').textContent = `Lv.${currentLevel}`;
             document.getElementById('home-level-title').textContent = equippedTitle; // 장착된 커스텀 칭호 노출
-            
+
             document.getElementById('home-exp-text').textContent = expInLevel;
             document.getElementById('home-exp-bar').style.width = `${(expInLevel / 200) * 100}%`;
-            document.getElementById('home-target-count-text').textContent = targetWordCount;
-            
-            // 평균 정답률 계산
-            const accuracyRate = totalLearnedWords > 0 ? Math.round((totalCorrectFirstTry / totalLearnedWords) * 100) : 100;
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+
+            const startBtnSpan = document.querySelector('#start-study-btn span');
+            if (startBtnSpan) {
+                const btnText = lastDate === todayStr ? "계속해서 학습하기" : "오늘의 학습 시작하기";
+                startBtnSpan.innerHTML = `${btnText} (<span id="home-target-count-text">${targetWordCount}</span>개)`;
+            }
+
+            // 평균 정답률 계산 (안전 정밀 캐스팅)
+            const learnedVal = parseInt(totalLearnedWords) || 0;
+            const correctVal = parseInt(totalCorrectFirstTry) || 0;
+            const accuracyRate = learnedVal > 0 ? Math.round((Math.min(correctVal, learnedVal) / learnedVal) * 100) : 100;
             document.getElementById('home-accuracy-text').textContent = `${accuracyRate}%`;
-            
+
             // 해제된 뱃지 개수 카운트
             let unlockedCount = 0;
             if (totalLearnedWords >= 10) unlockedCount++;
@@ -530,22 +873,22 @@
             if (totalLearnedWords >= 150) unlockedCount++;
             if (streakDays >= 3) unlockedCount++;
             if (currentLevel >= 5) unlockedCount++;
-            
+
             document.getElementById('home-badges-text').textContent = `${unlockedCount}개`; // "N개" 단일 카운트 표시
-            
+
             document.getElementById('home-box').style.display = 'block';
         }
 
         // 독립형 업적 팝업 데이터 연동 및 스타일링 함수
         function updateAchievementModal() {
             const currentLevel = Math.floor(currentExp / 200) + 1;
-            
+
             const badgeSprout = document.getElementById('modal-badge-sprout');
             const badgeCollector = document.getElementById('modal-badge-collector');
             const badgeConqueror = document.getElementById('modal-badge-conqueror');
             const badgeStreak = document.getElementById('modal-badge-streak');
             const badgeMaster = document.getElementById('modal-badge-master');
-            
+
             // 1. 새싹 학습자 (단어 10개)
             if (totalLearnedWords >= 10) {
                 badgeSprout.classList.remove('locked-badge');
@@ -554,7 +897,7 @@
                 badgeSprout.classList.add('locked-badge');
                 badgeSprout.style.border = '2px solid #e2e8f0';
             }
-            
+
             // 2. 어휘 수집가 (단어 50개)
             if (totalLearnedWords >= 50) {
                 badgeCollector.classList.remove('locked-badge');
@@ -563,7 +906,7 @@
                 badgeCollector.classList.add('locked-badge');
                 badgeCollector.style.border = '2px solid #e2e8f0';
             }
-            
+
             // 3. 세종의 후예 (단어 150개)
             if (totalLearnedWords >= 150) {
                 badgeConqueror.classList.remove('locked-badge');
@@ -572,7 +915,7 @@
                 badgeConqueror.classList.add('locked-badge');
                 badgeConqueror.style.border = '2px solid #e2e8f0';
             }
-            
+
             // 4. 작심삼일 극복 (연속 3일)
             if (streakDays >= 3) {
                 badgeStreak.classList.remove('locked-badge');
@@ -581,7 +924,7 @@
                 badgeStreak.classList.add('locked-badge');
                 badgeStreak.style.border = '2px solid #e2e8f0';
             }
-            
+
             // 5. 한글 마스터 (레벨 5)
             if (currentLevel >= 5) {
                 badgeMaster.classList.remove('locked-badge');
@@ -604,24 +947,24 @@
         async function loadQuestion() {
             isWaiting = false; hasFailedCurrent = false; isShowingStats = false;
             await updateDashboard();
-                    
+
             document.getElementById('inline-stats-container').style.display = 'none';
             document.getElementById('quiz-box').style.display = 'block';
-            
+
             const nextBtn = document.getElementById('next-btn');
             const submitBtn = document.getElementById('submit-btn');
             const showAnswerBtn = document.getElementById('show-answer-btn');
-            
+
             // UI 초기화: 다음 버튼 숨기고 기존 버튼 살리기
             nextBtn.style.display = 'none';
             submitBtn.style.display = 'inline-block';
             showAnswerBtn.style.display = 'inline-block';
-            
+
             // 입력창 비율 원래대로 (50% 넓이)
             inputEl.style.flex = 'none';
             inputEl.style.width = '50%';
 
-            if (quizQueue.length === 0) { 
+            if (quizQueue.length === 0) {
                 // 1. 연속 학습일(스트릭) 및 마지막 학습일 계산
                 const today = new Date();
                 const yyyy = today.getFullYear();
@@ -649,17 +992,20 @@
                 }
                 lastDate = todayStr;
 
-                // 2. 누적 학습 단어 수 및 첫 시도 정답 누적
-                totalLearnedWords += dailyTarget;
-                totalCorrectFirstTry += sessionCorrectFirstTry;
+                // 2. 누적 학습 단어 수 및 첫 시도 정답 누적 (안전한 정수형 강제 캐스팅 가산)
+                const addedWordsCount = parseInt(dailyTarget) || parseInt(completedQuestions) || 30;
+                const addedCorrectCount = parseInt(sessionCorrectFirstTry) || 0;
+
+                totalLearnedWords = (parseInt(totalLearnedWords) || 0) + addedWordsCount;
+                totalCorrectFirstTry = (parseInt(totalCorrectFirstTry) || 0) + addedCorrectCount;
 
                 // 3. UI 업데이트
-                dashboard.style.display = 'none'; 
-                document.getElementById('quiz-box').style.display = 'none'; 
+                dashboard.style.display = 'none';
+                document.getElementById('quiz-box').style.display = 'none';
                 document.getElementById('result-box').style.display = 'block';
-                document.getElementById('final-exp').textContent = currentExp; 
+                document.getElementById('final-exp').textContent = currentExp;
                 document.getElementById('retry-count').textContent = retryCount;
-                
+
                 // 4. Firestore 비동기 단일 쓰기로 통합 (경합 조건 및 유실 완벽 해소)
                 try {
                     await setDoc(userDocRef, {
@@ -672,26 +1018,28 @@
                         targetWordCount: targetWordCount,
                         totalLearnedWords: totalLearnedWords,
                         totalCorrectFirstTry: totalCorrectFirstTry,
-                        equippedTitle: equippedTitle
+                        equippedTitle: equippedTitle,
+                        learnedWords: learnedWords
                     }, { merge: true });
                 } catch (error) {
                     console.error("최종 세션 완료 데이터 저장 실패:", error);
                 }
-                return; 
+                return;
             }
-            
+
             const currentWord = quizQueue[0];
+            hasFailedCurrent = currentWord.failed ? true : false;
             sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
             meaningEl.innerHTML = `<span class="level-badge">Lv.${currentWord.level}</span>💡 ${currentWord.meaning}`;
             inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group';
-            
+
             const progress = (completedQuestions / dailyTarget) * 100;
             inputEl.disabled = false; submitBtn.disabled = false; showAnswerBtn.disabled = false;
             progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
             inputEl.focus();
         }
 
-        
+
         // 🌟 수정된 통계 보여주기 함수 (가로 배치 적용)
         async function showInlineStats(currentWordObj) {
             isShowingStats = true;
@@ -699,12 +1047,12 @@
             const nextBtn = document.getElementById('next-btn');
             const submitBtn = document.getElementById('submit-btn');
             const showAnswerBtn = document.getElementById('show-answer-btn');
-            const word = currentWordObj.target; const accepts = currentWordObj.accepts || []; 
-            
+            const word = currentWordObj.target; const accepts = currentWordObj.accepts || [];
+
             // 🌟 버튼 전환: 제출/정답 숨기고 다음 버튼 띄우기
             submitBtn.style.display = 'none';
             showAnswerBtn.style.display = 'none';
-            
+
             // 🌟 가로 배치: 입력창(2) : 다음버튼(1) 비율
             inputEl.style.width = 'auto';
             inputEl.style.flex = '2';
@@ -714,19 +1062,19 @@
 
             // 통계창 표시 (입력창 위에 나타남)
             statsContainer.style.display = 'block';
-            nextBtn.focus(); 
+            nextBtn.focus();
 
             try {
                 const statRef = doc(db, "word_stats", word);
                 const docSnap = await getDoc(statRef);
-                
+
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     const answers = data.answers || {};
                     // 실제 데이터 기반 total 계산
                     const total = Object.values(answers).reduce((sum, count) => sum + count, 0);
-                    const sortedAnswers = Object.entries(answers).sort((a, b) => b[1] - a[1]).slice(0,5);
-                    
+                    const sortedAnswers = Object.entries(answers).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
                     let html = `
                         <div style="font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 15px;">
                             💡 사람들은 이 문장을 어떻게 완성했을까요?
@@ -736,7 +1084,7 @@
                             <span style="margin-right: 5px;">비율</span>
                         </div>
                     `;
-                    
+
                     sortedAnswers.forEach(([submittedWord, count]) => {
                         const rate = total > 0 ? Math.round((count / total) * 100) : 0;
                         let badgeHtml = ''; let barColor = ''; let textColor = '';
@@ -780,11 +1128,11 @@
             const minGap = 3;
             const maxGap = 6;
             const gap = Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
-            
+
             // 현재 남은 문제 수보다 간격이 길면 맨 마지막에 넣음
             const insertIndex = Math.min(quizQueue.length, gap);
-            quizQueue.splice(insertIndex, 0, {...wordObj});
-            
+            quizQueue.splice(insertIndex, 0, { ...wordObj, failed: true });
+
             syncProgress(); // 복습 예약된 큐 상태 저장
         }
 
@@ -793,62 +1141,78 @@
         async function checkAnswer() {
             if (quizQueue.length === 0 || isWaiting) return;
             const userAnswer = inputEl.value.trim();
-            if (userAnswer === "") return; 
+            if (userAnswer === "") return;
 
-            isWaiting = true; 
+            isWaiting = true;
             const currentWord = quizQueue[0];
-            
+
             // 데이터 저장 대기
             await recordWordStat(currentWord.target, userAnswer);
 
             // 1. 완전 정답인 경우
             if (userAnswer === currentWord.target) {
-                inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); 
+                inputGroup.classList.remove('wrong', 'show-answer', 'synonym');
                 inputGroup.classList.add('correct');
-                
+
                 inputEl.value = currentWord.target;
                 sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#10b981; font-weight:800;">${currentWord.target}</span>`);
-                
-                if (!hasFailedCurrent) {
-                    currentExp += 20; 
-                    sessionCorrectFirstTry++;
-                }
-                quizQueue.shift(); completedQuestions++;
-                updateDashboard(); 
-                showInlineStats(currentWord);
 
-            } 
-            // 2. 유의어인 경우 (사용자가 입력한 답과 의도한 답을 함께 표시)
-            else if (currentWord.accepts && currentWord.accepts.includes(userAnswer)) {
-                inputGroup.classList.remove('wrong', 'show-answer', 'correct'); 
-                inputGroup.classList.add('synonym');
-                
-                // 🌟 입력창에 "입력답 (정답: 의도한답)" 형식으로 표시하고 알림 메시지 제공
-                inputEl.value = `${userAnswer} (정답: ${currentWord.target})`;
-                inputEl.placeholder = "유의어이므로 정답 처리되었습니다!"; 
-                
-                // 유의어는 파란색 계열로 표시
-                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${currentWord.target}</span>`);
-                
                 if (!hasFailedCurrent) {
                     currentExp += 20;
                     sessionCorrectFirstTry++;
                 }
+                // 정답 단어를 오늘 날짜와 함께 완료 기록
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const todayStr = `${yyyy}-${mm}-${dd}`;
+                learnedWords[currentWord.target] = todayStr;
+
                 quizQueue.shift(); completedQuestions++;
-                updateDashboard(); 
+                updateDashboard();
                 showInlineStats(currentWord);
 
-            } 
+            }
+            // 2. 유의어인 경우 (사용자가 입력한 답과 의도한 답을 함께 표시)
+            else if (currentWord.accepts && currentWord.accepts.includes(userAnswer)) {
+                inputGroup.classList.remove('wrong', 'show-answer', 'correct');
+                inputGroup.classList.add('synonym');
+
+                // 🌟 입력창에 "입력답 (정답: 의도한답)" 형식으로 표시하고 알림 메시지 제공
+                inputEl.value = `${userAnswer} (정답: ${currentWord.target})`;
+                inputEl.placeholder = "유의어이므로 정답 처리되었습니다!";
+
+                // 유의어는 파란색 계열로 표시
+                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${currentWord.target}</span>`);
+
+                if (!hasFailedCurrent) {
+                    currentExp += 20;
+                    sessionCorrectFirstTry++;
+                }
+                // 정답 단어를 오늘 날짜와 함께 완료 기록
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const todayStr = `${yyyy}-${mm}-${dd}`;
+                learnedWords[currentWord.target] = todayStr;
+
+                quizQueue.shift(); completedQuestions++;
+                updateDashboard();
+                showInlineStats(currentWord);
+
+            }
             // 3. 오답인 경우
             else {
-                inputGroup.classList.remove('wrong', 'show-answer', 'synonym'); 
+                inputGroup.classList.remove('wrong', 'show-answer', 'synonym');
                 void inputGroup.offsetWidth; // 애니메이션 리셋을 위한 트릭
-                inputGroup.classList.add('wrong'); 
-                inputEl.value = ''; 
+                inputGroup.classList.add('wrong');
+                inputEl.value = '';
                 inputEl.placeholder = '다시 시도해보세요!';
-                
+
                 if (!hasFailedCurrent) {
-                    hasFailedCurrent = true; 
+                    hasFailedCurrent = true;
                     retryCount++;
                     handleReinsertion(currentWord);
                 }
@@ -856,16 +1220,20 @@
             }
         }
 
-        function revealAnswer() {
+        async function revealAnswer() {
             if (quizQueue.length === 0 || isWaiting) return;
             isWaiting = true; const currentWord = quizQueue[0];
+
+            // 정답 보기를 누른 포기 행동을 오답 통계에 '정답 보기(모름)'로 실시간 가산 기록
+            await recordWordStat(currentWord.target, "모르겠어요");
+
             inputGroup.classList.remove('wrong', 'correct', 'synonym'); inputGroup.classList.add('show-answer');
             inputEl.value = currentWord.target; inputEl.disabled = true;
             sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${currentWord.target}</span>`);
-            
-            if (!hasFailedCurrent) { 
-                hasFailedCurrent = true;  
-                retryCount++; 
+
+            if (!hasFailedCurrent) {
+                hasFailedCurrent = true;
+                retryCount++;
                 handleReinsertion(currentWord);
             }
             quizQueue.shift();
@@ -876,17 +1244,17 @@
         showAnswerBtn.addEventListener('click', revealAnswer);
         document.getElementById('next-btn').addEventListener('click', loadQuestion);
         document.getElementById('start-study-btn').addEventListener('click', () => startSession(targetWordCount));
-        inputEl.addEventListener('keypress', function(e) { if (e.key === 'Enter') checkAnswer(); });
+        inputEl.addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAnswer(); });
 
         document.getElementById('edit-profile-trigger').addEventListener('click', () => {
             document.getElementById('input-nickname').value = userNickname;
             document.getElementById('input-emoji').value = userEmoji;
             document.getElementById('input-target-count').value = targetWordCount;
-            
+
             // 해제된 칭호 드롭다운 옵션 동적 채우기
             const titleSelect = document.getElementById('input-title');
             titleSelect.innerHTML = '';
-            
+
             const currentLevel = Math.floor(currentExp / 200) + 1;
             const titles = [
                 { name: "🐣 아기 병아리", unlocked: true },
@@ -896,7 +1264,7 @@
                 { name: "🔥 작심삼일 극복", unlocked: streakDays >= 3 },
                 { name: "🏆 한글 마스터", unlocked: currentLevel >= 5 }
             ];
-            
+
             titles.forEach(t => {
                 const opt = document.createElement('option');
                 opt.value = t.name;
@@ -907,18 +1275,18 @@
                 }
                 titleSelect.appendChild(opt);
             });
-            
+
             // 퀴즈 진행 중일 때만 홈으로 가기 버튼 노출
             if (quizQueue && quizQueue.length > 0) {
                 document.getElementById('modal-home-container').style.display = 'block';
             } else {
                 document.getElementById('modal-home-container').style.display = 'none';
             }
-            
+
             document.getElementById('profile-modal').style.display = 'flex';
         });
         document.getElementById('close-modal-btn').addEventListener('click', () => document.getElementById('profile-modal').style.display = 'none');
-        
+
         document.getElementById('modal-home-btn').addEventListener('click', () => {
             document.getElementById('profile-modal').style.display = 'none';
             goToHome();
@@ -927,23 +1295,23 @@
         document.getElementById('save-profile-btn').addEventListener('click', async () => {
             const newName = document.getElementById('input-nickname').value.trim();
             if (newName === "") return alert("활동명을 입력해주세요!");
-            userNickname = newName; 
-            userEmoji = document.getElementById('input-emoji').value.trim() || "⭐"; 
+            userNickname = newName;
+            userEmoji = document.getElementById('input-emoji').value.trim() || "⭐";
             targetWordCount = parseInt(document.getElementById('input-target-count').value) || 30;
             equippedTitle = document.getElementById('input-title').value || "🐣 아기 병아리";
-            
-            document.getElementById('display-nickname').textContent = userNickname; 
+
+            document.getElementById('display-nickname').textContent = userNickname;
             document.getElementById('display-emoji').textContent = userEmoji;
-            await syncUserData(); 
-            
+            await syncUserData();
+
             // 퀴즈 진행 중인 경우 학습으로 바로 복귀, 아닌 경우 홈화면 업데이트
             if (quizQueue && quizQueue.length > 0) {
-                document.getElementById('display-nickname').textContent = userNickname; 
+                document.getElementById('display-nickname').textContent = userNickname;
                 document.getElementById('display-emoji').textContent = userEmoji;
             } else {
                 showHomeScreen();
             }
-            
+
             document.getElementById('profile-modal').style.display = 'none';
         });
 
@@ -957,7 +1325,7 @@
         });
 
         document.getElementById("logout-btn").addEventListener("click", () => {
-            if(confirm("로그아웃 하시겠습니까?")) signOut(auth).then(() => location.reload());
+            if (confirm("로그아웃 하시겠습니까?")) signOut(auth).then(() => location.reload());
         });
         /*
         if ('serviceWorker' in navigator) {
@@ -966,4 +1334,5 @@
         */
     </script>
 </body>
+
 </html>
