@@ -393,6 +393,57 @@
             filter: grayscale(100%);
             opacity: 0.4;
         }
+
+        /* 🛠️ 개발자용 단어 제보 및 검토 패널 CSS */
+        .flag-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+
+        .flag-btn:hover {
+            transform: scale(1.1);
+            background-color: #cbd5e1;
+        }
+
+        .flag-btn.active {
+            background-color: #fef08a; /* 연노랑 강조색 */
+            border-color: #eab308;
+            box-shadow: 0 4px 12px rgba(234, 179, 8, 0.2);
+            animation: bounce 0.3s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+        }
+
+        .dev-panel-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.01);
+            transition: border-color 0.2s;
+        }
+
+        .dev-panel-item:focus-within {
+            border-color: #475569;
+        }
     </style>
 </head>
 
@@ -665,6 +716,14 @@
                     onmouseout="this.style.transform='translateY(0)'">
                     <span>오늘의 학습 시작하기 (<span id="home-target-count-text">30</span>개)</span> ➔
                 </button>
+
+                <!-- 🛠️ 개발자 단어 검토 버튼 -->
+                <button id="open-dev-panel-btn"
+                    style="margin-top: 12px; width: 100%; padding: 14px; font-size: 14px; background: #475569; color: white; border: none; border-radius: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(71, 85, 105, 0.15); transition: all 0.2s;"
+                    onmouseover="this.style.background='#334155'"
+                    onmouseout="this.style.background='#475569'">
+                    🛠️ 검토 및 수정이 필요한 단어 관리
+                </button>
             </div>
 
             <div class="dashboard" id="dashboard" style="display: none;">
@@ -677,6 +736,9 @@
                 </div>
             </div>
             <div class="quiz-container" id="quiz-box">
+                <!-- 🛠️ 개발자용 단어 검토 제보 버튼 -->
+                <button id="flag-word-btn" class="flag-btn" title="이 단어 검토 대상에 추가">🛠️</button>
+
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress"></div>
                 </div>
@@ -708,6 +770,41 @@
                     재학습한 단어 수: <strong id="retry-count">0</strong>개
                 </div>
                 <button onclick="goToHome()">홈으로 돌아가기</button>
+            </div>
+
+            <!-- 🛠️ 개발자용 검토 단어 관리 모달 패널 -->
+            <div id="dev-panel-modal"
+                style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
+                <div
+                    style="background: white; padding: 25px; border-radius: 24px; width: 90%; max-width: 480px; height: 80%; max-height: 650px; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); box-sizing: border-box; overflow: hidden; animation: slideUp 0.25s ease;">
+                    
+                    <!-- 모달 헤더 -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; flex-shrink: 0;">
+                        <h3 style="margin: 0; color: #1e293b; font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                            🛠️ 검토 단어 제어판
+                        </h3>
+                        <button id="copy-dev-json-btn"
+                            style="padding: 6px 12px; font-size: 12px; background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#cbd5e1'" onmouseout="this.style.background='#f1f5f9'">
+                            📋 JSON 복사
+                        </button>
+                    </div>
+
+                    <!-- 모달 바디 (목록 스크롤 영역) -->
+                    <div id="dev-panel-list"
+                        style="flex: 1; overflow-y: auto; padding-right: 4px; box-sizing: border-box;">
+                        <!-- JS에서 동적으로 검토 카드 렌더링 -->
+                    </div>
+
+                    <!-- 모달 푸터 -->
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; padding-top: 12px; border-top: 2px solid #f1f5f9; flex-shrink: 0;">
+                        <button id="close-dev-panel-btn"
+                            style="width: 100%; padding: 14px 0; background-color: #475569; color: white; border:none; border-radius:12px; font-weight:bold; cursor:pointer; font-size: 16px; transition: all 0.2s;"
+                            onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
+                            닫기
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -750,6 +847,7 @@
         let sessionCorrectFirstTry = 0;
         let equippedTitle = "🐣 아기 병아리";
         let learnedWords = {};
+        let flaggedWords = {};
 
         const sentenceEl = document.getElementById('sentence-text'); const meaningEl = document.getElementById('meaning-text');
         const inputEl = document.getElementById('answer-input'); const submitBtn = document.getElementById('submit-btn');
@@ -817,6 +915,7 @@
                 totalCorrectFirstTry = parseInt(data.totalCorrectFirstTry) || 0;
                 equippedTitle = data.equippedTitle || "🐣 아기 병아리";
                 learnedWords = data.learnedWords || {};
+                flaggedWords = data.flaggedWords || {};
 
                 document.getElementById('display-nickname').textContent = userNickname;
                 document.getElementById('display-emoji').textContent = userEmoji;
@@ -1193,6 +1292,19 @@
             }
 
             const currentWord = quizQueue[0];
+            
+            // 🛠️ 현재 단어의 검토(Flag) 여부에 따라 제보 버튼 갱신
+            const flagBtn = document.getElementById('flag-word-btn');
+            if (flaggedWords && flaggedWords[currentWord.target]) {
+                flagBtn.classList.add('active');
+                flagBtn.title = "검토 대상 지정 해제";
+                flagBtn.textContent = "⭐🛠️";
+            } else {
+                flagBtn.classList.remove('active');
+                flagBtn.title = "이 단어 검토 대상에 추가";
+                flagBtn.textContent = "🛠️";
+            }
+
             hasFailedCurrent = currentWord.failed ? true : false;
             sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
             
@@ -1419,6 +1531,223 @@
             quizQueue.shift();
             showInlineStats(currentWord);
         }
+
+        // ==========================================
+        // 🛠️ 개발자용 단어 검토 및 실시간 수정 모듈 로직
+        // ==========================================
+
+        // 퀴즈 화면에서 현재 단어를 검토 대상으로 지정 (토글)
+        async function toggleFlagWord() {
+            if (quizQueue.length === 0) return;
+            const currentWord = quizQueue[0];
+            const target = currentWord.target;
+            const flagBtn = document.getElementById('flag-word-btn');
+
+            if (flaggedWords && flaggedWords[target]) {
+                // 이미 검토 대상이면 해제
+                delete flaggedWords[target];
+                flagBtn.classList.remove('active');
+                flagBtn.title = "이 단어 검토 대상에 추가";
+                flagBtn.textContent = "🛠️";
+                console.log(`[Flag] 검토 대상 해제: ${target}`);
+            } else {
+                // 검토 대상 지정
+                flaggedWords[target] = {
+                    target: target,
+                    meaning: currentWord.meaning,
+                    sentence: currentWord.sentence,
+                    level: currentWord.level,
+                    accepts: currentWord.accepts || [],
+                    flaggedAt: new Date().toISOString()
+                };
+                flagBtn.classList.add('active');
+                flagBtn.title = "검토 대상 지정 해제";
+                flagBtn.textContent = "⭐🛠️";
+                console.log(`[Flag] 검토 대상 추가: ${target}`);
+            }
+
+            // Firestore에 동기화
+            try {
+                await setDoc(userDocRef, { flaggedWords: flaggedWords }, { merge: true });
+            } catch (error) {
+                console.error("[Flag] Firestore 동기화 실패:", error);
+            }
+        }
+
+        // 개발자 패널 열기
+        function openDevPanel() {
+            document.getElementById('dev-panel-modal').style.display = 'flex';
+            renderDevPanel();
+        }
+
+        // 개발자 패널 닫기
+        function closeDevPanel() {
+            document.getElementById('dev-panel-modal').style.display = 'none';
+        }
+
+        // 제보된 단어 목록 렌더링
+        function renderDevPanel() {
+            const listContainer = document.getElementById('dev-panel-list');
+            listContainer.innerHTML = '';
+
+            const flaggedArray = Object.values(flaggedWords).sort((a, b) => a.target.localeCompare(b.target));
+
+            if (flaggedArray.length === 0) {
+                listContainer.innerHTML = `
+                    <div style="text-align: center; color: #94a3b8; padding: 40px 20px; font-weight: bold;">
+                        제보되거나 검토 표시된 단어가 아직 없습니다.<br>퀴즈를 풀 때 우측 상단의 🛠️ 버튼을 눌러보세요!
+                    </div>
+                `;
+                return;
+            }
+
+            flaggedArray.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'dev-panel-item';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+                        <span style="font-weight: 900; color: #1e293b; font-size: 16px;">
+                            ${escapeHTML(item.target)}
+                            <span style="font-size: 11px; background: #3b82f6; color: white; padding: 2px 6px; border-radius: 6px; margin-left: 6px;">Lv.${item.level}</span>
+                        </span>
+                        <button onclick="removeDevWord('${escapeHTML(item.target)}')"
+                            style="padding: 4px 8px; font-size: 11px; background-color: #fee2e2; color: #ef4444; border: 1px solid #fecaca; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+                            검토 해제
+                        </button>
+                    </div>
+                    
+                    <div style="margin-bottom: 10px; text-align: left;">
+                        <label style="display: block; font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 4px;">단어 뜻 수정</label>
+                        <input type="text" id="dev-meaning-${escapeHTML(item.target)}" value="${escapeHTML(item.meaning)}"
+                            style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; font-weight: 500; outline: none; background: #f8fafc;">
+                    </div>
+                    
+                    <div style="margin-bottom: 12px; text-align: left;">
+                        <label style="display: block; font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 4px;">예문 수정 (빈칸 ____ 보존 필수)</label>
+                        <textarea id="dev-sentence-${escapeHTML(item.target)}" rows="2"
+                            style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; font-weight: 500; outline: none; resize: none; font-family: inherit; background: #f8fafc;">${escapeHTML(item.sentence)}</textarea>
+                    </div>
+
+                    <button onclick="saveDevWord('${escapeHTML(item.target)}')"
+                        style="width: 100%; padding: 10px; font-size: 12px; background-color: #10b981; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px;"
+                        onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                        💾 수정 내용 저장 및 세션 즉시 반영
+                    </button>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // 특정 제보 단어 내용 수정 및 저장
+        async function saveDevWord(wordTarget) {
+            const meaningInput = document.getElementById(`dev-meaning-${wordTarget}`);
+            const sentenceInput = document.getElementById(`dev-sentence-${wordTarget}`);
+
+            if (!meaningInput || !sentenceInput) return;
+
+            const newMeaning = meaningInput.value.trim();
+            const newSentence = sentenceInput.value.trim();
+
+            if (newMeaning === "" || newSentence === "") {
+                return alert("뜻과 예문을 빈칸으로 저장할 수 없습니다.");
+            }
+
+            if (!newSentence.includes("____")) {
+                return alert("예문에는 반드시 단어가 들어갈 빈칸 '____'이 포함되어 있어야 합니다.");
+            }
+
+            // 1. flaggedWords 맵 업데이트
+            if (flaggedWords[wordTarget]) {
+                flaggedWords[wordTarget].meaning = newMeaning;
+                flaggedWords[wordTarget].sentence = newSentence;
+            }
+
+            // 2. 현재 로컬 단어 큐(quizQueue) 및 윈도우 단어 목록 실시간 패치
+            let memoryUpdated = false;
+            quizQueue.forEach(item => {
+                if (item.target === wordTarget) {
+                    item.meaning = newMeaning;
+                    item.sentence = newSentence;
+                    memoryUpdated = true;
+                }
+            });
+
+            // 3. Firestore 데이터 동기화
+            try {
+                await setDoc(userDocRef, { flaggedWords: flaggedWords }, { merge: true });
+                
+                // 만약 현재 풀고 있는 활성 문제라면 즉시 퀴즈 스크린에 새 수정본 렌더링
+                if (quizQueue.length > 0 && quizQueue[0].target === wordTarget) {
+                    const nextBtn = document.getElementById('next-btn');
+                    // 현재 정답 통계가 보이는 화면이 아닌, 퀴즈 풀이 상태일 때만 리렌더링
+                    if (nextBtn.style.display !== 'inline-block' && nextBtn.style.display !== 'block') {
+                        sentenceEl.innerHTML = newSentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
+                        meaningEl.innerHTML = `<span class="level-badge">Lv.${quizQueue[0].level}</span>${newMeaning}`;
+                    }
+                }
+                
+                alert(`'${wordTarget}' 단어의 뜻과 예문이 성공적으로 저장 및 실시간 반영되었습니다!`);
+                renderDevPanel();
+            } catch (error) {
+                console.error("[Flag] 단어 수정 실패:", error);
+                alert("수정 내용 저장 중 오류가 발생했습니다: " + error.message);
+            }
+        }
+
+        // 제보 목록에서 삭제 (검토 해제)
+        async function removeDevWord(wordTarget) {
+            if (flaggedWords[wordTarget]) {
+                delete flaggedWords[wordTarget];
+            }
+
+            // 퀴즈 화면에 현재 해당 단어 버튼이 노출되고 있다면 스타일 되돌림
+            if (quizQueue.length > 0 && quizQueue[0].target === wordTarget) {
+                const flagBtn = document.getElementById('flag-word-btn');
+                flagBtn.classList.remove('active');
+                flagBtn.title = "이 단어 검토 대상에 추가";
+                flagBtn.textContent = "🛠️";
+            }
+
+            try {
+                await setDoc(userDocRef, { flaggedWords: flaggedWords }, { merge: true });
+                renderDevPanel();
+            } catch (error) {
+                console.error("[Flag] 검토 해제 실패:", error);
+            }
+        }
+
+        // 수정된 단어 데이터들을 words.json 복사용 포맷(JSON)으로 클립보드 복사
+        function copyDevJSON() {
+            const items = Object.values(flaggedWords);
+            if (items.length === 0) {
+                return alert("복사할 검토 단어가 없습니다.");
+            }
+
+            // words.json 규격에 맞춘 클린 JSON 배열
+            const cleanArray = items.map(item => ({
+                target: item.target,
+                accepts: item.accepts,
+                meaning: item.meaning,
+                sentence: item.sentence,
+                level: item.level
+            }));
+
+            const jsonStr = JSON.stringify(cleanArray, null, 4);
+
+            navigator.clipboard.writeText(jsonStr)
+                .then(() => {
+                    alert("수정된 검토 단어 목록이 클립보드에 JSON 형식으로 성공적으로 복사되었습니다! 개발 환경의 words.json 파일에 복사하여 즉시 합치실 수 있습니다.");
+                })
+                .catch(err => {
+                    console.error("클립보드 복사 실패:", err);
+                    alert("복사에 실패했습니다. 아래 콘솔에서 수동으로 복사하세요.\n" + jsonStr);
+                });
+        }
+
+        document.getElementById('flag-word-btn').addEventListener('click', toggleFlagWord);
+        document.getElementById('open-dev-panel-btn').addEventListener('click', openDevPanel);
+        document.getElementById('close-dev-panel-btn').addEventListener('click', closeDevPanel);
+        document.getElementById('copy-dev-json-btn').addEventListener('click', copyDevJSON);
 
         submitBtn.addEventListener('click', checkAnswer);
         showAnswerBtn.addEventListener('click', revealAnswer);
