@@ -829,13 +829,20 @@
         enableIndexedDbPersistence(db).catch((err) => console.log("오프라인 모드 실패:", err.code));
         let auth;
         try {
-            auth = initializeAuth(app, {
-                persistence: indexedDBLocalPersistence
-            });
-            console.log("Firebase Auth IndexedDB로 초기화 성공!");
-        } catch (error) {
+            // 이미 초기화된 Auth 인스턴스가 있는지 먼저 안전하게 확인
             auth = getAuth(app);
-            console.log("Firebase Auth 기존 인스턴스 획득:", auth);
+            console.log("Firebase Auth 기존 인스턴스 획득 성공:", auth);
+        } catch (e) {
+            try {
+                // 인스턴스가 없는 경우에만 최초로 IndexedDB 기반 오프라인 지속성 초기화 시도
+                auth = initializeAuth(app, {
+                    persistence: indexedDBLocalPersistence
+                });
+                console.log("Firebase Auth IndexedDB로 신규 초기화 성공!");
+            } catch (error) {
+                auth = getAuth(app);
+                console.log("Firebase Auth 기본 획득으로 최종 복구:", auth);
+            }
         }
 
         let userDocRef;
@@ -856,7 +863,6 @@
 
         document.getElementById("google-login-btn").addEventListener("click", () => {
             console.log("구글 로그인 버튼 클릭됨!");
-            alert("구글 로그인 버튼 클릭됨!");
             signInWithPopup(auth, new GoogleAuthProvider())
                 .catch((error) => {
                     console.error("구글 로그인 에러:", error);
@@ -865,7 +871,6 @@
         });
         document.getElementById("anon-login-btn").addEventListener("click", () => {
             console.log("익명 로그인 버튼 클릭됨!");
-            alert("익명 로그인 버튼 클릭됨!");
             signInAnonymously(auth)
                 .then((cred) => console.log("익명 로그인 성공:", cred.user.uid))
                 .catch((error) => {
@@ -1293,17 +1298,11 @@
 
             const currentWord = quizQueue[0];
             
-            // 🛠️ 현재 단어의 검토(Flag) 여부에 따라 제보 버튼 갱신
+            // 🛠️ 관리자(제보) 버튼은 새 질문 로드 시 항상 누르지 않은 기본 상태(비활성화)로 초기화
             const flagBtn = document.getElementById('flag-word-btn');
-            if (flaggedWords && flaggedWords[currentWord.target]) {
-                flagBtn.classList.add('active');
-                flagBtn.title = "검토 대상 지정 해제";
-                flagBtn.textContent = "⭐🛠️";
-            } else {
-                flagBtn.classList.remove('active');
-                flagBtn.title = "이 단어 검토 대상에 추가";
-                flagBtn.textContent = "🛠️";
-            }
+            flagBtn.classList.remove('active');
+            flagBtn.title = "이 단어 검토 대상에 추가";
+            flagBtn.textContent = "🛠️";
 
             hasFailedCurrent = currentWord.failed ? true : false;
             sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
@@ -1748,6 +1747,19 @@
         document.getElementById('open-dev-panel-btn').addEventListener('click', openDevPanel);
         document.getElementById('close-dev-panel-btn').addEventListener('click', closeDevPanel);
         document.getElementById('copy-dev-json-btn').addEventListener('click', copyDevJSON);
+
+        // 🛠️ 개발자 단축키 지원 (F4 또는 Alt + Q를 누르면 단어 검토 제보 토글)
+        window.addEventListener('keydown', function (e) {
+            // F4 키 또는 Alt + Q / Alt + q 키가 눌렸을 때
+            if (e.key === 'F4' || (e.key === 'q' && e.altKey) || (e.key === 'Q' && e.altKey)) {
+                e.preventDefault();
+                const flagBtn = document.getElementById('flag-word-btn');
+                // 퀴즈 화면이 열려있고 제보 버튼이 활성화된 상태일 때만 동작
+                if (flagBtn && document.getElementById('quiz-box').style.display !== 'none') {
+                    toggleFlagWord();
+                }
+            }
+        });
 
         submitBtn.addEventListener('click', checkAnswer);
         showAnswerBtn.addEventListener('click', revealAnswer);
