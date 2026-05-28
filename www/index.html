@@ -23,7 +23,7 @@
             height: -webkit-fill-available;
             margin: 0;
             padding: 0;
-            background-color: #f8fafc;
+            background-color: #ffffff;
             font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
             overscroll-behavior: none;
             overflow: hidden;
@@ -33,7 +33,7 @@
             display: flex;
             justify-content: center;
             align-items: stretch;
-            background-color: #f8fafc;
+            background-color: #ffffff;
         }
 
         .app-wrapper {
@@ -42,7 +42,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            background-color: #f8fafc;
+            background-color: #ffffff;
             position: relative;
             box-sizing: border-box;
             overflow: hidden;
@@ -51,7 +51,7 @@
         /* 데스크톱 웹 환경에서 화면 중앙에 스마트폰 기기 프레임 형태로 보이도록 설정 */
         @media (min-width: 560px) and (min-height: 650px) {
             body {
-                background-color: #f8fafc;
+                background-color: #ffffff;
             }
 
             #app-screen {
@@ -77,7 +77,7 @@
                 align-items: flex-start; /* 세로 위쪽(헤더 바로 아래)에 밀착 */
                 max-width: 100%; /* 웹 브라우저 전체 너비 사용 */
                 height: auto;
-                background-color: #f8fafc;
+                background-color: #ffffff;
                 padding: 10px 20px 20px 20px; /* 상단 여백을 10px로 최소화하여 밀착 */
                 box-sizing: border-box;
             }
@@ -96,7 +96,7 @@
                 box-sizing: border-box;
                 display: flex;
                 flex-direction: column;
-                justify-content: space-between;
+                justify-content: flex-start;
                 overflow: hidden; /* 스크롤바 방지 */
             }
 
@@ -126,7 +126,7 @@
             align-items: center;
             padding: calc(24px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
             box-sizing: border-box;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            background: #ffffff;
         }
 
         #app-screen {
@@ -136,7 +136,7 @@
             overflow: hidden;
             box-sizing: border-box;
             width: 100%;
-            background-color: #f8fafc;
+            background-color: #ffffff;
         }
 
         .dashboard {
@@ -176,7 +176,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
             overflow-y: auto;
             box-sizing: border-box;
             position: relative;
@@ -239,6 +239,203 @@
             display: flex;
             gap: 8px;
             justify-content: center;
+            margin-top: auto; /* 🌟 항상 최하단에 고정 */
+        }
+
+        /* 🌟 인앱 한글 자체 키보드 UI 스타일 (모던 iOS 글래스 시안 - 화면 최하단 네이티브 크기 안착) */
+        #custom-keyboard {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px; /* 메인 앱뷰 최대 가로폭과 매칭 */
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* 🌟 네이티브에 가깝게 줄 간격 확대 */
+            background: rgba(243, 244, 246, 0.92); /* 애플 순정 키보드 특유의 회색조 반투명 글래스 */
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 16px 8px calc(16px + env(safe-area-inset-bottom)) 8px; /* 🌟 상단 및 좌우 패딩을 넓혀 네이티브 크기로 증대 */
+            border-radius: 20px 20px 0 0; /* 상단 좌우 모서리만 둥글게 처리하여 화면 바닥 안착 극대화 */
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.08); /* 위쪽 방향으로 그림자 */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            box-sizing: border-box;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 키보드가 활성화되었을 때 퀴즈 카드 바닥 패딩 추가로 입력 영역 가림 방지 (키보드가 커짐에 따라 330px로 증대) */
+        #quiz-box.keyboard-active {
+            padding-bottom: 330px !important;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 7px; /* 🌟 자판 버튼 간 격차 소폭 증대 */
+            width: 100%;
+        }
+
+        .keyboard-row.middle-row {
+            padding: 0 4.5% !important; /* 🌟 ㅁㄴㅇㄹ 행의 좌우 여백을 넓혀서 가로 너비를 살짝 줄임 */
+            box-sizing: border-box !important;
+        }
+
+        .key-btn {
+            flex: 1;
+            height: 54px; /* 🌟 자판 세로 길이를 54px 네이티브 수준으로 대폭 확대 */
+            background: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: clamp(17px, 5.2vw, 22px); /* 🌟 시인성 극대화를 위해 자판 글꼴을 큼직하게 조정 */
+            font-weight: 600; /* 🌟 네이티브 느낌의 굵은 글꼴 적용 */
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: background 0.12s ease-out; /* 🌟 뗄 때 부드러운 복원 */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none !important; /* 🌟 iOS 길게 누르기 기능 방어 */
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important; /* 🌟 iOS 기본 회색 클릭 하이라이트 깜빡임 완전 제거 */
+            padding: 0 !important; /* 🌟 중요: 글로벌 button 패딩 상속 제거하여 가로 터짐 방지 */
+            min-width: 0 !important; /* 🌟 중요: 버튼 최소 가로 크기를 없애 유연하게 수축 허용 */
+            box-sizing: border-box !important;
+        }
+
+        .key-btn:active {
+            background: #cbd5e1;
+            /* 🌟 transform: scale 제거: 네이티브 키보드처럼 타겟 면적을 안정적으로 유지 */
+        }
+
+        /* 🌟 모바일 터치 오동작(초록색 굳음 현상) 방지용 호버/포커스 스타일 리셋 */
+        .key-btn:hover, .key-btn:focus {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        
+        .shift-btn:hover, .shift-btn:focus,
+        .backspace-btn:hover, .backspace-btn:focus,
+        .control-btn:hover, .control-btn:focus {
+            background-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        .shift-btn.active:hover, .shift-btn.active:focus {
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+        }
+
+        .enter-btn:hover, .enter-btn:focus {
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+        }
+
+        /* 🌟 모든 자판(일반/기능 키 포함) 터치 시 선명한 초록색 시각 피드백 효과 보장 (호버/포커스 리셋보다 아래에 위치 및 상세 선택자 사용으로 100% 우선순위 확보) */
+        #custom-keyboard .key-btn.pressed,
+        #custom-keyboard .key-btn.pressed:hover,
+        #custom-keyboard .key-btn.pressed:focus {
+            background-color: #10b981 !important; /* 선명하고 고급스러운 초록색 */
+            color: #ffffff !important;
+            box-shadow: 0 1px 3px rgba(16, 185, 129, 0.4) !important;
+            transition: none !important; /* 🌟 누를 때는 딜레이 없이 즉각(0ms) 점등 */
+        }
+
+        /* 🌟 모바일 터치 오동작(초록색 굳음 현상) 방지용 호버/포커스 스타일 리셋 */
+        .key-btn:hover, .key-btn:focus {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        
+        .shift-btn:hover, .shift-btn:focus,
+        .backspace-btn:hover, .backspace-btn:focus,
+        .control-btn:hover, .control-btn:focus {
+            background-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        .shift-btn.active:hover, .shift-btn.active:focus {
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+        }
+
+        .enter-btn:hover, .enter-btn:focus {
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+        }
+
+        /* 기능 버튼 (iOS 어두운 회색 스타일, 1.25배 가로 확대) */
+        .shift-btn, .backspace-btn {
+            flex: 1.25 !important;
+            background: #cbd5e1;
+            color: #0f172a;
+            font-size: 18px;
+            min-width: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .shift-btn:active, .backspace-btn:active {
+            background: #94a3b8;
+        }
+
+        .shift-btn.active {
+            background: #0284c7;
+            color: white;
+        }
+
+        /* 하단 주요 컨트롤러 버튼 (설정 1.25배, 스페이스 5.5배, 제출 2.25배로 모바일 에어핏 매칭) */
+        .control-btn {
+            flex: 1.25 !important;
+            background: #cbd5e1;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: bold;
+            min-width: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .control-btn:active {
+            background: #94a3b8;
+        }
+
+        .space-btn {
+            flex: 5.5 !important;
+            background: white;
+            font-size: 14px;
+            min-width: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .enter-btn {
+            flex: 2.25 !important;
+            background: #0284c7;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 1px 3px rgba(2, 132, 199, 0.3);
+            min-width: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .enter-btn:active {
+            background: #0369a1;
+        }
+
+        /* 입력창 readonly 모드에서 회색 처리 비활성화 */
+        input[readonly] {
+            background-color: white !important;
+            color: #1e293b !important;
+            cursor: default;
         }
 
         input[type="text"] {
@@ -753,14 +950,61 @@
                 </div>
 
                 <div class="input-group" id="input-group" style="display: flex; gap: 12px; align-items: stretch; width: 100%; box-sizing: border-box;">
-                    <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" disabled
+                    <button id="show-answer-btn" class="btn-secondary" disabled style="width: 70px; padding: 15px 0 !important; font-size: 12px !important; text-align: center;">정답 보기</button>
+                    <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" inputmode="none" readonly
                         style="flex: 1; min-width: 0; transition: all 0.3s ease;">
-                    <button id="submit-btn" disabled>제출</button>
-                    <button id="show-answer-btn" class="btn-secondary" disabled>정답 보기</button>
+                    <button id="submit-btn" disabled style="width: 70px; padding: 15px 0 !important; font-size: 12px !important; text-align: center;">제출</button>
 
                     <button id="next-btn"
                         style="display: none; flex: 1; background-color: #3b82f6; color: white; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; white-space: nowrap; animation: fadeIn 0.2s ease;">다음
                         ➔</button>
+                </div>
+
+                <!-- 🌟 인앱 자체 한글 키보드 마크업 (모던 iOS 글래스 스타일) -->
+                <div id="custom-keyboard" style="display: none;">
+                    <!-- First Row -->
+                    <div class="keyboard-row">
+                        <button class="key-btn" data-key="ㅂ">ㅂ</button>
+                        <button class="key-btn" data-key="ㅈ">ㅈ</button>
+                        <button class="key-btn" data-key="ㄷ">ㄷ</button>
+                        <button class="key-btn" data-key="ㄱ">ㄱ</button>
+                        <button class="key-btn" data-key="ㅅ">ㅅ</button>
+                        <button class="key-btn" data-key="ㅛ">ㅛ</button>
+                        <button class="key-btn" data-key="ㅕ">ㅕ</button>
+                        <button class="key-btn" data-key="ㅑ">ㅑ</button>
+                        <button class="key-btn" data-key="ㅐ">ㅐ</button>
+                        <button class="key-btn" data-key="ㅔ">ㅔ</button>
+                    </div>
+                    <!-- Second Row -->
+                    <div class="keyboard-row middle-row">
+                        <button class="key-btn" data-key="ㅁ">ㅁ</button>
+                        <button class="key-btn" data-key="ㄴ">ㄴ</button>
+                        <button class="key-btn" data-key="ㅇ">ㅇ</button>
+                        <button class="key-btn" data-key="ㄹ">ㄹ</button>
+                        <button class="key-btn" data-key="ㅎ">ㅎ</button>
+                        <button class="key-btn" data-key="ㅗ">ㅗ</button>
+                        <button class="key-btn" data-key="ㅓ">ㅓ</button>
+                        <button class="key-btn" data-key="ㅏ">ㅏ</button>
+                        <button class="key-btn" data-key="ㅣ">ㅣ</button>
+                    </div>
+                    <!-- Third Row -->
+                    <div class="keyboard-row">
+                        <button class="key-btn shift-btn" id="kbd-shift-btn" data-key="shift">⇧</button>
+                        <button class="key-btn" data-key="ㅋ">ㅋ</button>
+                        <button class="key-btn" data-key="ㅌ">ㅌ</button>
+                        <button class="key-btn" data-key="ㅊ">ㅊ</button>
+                        <button class="key-btn" data-key="ㅍ">ㅍ</button>
+                        <button class="key-btn" data-key="ㅠ">ㅠ</button>
+                        <button class="key-btn" data-key="ㅜ">ㅜ</button>
+                        <button class="key-btn" data-key="ㅡ">ㅡ</button>
+                        <button class="key-btn backspace-btn" data-key="backspace">⌫</button>
+                    </div>
+                    <!-- Fourth Row (Settings + Space + Submit) -->
+                    <div class="keyboard-row">
+                        <button class="key-btn control-btn" data-key="report">🛠️ 신고</button>
+                        <button class="key-btn space-btn" data-key="space">스페이스</button>
+                        <button class="key-btn enter-btn" id="kbd-enter-btn" data-key="enter">제출</button>
+                    </div>
                 </div>
             </div>
             <div class="quiz-container result-screen" id="result-box">
@@ -812,7 +1056,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, increment, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, initializeAuth, indexedDBLocalPersistence, GoogleAuthProvider, signInWithPopup, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDSSvJSfL0B8lRflALTZvKjcoDRsYE01Sg",
@@ -829,19 +1073,19 @@
         enableIndexedDbPersistence(db).catch((err) => console.log("오프라인 모드 실패:", err.code));
         let auth;
         try {
-            // 이미 초기화된 Auth 인스턴스가 있는지 먼저 안전하게 확인
-            auth = getAuth(app);
-            console.log("Firebase Auth 기존 인스턴스 획득 성공:", auth);
+            // iOS WKWebView(Capacitor) 환경에서 IndexedDB가 무한 대기(데드락)에 빠지는 치명적인 iOS 자체 버그가 있습니다.
+            // 이를 완벽히 예방하기 위해 모바일 환경에서 매우 안정적이고 빠르며 무한 대기 버그가 없는
+            // 로컬스토리지 기반(browserLocalPersistence)으로 명시적 초기화를 가장 먼저 시도합니다.
+            auth = initializeAuth(app, {
+                persistence: browserLocalPersistence
+            });
+            console.log("Firebase Auth browserLocalPersistence 초기화 성공:", auth);
         } catch (e) {
             try {
-                // 인스턴스가 없는 경우에만 최초로 IndexedDB 기반 오프라인 지속성 초기화 시도
-                auth = initializeAuth(app, {
-                    persistence: indexedDBLocalPersistence
-                });
-                console.log("Firebase Auth IndexedDB로 신규 초기화 성공!");
-            } catch (error) {
                 auth = getAuth(app);
-                console.log("Firebase Auth 기본 획득으로 최종 복구:", auth);
+                console.log("Firebase Auth 기존 인스턴스 획득 성공:", auth);
+            } catch (error) {
+                console.error("Firebase Auth 초기화 최종 실패:", error);
             }
         }
 
@@ -863,20 +1107,39 @@
 
         document.getElementById("google-login-btn").addEventListener("click", () => {
             console.log("구글 로그인 버튼 클릭됨!");
-            signInWithPopup(auth, new GoogleAuthProvider())
-                .catch((error) => {
-                    console.error("구글 로그인 에러:", error);
-                    alert("구글 로그인 실패: " + error.message);
-                });
+            try {
+                if (!auth) {
+                    throw new Error("Firebase Auth 객체가 초기화되지 않았습니다.");
+                }
+                signInWithPopup(auth, new GoogleAuthProvider())
+                    .catch((error) => {
+                        console.error("구글 로그인 에러:", error);
+                        alert("구글 로그인 실패: " + error.message);
+                    });
+            } catch (error) {
+                console.error("구글 로그인 실행 에러:", error);
+                alert("구글 로그인 실행 중 오류 발생: " + error.message);
+            }
         });
+
         document.getElementById("anon-login-btn").addEventListener("click", () => {
             console.log("익명 로그인 버튼 클릭됨!");
-            signInAnonymously(auth)
-                .then((cred) => console.log("익명 로그인 성공:", cred.user.uid))
-                .catch((error) => {
-                    console.error("익명 로그인 에러:", error);
-                    alert("익명 로그인 실패: " + error.message);
-                });
+            try {
+                if (!auth) {
+                    throw new Error("Firebase Auth 객체가 초기화되지 않았습니다.");
+                }
+                signInAnonymously(auth)
+                    .then((cred) => {
+                        console.log("익명 로그인 성공:", cred.user.uid);
+                    })
+                    .catch((error) => {
+                        console.error("익명 로그인 에러:", error);
+                        alert("익명 로그인 실패:\n메시지: " + error.message + "\n코드: " + error.code);
+                    });
+            } catch (error) {
+                console.error("익명 로그인 실행 에러:", error);
+                alert("익명 로그인 실행 중 오류 발생: " + error.message);
+            }
         });
 
         onAuthStateChanged(auth, (user) => {
@@ -1085,7 +1348,9 @@
             document.getElementById('level-text').textContent = currentLevel;
             document.getElementById('exp-text').textContent = expInLevel;
             document.getElementById('exp-bar').style.width = `${(expInLevel / 200) * 100}%`;
-            await syncUserData();
+            
+            // 파이어베이스 동기화는 백그라운드에서 비동기로 처리하여 메인 UI 스레드와 화면 로딩을 가로막지 않도록 합니다.
+            syncUserData().catch((error) => console.error("사용자 데이터 비동기 동기화 실패:", error));
         }
 
         function getLevelTitle(level) {
@@ -1298,11 +1563,17 @@
 
             const currentWord = quizQueue[0];
             
-            // 🛠️ 관리자(제보) 버튼은 새 질문 로드 시 항상 누르지 않은 기본 상태(비활성화)로 초기화
+            // 🛠️ 관리자(제보) 버튼 로드 시 flaggedWords에 존재 여부에 따라 상태 결정
             const flagBtn = document.getElementById('flag-word-btn');
-            flagBtn.classList.remove('active');
-            flagBtn.title = "이 단어 검토 대상에 추가";
-            flagBtn.textContent = "🛠️";
+            if (flaggedWords && flaggedWords[currentWord.target]) {
+                flagBtn.classList.add('active');
+                flagBtn.title = "검토 대상 지정 해제";
+                flagBtn.textContent = "⭐🛠️";
+            } else {
+                flagBtn.classList.remove('active');
+                flagBtn.title = "이 단어 검토 대상에 추가";
+                flagBtn.textContent = "🛠️";
+            }
 
             hasFailedCurrent = currentWord.failed ? true : false;
             sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
@@ -1322,12 +1593,23 @@
             }
 
             meaningEl.innerHTML = `<span class="level-badge">Lv.${currentWord.level}</span>${currentWord.meaning}`;
+            
+            // 한글 조합기 버퍼 리셋 및 입력창 readonly 속성 확보
+            jamoBuffer = [];
             inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group';
+            inputEl.readOnly = true;
 
             const progress = (completedQuestions / dailyTarget) * 100;
-            inputEl.disabled = false; submitBtn.disabled = false; showAnswerBtn.disabled = false;
+            inputEl.disabled = false;
+            submitBtn.disabled = false;
+            showAnswerBtn.disabled = false;
             progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
-            inputEl.focus();
+            
+            // 키보드 노출 설정 및 제출 레이블 복원
+            document.getElementById('custom-keyboard').style.display = 'flex';
+            document.getElementById('quiz-box').classList.add('keyboard-active');
+            document.getElementById('kbd-enter-btn').textContent = "제출";
+            document.getElementById('kbd-enter-btn').classList.remove('next-state');
         }
 
 
@@ -1351,9 +1633,10 @@
             nextBtn.style.flex = '1';
             inputEl.disabled = true;
 
-            // 통계창 표시 (입력창 위에 나타남)
+            // 통계 표시 시 자체 키보드는 감추어 넓은 화면 가독성 제공
+            document.getElementById('custom-keyboard').style.display = 'none';
+            document.getElementById('quiz-box').classList.remove('keyboard-active');
             statsContainer.style.display = 'block';
-            nextBtn.focus();
 
             try {
                 const statRef = doc(db, "word_stats", word);
@@ -1500,6 +1783,7 @@
                 void inputGroup.offsetWidth; // 애니메이션 리셋을 위한 트릭
                 inputGroup.classList.add('wrong');
                 inputEl.value = '';
+                jamoBuffer = []; // 🌟 자체 한글 가상 키보드 버퍼를 비워 처음부터 새로운 답을 입력할 수 있게 함
                 inputEl.placeholder = '다시 시도해보세요!';
 
                 if (!hasFailedCurrent) {
@@ -1765,21 +2049,391 @@
         showAnswerBtn.addEventListener('click', revealAnswer);
         document.getElementById('next-btn').addEventListener('click', loadQuestion);
         document.getElementById('start-study-btn').addEventListener('click', () => startSession(targetWordCount));
-        inputEl.addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAnswer(); });
+        inputEl.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                if (isShowingStats) {
+                    loadQuestion();
+                } else {
+                    checkAnswer();
+                }
+            }
+        });
         inputEl.addEventListener('focus', () => {
-            // iOS WebKit 환경에서 키보드가 나타날 때 전체 뷰포트가 스크롤되어 상단 헤더가 Notch 뒤로 밀려나는 현상을 완전히 방지합니다.
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-                document.body.scrollTop = 0;
-            }, 80);
+            // 이제 readonly이므로 네이티브 포커스가 가지 않지만 오동작 차단
+            window.scrollTo(0, 0);
+            document.body.scrollTop = 0;
         });
 
-        // 윈도우 스크롤 강제 고정 (WebKit 키보드 밀림 무력화)
-        window.addEventListener('scroll', () => {
-            if (window.scrollY !== 0 || window.scrollX !== 0) {
-                window.scrollTo(0, 0);
+        inputEl.addEventListener('blur', () => {
+            window.scrollTo(0, 0);
+            document.body.scrollTop = 0;
+        });
+
+        // ==========================================
+        // 🌟 초소형 고성능 인앱 한글 조합 엔진 (오토마타)
+        // ==========================================
+        const CHO_LIST = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+        const JUNG_LIST = ['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ'];
+        const JONG_LIST = ['', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+
+        const CONSONANTS = new Set(['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ', 'ㄳ', 'ㄵ', 'ㄶ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅄ']);
+        const VOWELS = new Set(['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ']);
+
+        function isConsonant(c) { return CONSONANTS.has(c); }
+        function isVowel(c) { return VOWELS.has(c); }
+
+        function combineVowel(v1, v2) {
+            const key = v1 + v2;
+            const DOUBLE_VOWELS = {
+                'ㅗㅏ': 'ㅘ', 'ㅗㅐ': 'ㅙ', 'ㅗㅣ': 'ㅚ',
+                'ㅜㅓ': 'ㅝ', 'ㅜㅔ': 'ㅞ', 'ㅜㅣ': 'ㅟ',
+                'ㅡㅣ': 'ㅢ'
+            };
+            return DOUBLE_VOWELS[key] || null;
+        }
+
+        function combineJong(j1, j2) {
+            const key = j1 + j2;
+            const DOUBLE_JONGS = {
+                'ㄱㅅ': 'ㄳ', 'ㄴㅈ': 'ㄵ', 'ㄴㅎ': 'ㄶ',
+                'ㄹㄱ': 'ㄺ', 'ㄹㅁ': 'ㄻ', 'ㄹㅂ': 'ㄼ',
+                'ㄹㅅ': 'ㄽ', 'ㄹㅌ': 'ㄾ', 'ㄹㅍ': 'ㄿ',
+                'ㄹㅎ': 'ㅀ', 'ㅂㅅ': 'ㅄ'
+            };
+            return DOUBLE_JONGS[key] || null;
+        }
+
+        function splitJong(j) {
+            const SPLIT_JONGS = {
+                'ㄳ': ['ㄱ', 'ㅅ'], 'ㄵ': ['ㄴ', 'ㅈ'], 'ㄶ': ['ㄴ', 'ㅎ'],
+                'ㄺ': ['ㄹ', 'ㄱ'], 'ㄻ': ['ㄹ', 'ㅁ'], 'ㄼ': ['ㄹ', 'ㅂ'],
+                'ㄽ': ['ㄹ', 'ㅅ'], 'ㄾ': ['ㄹ', 'ㅌ'], 'ㄿ': ['ㄹ', 'ㅍ'],
+                'ㅀ': ['ㄹ', 'ㅎ'], 'ㅄ': ['ㅂ', 'ㅅ']
+            };
+            return SPLIT_JONGS[j] || null;
+        }
+
+        function syllableToString(s) {
+            if (s.isRaw) return s.value;
+            if (!s.cho) return s.jung || '';
+            if (!s.jung) return s.cho;
+            const choIdx = CHO_LIST.indexOf(s.cho);
+            const jungIdx = JUNG_LIST.indexOf(s.jung);
+            const jongIdx = s.jong ? JONG_LIST.indexOf(s.jong) : 0;
+            
+            if (choIdx === -1 || jungIdx === -1) {
+                return s.cho + s.jung + (s.jong || '');
             }
-        }, { passive: true });
+            return String.fromCharCode(0xAC00 + (choIdx * 21 + jungIdx) * 28 + jongIdx);
+        }
+
+        function compileJamos(jamos) {
+            if (jamos.length === 0) return "";
+            const syllables = [];
+            let i = 0;
+            while (i < jamos.length) {
+                const char = jamos[i];
+                if (isConsonant(char)) {
+                    const next = jamos[i+1];
+                    if (next && isVowel(next)) {
+                        syllables.push({ cho: char, jung: '', jong: '' });
+                        i++;
+                        continue;
+                    }
+                    const last = syllables[syllables.length - 1];
+                    if (last && last.cho && last.jung) {
+                        if (!last.jong) {
+                            last.jong = char;
+                            i++;
+                            continue;
+                        } else {
+                            const nextNext = jamos[i+1];
+                            if (nextNext && isVowel(nextNext)) {
+                                syllables.push({ cho: char, jung: '', jong: '' });
+                                i++;
+                                continue;
+                            }
+                            const combinedJong = combineJong(last.jong, char);
+                            if (combinedJong) {
+                                last.jong = combinedJong;
+                                i++;
+                                continue;
+                            }
+                        }
+                    }
+                    syllables.push({ cho: char, jung: '', jong: '' });
+                    i++;
+                } else if (isVowel(char)) {
+                    const last = syllables[syllables.length - 1];
+                    if (last && last.cho && !last.jung) {
+                        last.jung = char;
+                        i++;
+                        continue;
+                    }
+                    if (last && last.cho && last.jung && !last.jong) {
+                        const combinedVowel = combineVowel(last.jung, char);
+                        if (combinedVowel) {
+                            last.jung = combinedVowel;
+                            i++;
+                            continue;
+                        }
+                    }
+                    if (last && last.cho && last.jung && last.jong) {
+                        const split = splitJong(last.jong);
+                        if (split) {
+                            last.jong = split[0];
+                            syllables.push({ cho: split[1], jung: char, jong: '' });
+                            i++;
+                            continue;
+                        } else {
+                            const carriedCho = last.jong;
+                            last.jong = '';
+                            syllables.push({ cho: carriedCho, jung: char, jong: '' });
+                            i++;
+                            continue;
+                        }
+                    }
+                    if (last && !last.cho && last.jung) {
+                        const combinedVowel = combineVowel(last.jung, char);
+                        if (combinedVowel) {
+                            last.jung = combinedVowel;
+                            i++;
+                            continue;
+                        }
+                    }
+                    syllables.push({ cho: '', jung: char, jong: '' });
+                    i++;
+                } else {
+                    syllables.push({ isRaw: true, value: char });
+                    i++;
+                }
+            }
+            return syllables.map(s => syllableToString(s)).join('');
+        }
+
+        // ==========================================
+        // 🌟 인앱 자체 키보드 상태 관리 및 이벤트 바인딩
+        // ==========================================
+        let jamoBuffer = [];
+        let isShiftActive = false;
+        let deleteTimeout = null;
+        let deleteInterval = null;
+
+        function startDeleteRepeat(btn) {
+            const key = btn.getAttribute('data-key');
+            if (key !== 'backspace') return;
+
+            clearDeleteRepeat();
+
+            // 400ms 롱프레스 감지 후 80ms 주기로 삭제 처리
+            deleteTimeout = setTimeout(() => {
+                deleteInterval = setInterval(() => {
+                    triggerHaptic();
+                    playClickSound();
+                    handleKeyPress('backspace');
+                }, 80);
+            }, 400);
+        }
+
+        function clearDeleteRepeat() {
+            if (deleteTimeout) {
+                clearTimeout(deleteTimeout);
+                deleteTimeout = null;
+            }
+            if (deleteInterval) {
+                clearInterval(deleteInterval);
+                deleteInterval = null;
+            }
+        }
+
+        const KEY_MAP_NORMAL = {
+            'ㅂ': 'ㅂ', 'ㅈ': 'ㅈ', 'ㄷ': 'ㄷ', 'ㄱ': 'ㄱ', 'ㅅ': 'ㅅ',
+            'ㅐ': 'ㅐ', 'ㅔ': 'ㅔ', 'ㅁ': 'ㅁ', 'ㄴ': 'ㄴ', 'ㅇ': 'ㅇ',
+            'ㄹ': 'ㄹ', 'ㅎ': 'ㅎ', 'ㅗ': 'ㅗ', 'ㅓ': 'ㅓ', 'ㅏ': 'ㅏ',
+            'ㅣ': 'ㅣ', 'ㅋ': 'ㅋ', 'ㅌ': 'ㅌ', 'ㅊ': 'ㅊ', 'ㅍ': 'ㅍ',
+            'ㅠ': 'ㅠ', 'ㅜ': 'ㅜ', 'ㅡ': 'ㅡ'
+        };
+
+        const KEY_MAP_SHIFT = {
+            'ㅂ': 'ㅃ', 'ㅈ': 'ㅉ', 'ㄷ': 'ㄸ', 'ㄱ': 'ㄲ', 'ㅅ': 'ㅆ',
+            'ㅐ': 'ㅒ', 'ㅔ': 'ㅖ', 'ㅁ': 'ㅁ', 'ㄴ': 'ㄴ', 'ㅇ': 'ㅇ',
+            'ㄹ': 'ㄹ', 'ㅎ': 'ㅎ', 'ㅗ': 'ㅗ', 'ㅓ': 'ㅓ', 'ㅏ': 'ㅏ',
+            'ㅣ': 'ㅣ', 'ㅋ': 'ㅋ', 'ㅌ': 'ㅌ', 'ㅊ': 'ㅊ', 'ㅍ': 'ㅍ',
+            'ㅠ': 'ㅠ', 'ㅜ': 'ㅜ', 'ㅡ': 'ㅡ'
+        };
+
+        function toggleShift() {
+            isShiftActive = !isShiftActive;
+            const shiftBtn = document.getElementById('kbd-shift-btn');
+            if (isShiftActive) {
+                shiftBtn.classList.add('active');
+            } else {
+                shiftBtn.classList.remove('active');
+            }
+            document.querySelectorAll('#custom-keyboard .key-btn').forEach(btn => {
+                const key = btn.getAttribute('data-key');
+                if (key && KEY_MAP_SHIFT[key]) {
+                    btn.textContent = isShiftActive ? KEY_MAP_SHIFT[key] : KEY_MAP_NORMAL[key];
+                }
+            });
+        }
+
+        function handleKeyPress(key) {
+            if (key === 'backspace') {
+                jamoBuffer.pop();
+            } else if (key === 'space') {
+                jamoBuffer.push(' ');
+            } else if (key === 'report') {
+                toggleFlagWord();
+                return;
+            } else if (key === 'enter') {
+                if (isShowingStats) {
+                    document.getElementById('next-btn').click();
+                } else {
+                    document.getElementById('submit-btn').click();
+                }
+                return;
+            } else {
+                let char = key;
+                if (isShiftActive && KEY_MAP_SHIFT[char]) {
+                    char = KEY_MAP_SHIFT[char];
+                    toggleShift();
+                }
+                jamoBuffer.push(char);
+            }
+            inputEl.value = compileJamos(jamoBuffer);
+        }
+
+        // 🌟 약한 진동 햅틱 피드백 유틸리티 함수
+        function triggerHaptic() {
+            try {
+                // 1. Capacitor Haptics 플러그인 시도 (iOS/Android 네이티브 앱용)
+                const Haptics = window.Capacitor?.Plugins?.Haptics;
+                if (Haptics) {
+                    // 공식 Capacitor Haptics.impact style 값은 대문자 "LIGHT"입니다.
+                    Haptics.impact({ style: 'LIGHT' });
+                    return;
+                }
+                
+                // 2. HTML5 표준 Vibration API 시도 (안드로이드 및 모바일 웹 프리뷰용)
+                if (navigator.vibrate) {
+                    navigator.vibrate(10); // 10ms의 아주 가볍고 약한 진동
+                }
+            } catch (e) {
+                console.warn("햅틱 실행 실패:", e);
+            }
+        }
+
+        // 🌟 초프리미엄 네이티브급 사운드 피드백 (Web Audio API 실시간 합성음)
+        let audioCtx = null;
+        function playClickSound() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                // 네이티브 iOS 키 클릭 주파수 모델링 (부드러운 타격감)
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(130, audioCtx.currentTime); 
+                osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 0.02);
+                
+                // 아주 희미하고 조용하게 소리 재생 (귀에 자극적이지 않고 고급스러움)
+                gain.gain.setValueAtTime(0.012, audioCtx.currentTime); 
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.02);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.02);
+            } catch (e) {
+                console.warn("오디오 피드백 재생 실패:", e);
+            }
+        }
+
+        // 🌟 키 입력 즉각 처리 함수 (0ms 지연)
+        function handleKeyStart(btn, e) {
+            if (e) {
+                // touchstart의 경우 기본 click 이벤트 생성을 차단하여 300ms 지연 및 이중 트리거 원천 차단
+                e.preventDefault();
+            }
+            btn.classList.add('pressed');
+            triggerHaptic(); // 즉시 햅틱 반응 실행
+            playClickSound(); // 🌟 실시간 합성 타건음 즉각 재생 (키감 극대화)
+
+            const key = btn.getAttribute('data-key');
+            if (key === 'shift') {
+                toggleShift();
+            } else {
+                handleKeyPress(key);
+            }
+        }
+
+        // 키보드 자판 클릭 이벤트 등록
+        document.querySelectorAll('#custom-keyboard .key-btn').forEach(btn => {
+            const key = btn.getAttribute('data-key');
+            
+            // 모바일 터치 피드백 (iOS/Android WKWebView 무지연 즉각 처리)
+            btn.addEventListener('touchstart', (e) => {
+                handleKeyStart(btn, e);
+                if (key === 'backspace') {
+                    startDeleteRepeat(btn);
+                }
+            }, { passive: false });
+            
+            btn.addEventListener('touchend', (e) => {
+                if (e) e.preventDefault();
+                btn.classList.remove('pressed'); // 손을 떼는 순간 지연 없이 복귀
+                if (key === 'backspace') {
+                    clearDeleteRepeat();
+                }
+            }, { passive: false });
+            
+            btn.addEventListener('touchcancel', (e) => {
+                if (e) e.preventDefault();
+                btn.classList.remove('pressed');
+                if (key === 'backspace') {
+                    clearDeleteRepeat();
+                }
+            }, { passive: false });
+
+            // 데스크톱 마우스 피드백 (웹 환경 테스트용 - 터치 기기에서는 touchstart의 preventDefault()에 의해 실행되지 않음)
+            btn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                handleKeyStart(btn, null);
+                if (key === 'backspace') {
+                    startDeleteRepeat(btn);
+                }
+            });
+            
+            btn.addEventListener('mouseup', (e) => {
+                e.preventDefault();
+                btn.classList.remove('pressed');
+                if (key === 'backspace') {
+                    clearDeleteRepeat();
+                }
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+                btn.classList.remove('pressed');
+                if (key === 'backspace') {
+                    clearDeleteRepeat();
+                }
+            });
+
+            // 클릭 이벤트는 터치/마우스 이벤트에서 차단되지만 마크업 예방용으로 둡니다.
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+            });
+        });
+
+
 
         document.getElementById('edit-profile-trigger').addEventListener('click', () => {
             document.getElementById('input-nickname').value = userNickname;
@@ -1811,16 +2465,25 @@
                 titleSelect.appendChild(opt);
             });
 
-            // 퀴즈 진행 중일 때만 홈으로 가기 버튼 노출
+            // 퀴즈 진행 중일 때만 홈으로 가기 버튼 노출 및 자체 가상 키보드 숨김
             if (quizQueue && quizQueue.length > 0) {
                 document.getElementById('modal-home-container').style.display = 'block';
+                document.getElementById('custom-keyboard').style.display = 'none';
+                document.getElementById('quiz-box').classList.remove('keyboard-active');
             } else {
                 document.getElementById('modal-home-container').style.display = 'none';
             }
 
             document.getElementById('profile-modal').style.display = 'flex';
         });
-        document.getElementById('close-modal-btn').addEventListener('click', () => document.getElementById('profile-modal').style.display = 'none');
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+            document.getElementById('profile-modal').style.display = 'none';
+            // 모달을 닫을 때 퀴즈 진행 중이고 결과/통계 화면이 아니라면 가상 키보드 복구
+            if (quizQueue && quizQueue.length > 0 && !isShowingStats) {
+                document.getElementById('custom-keyboard').style.display = 'flex';
+                document.getElementById('quiz-box').classList.add('keyboard-active');
+            }
+        });
 
         document.getElementById('modal-home-btn').addEventListener('click', () => {
             document.getElementById('profile-modal').style.display = 'none';
@@ -1843,6 +2506,11 @@
             if (quizQueue && quizQueue.length > 0) {
                 document.getElementById('display-nickname').textContent = userNickname;
                 document.getElementById('display-emoji').textContent = userEmoji;
+                // 저장하고 닫을 때 퀴즈 진행 중이고 결과/통계 화면이 아니라면 가상 키보드 복구
+                if (!isShowingStats) {
+                    document.getElementById('custom-keyboard').style.display = 'flex';
+                    document.getElementById('quiz-box').classList.add('keyboard-active');
+                }
             } else {
                 showHomeScreen();
             }

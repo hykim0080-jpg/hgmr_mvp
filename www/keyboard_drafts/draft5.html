@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>말해보카 스타일 키보드 - 시안 5: 퓨처리스틱 사이버</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #05020c;
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #22d3ee; /* 네온 시안 */
+        }
+
+        /* 스마트폰 화면 프레임 (데스크톱 데모용) */
+        .phone-frame {
+            width: 100%;
+            max-width: 412px;
+            height: 100vh;
+            max-height: 850px;
+            background: radial-gradient(circle at center, #1e0b36 0%, #05020c 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(236, 72, 153, 0.3);
+            border-radius: 40px;
+            border: 8px solid #2e1065;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 450px) {
+            .phone-frame {
+                max-height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+        }
+
+        /* 상단 네비게이션 헤더 */
+        .app-header {
+            padding: 20px 20px 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .back-btn {
+            font-size: 24px;
+            color: #ec4899;
+            cursor: pointer;
+            text-shadow: 0 0 8px #ec4899;
+        }
+
+        .progress-container {
+            flex: 1;
+            margin: 0 15px;
+            height: 16px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            box-sizing: border-box;
+            border: 1px solid #ec4899;
+            box-shadow: 0 0 8px rgba(236, 72, 153, 0.3);
+        }
+
+        .progress-fill {
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, #ec4899, #a855f7);
+            border-radius: 20px;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px #ec4899;
+        }
+
+        .gear-btn {
+            font-size: 20px;
+            color: #ec4899;
+            cursor: pointer;
+            text-shadow: 0 0 8px #ec4899;
+        }
+
+        /* 퀴즈 박스 영역 (디지털 패널 스타일) */
+        .quiz-card {
+            background: rgba(15, 10, 30, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            margin: 20px;
+            padding: 30px 24px;
+            border-radius: 24px;
+            border: 1px solid #ec4899;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.25);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+
+        .sentence-area {
+            text-align: left;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1.6;
+            color: #f8fafc;
+        }
+
+        .highlight-blue {
+            color: #22d3ee;
+            text-shadow: 0 0 10px rgba(34, 211, 238, 0.8);
+            border-bottom: 2px solid #22d3ee;
+            padding: 0 4px;
+        }
+
+        .input-display-area {
+            border: 2px solid #22d3ee;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            background: #000000;
+            color: #22d3ee;
+            text-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-top: auto;
+            box-shadow: inset 0 0 15px rgba(34, 211, 238, 0.2);
+        }
+
+        .cursor {
+            width: 2px;
+            height: 24px;
+            background: #22d3ee;
+            display: inline-block;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            box-shadow: 0 0 10px #22d3ee;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* 🌟 퓨처리스틱 사이버 스타일 자체 키보드 영역 */
+        .keyboard-container {
+            background-color: #05020c; /* 테크니컬 블랙 */
+            border-top: 2px solid #ec4899;
+            box-shadow: 0 -5px 15px rgba(236, 72, 153, 0.2);
+            padding: 12px 6px calc(12px + env(safe-area-inset-bottom)) 6px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        /* 키보드 자판 열 */
+        .kbd-row {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 7px;
+            width: 100%;
+        }
+
+        /* 개별 자판 버튼 (글래스모픽 홀로그램 키) */
+        .kbd-btn {
+            flex: 1;
+            height: 46px;
+            background: rgba(30, 20, 50, 0.6);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #22d3ee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 5px rgba(34, 211, 238, 0.1);
+            cursor: pointer;
+            transition: all 0.1s;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .kbd-btn:active {
+            transform: scale(0.95);
+            background: #ec4899;
+            border-color: #ec4899;
+            color: #ffffff;
+            box-shadow: 0 0 15px #ec4899;
+            text-shadow: 0 0 5px #ffffff;
+        }
+
+        /* 기능성 어두운 자판 (Shift, Backspace) */
+        .fn-btn {
+            background: rgba(236, 72, 153, 0.15);
+            border-color: rgba(236, 72, 153, 0.4);
+            color: #ec4899;
+        }
+
+        .fn-btn:active {
+            background: #ec4899;
+            color: white;
+            box-shadow: 0 0 15px #ec4899;
+        }
+
+        .fn-btn.active {
+            background: #a855f7;
+            color: white;
+            border-color: #c084fc;
+            box-shadow: 0 0 15px #a855f7;
+        }
+
+        /* 최하단 대형 컨트롤 자판 */
+        .control-btn {
+            background: rgba(14, 116, 144, 0.2);
+            border-color: rgba(34, 211, 238, 0.4);
+            color: #22d3ee;
+            font-size: 13px;
+        }
+
+        .control-btn:active {
+            background: #22d3ee;
+            color: black;
+            box-shadow: 0 0 15px #22d3ee;
+        }
+
+        .space-btn {
+            flex: 3.5;
+            background: rgba(30, 20, 50, 0.4);
+            color: #a855f7;
+            border-color: rgba(168, 85, 247, 0.4);
+            font-size: 13px;
+        }
+
+        .space-btn:active {
+            background: #a855f7;
+            color: white;
+            box-shadow: 0 0 15px #a855f7;
+        }
+
+        .submit-btn {
+            flex: 1.5;
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+            border: none;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+        }
+
+        .submit-btn:active {
+            background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+            box-shadow: 0 0 20px #ec4899;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        <!-- 상단 네비게이션 -->
+        <div class="app-header">
+            <span class="back-btn" onclick="history.back()">⟨</span>
+            <div class="progress-container">
+                <div class="progress-fill">20/90</div>
+            </div>
+            <span class="gear-btn">⚙️</span>
+        </div>
+
+        <!-- 퀴즈 영역 -->
+        <div class="quiz-card">
+            <div class="sentence-area">
+                나 그 피자 먹어봤어.<br><br>
+                I <span class="highlight-blue">____</span> the pizza.
+            </div>
+
+            <!-- 입력창 -->
+            <div class="input-display-area" id="input-display">
+                <span id="typed-text"></span><span class="cursor"></span>
+            </div>
+        </div>
+
+        <!-- 🌟 자체 키보드 영역 (퓨처리스틱 사이버 스타일) -->
+        <div class="keyboard-container">
+            <!-- First Row (10 Keys) -->
+            <div class="kbd-row">
+                <button class="kbd-btn" data-key="ㅂ">ㅂ</button>
+                <button class="kbd-btn" data-key="ㅈ">ㅈ</button>
+                <button class="kbd-btn" data-key="ㄷ">ㄷ</button>
+                <button class="kbd-btn" data-key="ㄱ">ㄱ</button>
+                <button class="kbd-btn" data-key="ㅅ">ㅅ</button>
+                <button class="kbd-btn" data-key="요">ㅛ</button>
+                <button class="kbd-btn" data-key="ㅕ">ㅕ</button>
+                <button class="kbd-btn" data-key="ㅑ">ㅑ</button>
+                <button class="kbd-btn" data-key="ㅐ">ㅐ</button>
+                <button class="kbd-btn" data-key="ㅔ">ㅔ</button>
+            </div>
+
+            <!-- Second Row (9 Keys) -->
+            <div class="kbd-row">
+                <button class="kbd-btn" data-key="ㅁ">ㅁ</button>
+                <button class="kbd-btn" data-key="ㄴ">ㄴ</button>
+                <button class="kbd-btn" data-key="ㅇ">ㅇ</button>
+                <button class="kbd-btn" data-key="ㄹ">ㄹ</button>
+                <button class="kbd-btn" data-key="ㅎ">ㅎ</button>
+                <button class="kbd-btn" data-key="ㅗ">ㅗ</button>
+                <button class="kbd-btn" data-key="ㅓ">ㅓ</button>
+                <button class="kbd-btn" data-key="ㅏ">ㅏ</button>
+                <button class="kbd-btn" data-key="ㅣ">ㅣ</button>
+            </div>
+
+            <!-- Third Row -->
+            <div class="kbd-row">
+                <button class="kbd-btn fn-btn" id="kbd-shift-btn" data-key="shift">⇧</button>
+                <button class="kbd-btn" data-key="ㅋ">ㅋ</button>
+                <button class="kbd-btn" data-key="ㅌ">ㅌ</button>
+                <button class="kbd-btn" data-key="ㅊ">ㅊ</button>
+                <button class="kbd-btn" data-key="ㅍ">ㅍ</button>
+                <button class="kbd-btn" data-key="ㅠ">ㅠ</button>
+                <button class="kbd-btn" data-key="ㅜ">ㅜ</button>
+                <button class="kbd-btn" data-key="ㅡ">ㅡ</button>
+                <button class="kbd-btn fn-btn" data-key="backspace">⌫</button>
+            </div>
+
+            <!-- Fourth Row -->
+            <div class="kbd-row">
+                <button class="kbd-btn control-btn" data-key="settings">⚙️ 설정</button>
+                <button class="kbd-btn space-btn" data-key="space">스페이스</button>
+                <button class="kbd-btn submit-btn" data-key="enter">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🌟 오토마타 엔진 내장 -->
+    <script>
+        const CHO_LIST = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+        const JUNG_LIST = ['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ'];
+        const JONG_LIST = ['', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+
+        const CONSONANTS = new Set(['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ', 'ㄳ', 'ㄵ', 'ㄶ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅄ']);
+        const VOWELS = new Set(['ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ']);
+
+        function isConsonant(c) { return CONSONANTS.has(c); }
+        function isVowel(c) { return VOWELS.has(c); }
+
+        function combineVowel(v1, v2) {
+            const key = v1 + v2;
+            const DOUBLE_VOWELS = {
+                'ㅗㅏ': 'ㅘ', 'ㅗㅐ': 'ㅙ', 'ㅗㅣ': 'ㅚ',
+                'ㅜㅓ': 'ㅝ', 'ㅜㅔ': 'ㅞ', 'ㅜㅣ': 'ㅟ',
+                'ㅡㅣ': 'ㅢ'
+            };
+            return DOUBLE_VOWELS[key] || null;
+        }
+
+        function combineJong(j1, j2) {
+            const key = j1 + j2;
+            const DOUBLE_JONGS = {
+                'ㄱㅅ': 'ㄳ', 'ㄴㅈ': 'ㄵ', 'ㄴㅎ': 'ㄶ',
+                'ㄹㄱ': 'ㄺ', 'ㄹㅁ': 'ㄻ', 'ㄹㅂ': 'ㄼ',
+                'ㄹㅅ': 'ㄽ', 'ㄹㅌ': 'ㄾ', 'ㄹㅍ': 'ㄿ',
+                'ㄹㅎ': 'ㅀ', 'ㅂㅅ': 'ㅄ'
+            };
+            return DOUBLE_JONGS[key] || null;
+        }
+
+        function splitJong(j) {
+            const SPLIT_JONGS = {
+                'ㄳ': ['ㄱ', 'ㅅ'], 'ㄵ': ['ㄴ', 'ㅈ'], 'ㄶ': ['ㄴ', 'ㅎ'],
+                'ㄺ': ['ㄹ', 'ㄱ'], 'ㄻ': ['ㄹ', 'ㅁ'], 'ㄼ': ['ㄹ', 'ㅂ'],
+                'ㄽ': ['ㄹ', 'ㅅ'], 'ㄾ': ['ㄹ', 'ㅌ'], 'ㄿ': ['ㄹ', 'ㅍ'],
+                'ㅀ': ['ㄹ', 'ㅎ'], 'ㅄ': ['ㅂ', 'ㅅ']
+            };
+            return SPLIT_JONGS[j] || null;
+        }
+
+        function syllableToString(s) {
+            if (s.isRaw) return s.value;
+            if (!s.cho) return s.jung || '';
+            if (!s.jung) return s.cho;
+            const choIdx = CHO_LIST.indexOf(s.cho);
+            const jungIdx = JUNG_LIST.indexOf(s.jung);
+            const jongIdx = s.jong ? JONG_LIST.indexOf(s.jong) : 0;
+            
+            if (choIdx === -1 || jungIdx === -1) {
+                return s.cho + s.jung + (s.jong || '');
+            }
+            return String.fromCharCode(0xAC00 + (choIdx * 21 + jungIdx) * 28 + jongIdx);
+        }
+
+        function compileJamos(jamos) {
+            if (jamos.length === 0) return "";
+            const syllables = [];
+            let i = 0;
+            while (i < jamos.length) {
+                const char = jamos[i];
+                if (isConsonant(char)) {
+                    const next = jamos[i+1];
+                    if (next && isVowel(next)) {
+                        syllables.push({ cho: char, jung: '', jong: '' });
+                        i++;
+                        continue;
+                    }
+                    const last = syllables[syllables.length - 1];
+                    if (last && last.cho && last.jung) {
+                        if (!last.jong) {
+                            last.jong = char;
+                            i++;
+                            continue;
+                        } else {
+                            const nextNext = jamos[i+1];
+                            if (nextNext && isVowel(nextNext)) {
+                                syllables.push({ cho: char, jung: '', jong: '' });
+                                i++;
+                                continue;
+                            }
+                            const combinedJong = combineJong(last.jong, char);
+                            if (combinedJong) {
+                                last.jong = combinedJong;
+                                i++;
+                                continue;
+                            }
+                        }
+                    }
+                    syllables.push({ cho: char, jung: '', jong: '' });
+                    i++;
+                } else if (isVowel(char)) {
+                    const last = syllables[syllables.length - 1];
+                    if (last && last.cho && !last.jung) {
+                        last.jung = char;
+                        i++;
+                        continue;
+                    }
+                    if (last && last.cho && last.jung && !last.jong) {
+                        const combinedVowel = combineVowel(last.jung, char);
+                        if (combinedVowel) {
+                            last.jung = combinedVowel;
+                            i++;
+                            continue;
+                        }
+                    }
+                    if (last && last.cho && last.jung && last.jong) {
+                        const split = splitJong(last.jong);
+                        if (split) {
+                            last.jong = split[0];
+                            syllables.push({ cho: split[1], jung: char, jong: '' });
+                            i++;
+                            continue;
+                        } else {
+                            const carriedCho = last.jong;
+                            last.jong = '';
+                            syllables.push({ cho: carriedCho, jung: char, jong: '' });
+                            i++;
+                            continue;
+                        }
+                    }
+                    if (last && !last.cho && last.jung) {
+                        const combinedVowel = combineVowel(last.jung, char);
+                        if (combinedVowel) {
+                            last.jung = combinedVowel;
+                            i++;
+                            continue;
+                        }
+                    }
+                    syllables.push({ cho: '', jung: char, jong: '' });
+                    i++;
+                } else {
+                    syllables.push({ isRaw: true, value: char });
+                    i++;
+                }
+            }
+            return syllables.map(s => syllableToString(s)).join('');
+        }
+
+        let jamoBuffer = [];
+        let isShiftActive = false;
+
+        const KEY_MAP_NORMAL = {
+            'ㅂ': 'ㅂ', 'ㅈ': 'ㅈ', 'ㄷ': 'ㄷ', 'ㄱ': 'ㄱ', 'ㅅ': 'ㅅ',
+            'ㅐ': 'ㅐ', 'ㅔ': 'ㅔ', 'ㅁ': 'ㅁ', 'ㄴ': 'ㄴ', 'ㅇ': 'ㅇ',
+            'ㄹ': 'ㄹ', 'ㅎ': 'ㅎ', 'ㅗ': 'ㅗ', 'ㅓ': 'ㅓ', 'ㅏ': 'ㅏ',
+            'ㅣ': 'ㅣ', 'ㅋ': 'ㅋ', 'ㅌ': 'ㅌ', 'ㅊ': 'ㅊ', 'ㅍ': 'ㅍ',
+            'ㅠ': 'ㅠ', 'ㅜ': 'ㅜ', 'ㅡ': 'ㅡ'
+        };
+
+        const KEY_MAP_SHIFT = {
+            'ㅂ': 'ㅃ', 'ㅈ': 'ㅉ', 'ㄷ': 'ㄸ', 'ㄱ': 'ㄲ', 'ㅅ': 'ㅆ',
+            'ㅐ': 'ㅒ', 'ㅔ': 'ㅖ', 'ㅁ': 'ㅁ', 'ㄴ': 'ㄴ', 'ㅇ': 'ㅇ',
+            'ㄹ': 'ㄹ', 'ㅎ': 'ㅎ', 'ㅗ': 'ㅗ', 'ㅓ': 'ㅓ', 'ㅏ': 'ㅏ',
+            'ㅣ': 'ㅣ', 'ㅋ': 'ㅋ', 'ㅌ': 'ㅌ', 'ㅊ': 'ㅊ', 'ㅍ': 'ㅍ',
+            'ㅠ': 'ㅠ', 'ㅜ': 'ㅜ', 'ㅡ': 'ㅡ'
+        };
+
+        function toggleShift() {
+            isShiftActive = !isShiftActive;
+            const shiftBtn = document.getElementById('kbd-shift-btn');
+            if (isShiftActive) {
+                shiftBtn.classList.add('active');
+            } else {
+                shiftBtn.classList.remove('active');
+            }
+            document.querySelectorAll('.kbd-btn').forEach(btn => {
+                const key = btn.getAttribute('data-key');
+                if (key && KEY_MAP_SHIFT[key]) {
+                    btn.textContent = isShiftActive ? KEY_MAP_SHIFT[key] : KEY_MAP_NORMAL[key];
+                }
+            });
+        }
+
+        const textEl = document.getElementById('typed-text');
+
+        function handleKeyPress(key) {
+            if (key === 'backspace') {
+                jamoBuffer.pop();
+            } else if (key === 'space') {
+                jamoBuffer.push(' ');
+            } else if (key === 'enter') {
+                alert('입력 완료! 정답: ' + compileJamos(jamoBuffer));
+                jamoBuffer = [];
+            } else if (key === 'settings') {
+                alert('설정창 클릭됨!');
+                return;
+            } else if (key === 'shift') {
+                toggleShift();
+                return;
+            } else {
+                let char = key;
+                if (isShiftActive && KEY_MAP_SHIFT[char]) {
+                    char = KEY_MAP_SHIFT[char];
+                    toggleShift();
+                }
+                jamoBuffer.push(char);
+            }
+            textEl.textContent = compileJamos(jamoBuffer);
+        }
+
+        document.querySelectorAll('.kbd-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const key = btn.getAttribute('data-key');
+                handleKeyPress(key);
+            });
+        });
+    </script>
+</body>
+</html>
