@@ -12,7 +12,8 @@
             user-select: none;
         }
 
-        html, body {
+        html,
+        body {
             position: fixed;
             top: 0;
             left: 0;
@@ -62,7 +63,7 @@
             }
 
             /* 상단 헤더의 가로 100% 위치 그대로 보존 */
-            #app-screen > header {
+            #app-screen>header {
                 width: 100% !important;
                 max-width: 100% !important;
                 flex-shrink: 0;
@@ -74,35 +75,44 @@
                 flex: 1;
                 display: flex;
                 justify-content: center;
-                align-items: flex-start; /* 세로 위쪽(헤더 바로 아래)에 밀착 */
-                max-width: 100%; /* 웹 브라우저 전체 너비 사용 */
+                align-items: flex-start;
+                /* 세로 위쪽(헤더 바로 아래)에 밀착 */
+                max-width: 100%;
+                /* 웹 브라우저 전체 너비 사용 */
                 height: auto;
                 background-color: #ffffff;
-                padding: 10px 20px 20px 20px; /* 상단 여백을 10px로 최소화하여 밀착 */
+                padding: 10px 20px 20px 20px;
+                /* 상단 여백을 10px로 최소화하여 밀착 */
                 box-sizing: border-box;
             }
 
             /* 메인 카드 컴포넌트 */
             .quiz-container {
                 width: 100%;
-                max-width: 480px; /* 전형적인 모바일 웹뷰 가로폭 */
+                max-width: 480px;
+                /* 전형적인 모바일 웹뷰 가로폭 */
                 height: auto;
-                max-height: calc(100vh - 100px); /* 헤더 바로 아래 밀착되므로 가용 높이 확대하여 스크롤 완전 방지 */
-                margin: 0 auto !important; /* 중앙 정렬 */
+                max-height: calc(100vh - 100px);
+                /* 헤더 바로 아래 밀착되므로 가용 높이 확대하여 스크롤 완전 방지 */
+                margin: 0 auto !important;
+                /* 중앙 정렬 */
                 padding: 30px 24px !important;
                 border-radius: 28px;
-                box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08); /* 고급스러운 부드러운 그림자 */
+                box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+                /* 고급스러운 부드러운 그림자 */
                 border: 1px solid #e2e8f0;
                 box-sizing: border-box;
                 display: flex;
                 flex-direction: column;
                 justify-content: flex-start;
-                overflow: hidden; /* 스크롤바 방지 */
+                overflow: hidden;
+                /* 스크롤바 방지 */
             }
 
             /* 카드 안의 큰 텍스트들 높이나 여백 미세 조절하여 데스크톱 뷰포트 내 스크롤 최소화 */
             .sentence {
-                font-size: 20px; /* 데스크톱에서 약간 슬림하게 */
+                font-size: 20px;
+                /* 데스크톱에서 약간 슬림하게 */
                 margin-bottom: 12px;
                 min-height: auto;
             }
@@ -118,7 +128,8 @@
             }
         }
 
-        #login-screen, #setup-screen {
+        #login-screen,
+        #setup-screen {
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -239,7 +250,8 @@
             display: flex;
             gap: 8px;
             justify-content: center;
-            margin-top: auto; /* 🌟 항상 최하단에 고정 */
+            margin-top: auto;
+            /* 🌟 항상 최하단에 고정 */
         }
 
         /* 🌟 인앱 한글 자체 키보드 UI 스타일 (모던 iOS 글래스 시안 - 화면 최하단 네이티브 크기 안착) */
@@ -249,18 +261,24 @@
             left: 50%;
             transform: translateX(-50%);
             width: 100%;
-            max-width: 480px; /* 메인 앱뷰 최대 가로폭과 매칭 */
+            max-width: 480px;
+            /* 메인 앱뷰 최대 가로폭과 매칭 */
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            gap: 8px; /* 🌟 네이티브에 가깝게 줄 간격 확대 */
-            background: rgba(243, 244, 246, 0.92); /* 애플 순정 키보드 특유의 회색조 반투명 글래스 */
+            gap: 8px;
+            /* 🌟 네이티브에 가깝게 줄 간격 확대 */
+            background: rgba(243, 244, 246, 0.92);
+            /* 애플 순정 키보드 특유의 회색조 반투명 글래스 */
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            padding: 16px 8px calc(16px + env(safe-area-inset-bottom)) 8px; /* 🌟 상단 및 좌우 패딩을 넓혀 네이티브 크기로 증대 */
-            border-radius: 20px 20px 0 0; /* 상단 좌우 모서리만 둥글게 처리하여 화면 바닥 안착 극대화 */
+            padding: 16px 8px calc(16px + env(safe-area-inset-bottom)) 8px;
+            /* 🌟 상단 및 좌우 패딩을 넓혀 네이티브 크기로 증대 */
+            border-radius: 20px 20px 0 0;
+            /* 상단 좌우 모서리만 둥글게 처리하여 화면 바닥 안착 극대화 */
             border-top: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.08); /* 위쪽 방향으로 그림자 */
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.08);
+            /* 위쪽 방향으로 그림자 */
             user-select: none;
             -webkit-user-select: none;
             touch-action: manipulation;
@@ -276,36 +294,46 @@
         .keyboard-row {
             display: flex;
             justify-content: center;
-            gap: 7px; /* 🌟 자판 버튼 간 격차 소폭 증대 */
+            gap: 7px;
+            /* 🌟 자판 버튼 간 격차 소폭 증대 */
             width: 100%;
         }
 
         .keyboard-row.middle-row {
-            padding: 0 4.5% !important; /* 🌟 ㅁㄴㅇㄹ 행의 좌우 여백을 넓혀서 가로 너비를 살짝 줄임 */
+            padding: 0 4.5% !important;
+            /* 🌟 ㅁㄴㅇㄹ 행의 좌우 여백을 넓혀서 가로 너비를 살짝 줄임 */
             box-sizing: border-box !important;
         }
 
         .key-btn {
             flex: 1;
-            height: 54px; /* 🌟 자판 세로 길이를 54px 네이티브 수준으로 대폭 확대 */
+            height: 54px;
+            /* 🌟 자판 세로 길이를 54px 네이티브 수준으로 대폭 확대 */
             background: #ffffff;
             border: none;
             border-radius: 6px;
-            font-size: clamp(17px, 5.2vw, 22px); /* 🌟 시인성 극대화를 위해 자판 글꼴을 큼직하게 조정 */
-            font-weight: 600; /* 🌟 네이티브 느낌의 굵은 글꼴 적용 */
+            font-size: clamp(17px, 5.2vw, 22px);
+            /* 🌟 시인성 극대화를 위해 자판 글꼴을 큼직하게 조정 */
+            font-weight: 600;
+            /* 🌟 네이티브 느낌의 굵은 글꼴 적용 */
             color: #0f172a;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
             cursor: pointer;
-            transition: background 0.12s ease-out; /* 🌟 뗄 때 부드러운 복원 */
+            transition: background 0.12s ease-out;
+            /* 🌟 뗄 때 부드러운 복원 */
             user-select: none;
             -webkit-user-select: none;
-            -webkit-touch-callout: none !important; /* 🌟 iOS 길게 누르기 기능 방어 */
-            -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important; /* 🌟 iOS 기본 회색 클릭 하이라이트 깜빡임 완전 제거 */
-            padding: 0 !important; /* 🌟 중요: 글로벌 button 패딩 상속 제거하여 가로 터짐 방지 */
-            min-width: 0 !important; /* 🌟 중요: 버튼 최소 가로 크기를 없애 유연하게 수축 허용 */
+            -webkit-touch-callout: none !important;
+            /* 🌟 iOS 길게 누르기 기능 방어 */
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+            /* 🌟 iOS 기본 회색 클릭 하이라이트 깜빡임 완전 제거 */
+            padding: 0 !important;
+            /* 🌟 중요: 글로벌 button 패딩 상속 제거하여 가로 터짐 방지 */
+            min-width: 0 !important;
+            /* 🌟 중요: 버튼 최소 가로 크기를 없애 유연하게 수축 허용 */
             box-sizing: border-box !important;
         }
 
@@ -315,24 +343,30 @@
         }
 
         /* 🌟 모바일 터치 오동작(초록색 굳음 현상) 방지용 호버/포커스 스타일 리셋 */
-        .key-btn:hover, .key-btn:focus {
+        .key-btn:hover,
+        .key-btn:focus {
             background-color: #ffffff !important;
             color: #0f172a !important;
         }
-        
-        .shift-btn:hover, .shift-btn:focus,
-        .backspace-btn:hover, .backspace-btn:focus,
-        .control-btn:hover, .control-btn:focus {
+
+        .shift-btn:hover,
+        .shift-btn:focus,
+        .backspace-btn:hover,
+        .backspace-btn:focus,
+        .control-btn:hover,
+        .control-btn:focus {
             background-color: #cbd5e1 !important;
             color: #0f172a !important;
         }
 
-        .shift-btn.active:hover, .shift-btn.active:focus {
+        .shift-btn.active:hover,
+        .shift-btn.active:focus {
             background-color: #0284c7 !important;
             color: #ffffff !important;
         }
 
-        .enter-btn:hover, .enter-btn:focus {
+        .enter-btn:hover,
+        .enter-btn:focus {
             background-color: #0284c7 !important;
             color: #ffffff !important;
         }
@@ -341,37 +375,46 @@
         #custom-keyboard .key-btn.pressed,
         #custom-keyboard .key-btn.pressed:hover,
         #custom-keyboard .key-btn.pressed:focus {
-            background-color: #10b981 !important; /* 선명하고 고급스러운 초록색 */
+            background-color: #10b981 !important;
+            /* 선명하고 고급스러운 초록색 */
             color: #ffffff !important;
             box-shadow: 0 1px 3px rgba(16, 185, 129, 0.4) !important;
-            transition: none !important; /* 🌟 누를 때는 딜레이 없이 즉각(0ms) 점등 */
+            transition: none !important;
+            /* 🌟 누를 때는 딜레이 없이 즉각(0ms) 점등 */
         }
 
         /* 🌟 모바일 터치 오동작(초록색 굳음 현상) 방지용 호버/포커스 스타일 리셋 */
-        .key-btn:hover, .key-btn:focus {
+        .key-btn:hover,
+        .key-btn:focus {
             background-color: #ffffff !important;
             color: #0f172a !important;
         }
-        
-        .shift-btn:hover, .shift-btn:focus,
-        .backspace-btn:hover, .backspace-btn:focus,
-        .control-btn:hover, .control-btn:focus {
+
+        .shift-btn:hover,
+        .shift-btn:focus,
+        .backspace-btn:hover,
+        .backspace-btn:focus,
+        .control-btn:hover,
+        .control-btn:focus {
             background-color: #cbd5e1 !important;
             color: #0f172a !important;
         }
 
-        .shift-btn.active:hover, .shift-btn.active:focus {
+        .shift-btn.active:hover,
+        .shift-btn.active:focus {
             background-color: #0284c7 !important;
             color: #ffffff !important;
         }
 
-        .enter-btn:hover, .enter-btn:focus {
+        .enter-btn:hover,
+        .enter-btn:focus {
             background-color: #0284c7 !important;
             color: #ffffff !important;
         }
 
         /* 기능 버튼 (iOS 어두운 회색 스타일, 1.25배 가로 확대) */
-        .shift-btn, .backspace-btn {
+        .shift-btn,
+        .backspace-btn {
             flex: 1.25 !important;
             background: #cbd5e1;
             color: #0f172a;
@@ -381,7 +424,8 @@
             box-sizing: border-box !important;
         }
 
-        .shift-btn:active, .backspace-btn:active {
+        .shift-btn:active,
+        .backspace-btn:active {
             background: #94a3b8;
         }
 
@@ -617,15 +661,58 @@
         }
 
         .flag-btn.active {
-            background-color: #fef08a; /* 연노랑 강조색 */
+            background-color: #fef08a;
+            /* 연노랑 강조색 */
             border-color: #eab308;
             box-shadow: 0 4px 12px rgba(234, 179, 8, 0.2);
             animation: bounce 0.3s ease;
         }
 
         @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.25); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.25);
+            }
+        }
+
+        /* 주제별 학습 선택 버튼 */
+        .topic-btn {
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .topic-btn:active { transform: scale(0.95); }
+        .topic-btn.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.25);
+        }
+
+        /* 문제 좌상단 태그 뱃지 */
+        .word-tag-chip {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #6366f1;
+            background: #ede9fe;
+            border: 1px solid #c4b5fd;
+            border-radius: 6px;
+            padding: 2px 8px;
+            margin-right: 4px;
         }
 
         .dev-panel-item {
@@ -634,7 +721,7 @@
             border-radius: 16px;
             padding: 16px;
             margin-bottom: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.01);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
             transition: border-color 0.2s;
         }
 
@@ -680,16 +767,22 @@
     <div id="app-screen" style="display: none;">
 
         <!-- 🌟 상단 네비게이션 헤더 바 (iOS Safe Area 지원) -->
-        <header style="display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top)) 20px 12px 20px; background: white; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 100; box-sizing: border-box; width: 100%;">
-            <div style="font-size: 20px; font-weight: 900; background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px;">한글마루</div>
+        <header
+            style="display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top)) 20px 12px 20px; background: white; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 100; box-sizing: border-box; width: 100%;">
+            <div
+                style="font-size: 20px; font-weight: 900; background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px;">
+                한글마루</div>
             <div style="display: flex; align-items: center; gap: 8px;">
-                <div id="edit-profile-trigger" style="cursor: pointer; display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0; transition: all 0.2s;"
+                <div id="edit-profile-trigger"
+                    style="cursor: pointer; display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0; transition: all 0.2s;"
                     onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
                     <span id="display-emoji" style="font-size: 16px;">⭐</span>
-                    <span id="display-nickname" style="font-weight: bold; color: #334155; font-size: 13px;">로딩중...</span>
+                    <span id="display-nickname"
+                        style="font-weight: bold; color: #334155; font-size: 13px;">로딩중...</span>
                     <span style="font-size: 11px; color: #94a3b8;">✏️</span>
                 </div>
-                <button id="logout-btn" style="padding: 6px 12px; font-size: 12px; background-color: transparent; color: #ef4444; border: 1px solid #fee2e2; border-radius: 20px; cursor: pointer; font-weight: bold; height: auto; line-height: 1.2; transition: all 0.2s;"
+                <button id="logout-btn"
+                    style="padding: 6px 12px; font-size: 12px; background-color: transparent; color: #ef4444; border: 1px solid #fee2e2; border-radius: 20px; cursor: pointer; font-weight: bold; height: auto; line-height: 1.2; transition: all 0.2s;"
                     onmouseover="this.style.background='#fef2f2'"
                     onmouseout="this.style.background='transparent'">로그아웃</button>
             </div>
@@ -906,6 +999,20 @@
                     </div>
                 </div>
 
+                <!-- 주제별 학습 선택 -->
+                <div style="margin-bottom: 20px; text-align: left;">
+                    <div style="font-size: 12px; color: #64748b; font-weight: 700; margin-bottom: 10px;">중점 학습 주제</div>
+                    <div id="topic-selector" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <button class="topic-btn active" data-topic="all">전체</button>
+                        <button class="topic-btn" data-topic="학술">📚 학술/논리</button>
+                        <button class="topic-btn" data-topic="수능">✏️ 수능</button>
+                        <button class="topic-btn" data-topic="비즈니스">💼 경제/비즈니스</button>
+                        <button class="topic-btn" data-topic="사회">🌐 사회/문화</button>
+                        <button class="topic-btn" data-topic="감정">💭 감정/심리</button>
+                    </div>
+                    <div id="topic-desc" style="font-size: 11px; color: #94a3b8; margin-top: 8px; font-weight: 500;">모든 주제를 균등하게 출제합니다.</div>
+                </div>
+
                 <!-- 오늘의 학습 시작하기 버튼 -->
                 <button id="start-study-btn"
                     style="width: 100%; padding: 18px; font-size: 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 16px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
@@ -917,8 +1024,7 @@
                 <!-- 🛠️ 개발자 단어 검토 버튼 -->
                 <button id="open-dev-panel-btn"
                     style="margin-top: 12px; width: 100%; padding: 14px; font-size: 14px; background: #475569; color: white; border: none; border-radius: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(71, 85, 105, 0.15); transition: all 0.2s;"
-                    onmouseover="this.style.background='#334155'"
-                    onmouseout="this.style.background='#475569'">
+                    onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
                     🛠️ 검토 및 수정이 필요한 단어 관리
                 </button>
             </div>
@@ -940,6 +1046,8 @@
                     <div class="progress-fill" id="progress"></div>
                 </div>
 
+                <div id="word-tag-display" style="display:none; text-align:left; margin-bottom:8px;"></div>
+
                 <div style="text-align: left;">
                     <div class="sentence" id="sentence-text">데이터를 동기화하는 중입니다...</div>
                     <div class="meaning" id="meaning-text"></div>
@@ -949,11 +1057,15 @@
                     style="display: none; margin-bottom: 25px; text-align: left; background: #f8fafc; padding: 24px; border-radius: 16px; border: 2px solid #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); animation: slideUp 0.3s ease;">
                 </div>
 
-                <div class="input-group" id="input-group" style="display: flex; gap: 12px; align-items: stretch; width: 100%; box-sizing: border-box;">
-                    <button id="show-answer-btn" class="btn-secondary" disabled style="width: 70px; padding: 15px 0 !important; font-size: 12px !important; text-align: center;">정답 보기</button>
-                    <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" inputmode="none" readonly
-                        style="flex: 1; min-width: 0; transition: all 0.3s ease;">
-                    <button id="submit-btn" disabled style="width: 70px; padding: 15px 0 !important; font-size: 12px !important; text-align: center;">제출</button>
+                <div class="input-group" id="input-group"
+                    style="display: flex; gap: 12px; align-items: stretch; width: 100%; box-sizing: border-box;">
+                    <button id="show-answer-btn" class="btn-secondary" disabled
+                        style="width: 70px; padding: 15px 0 !important; font-size: 12px !important; text-align: center;">정답
+                        보기</button>
+                    <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" inputmode="none"
+                        readonly style="flex: 1; min-width: 0; transition: all 0.3s ease;">
+                    <button id="submit-btn" disabled
+                        style="width: 70px; padding: 15px 0 !important; font-size: 12px !important; text-align: center;">제출</button>
 
                     <button id="next-btn"
                         style="display: none; flex: 1; background-color: #3b82f6; color: white; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; white-space: nowrap; animation: fadeIn 0.2s ease;">다음
@@ -1021,10 +1133,12 @@
                 style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
                 <div
                     style="background: white; padding: 25px; border-radius: 24px; width: 90%; max-width: 480px; height: 80%; max-height: 650px; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); box-sizing: border-box; overflow: hidden; animation: slideUp 0.25s ease;">
-                    
+
                     <!-- 모달 헤더 -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; flex-shrink: 0;">
-                        <h3 style="margin: 0; color: #1e293b; font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; flex-shrink: 0;">
+                        <h3
+                            style="margin: 0; color: #1e293b; font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
                             🛠️ 검토 단어 제어판
                         </h3>
                         <button id="copy-dev-json-btn"
@@ -1041,7 +1155,8 @@
                     </div>
 
                     <!-- 모달 푸터 -->
-                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; padding-top: 12px; border-top: 2px solid #f1f5f9; flex-shrink: 0;">
+                    <div
+                        style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; padding-top: 12px; border-top: 2px solid #f1f5f9; flex-shrink: 0;">
                         <button id="close-dev-panel-btn"
                             style="width: 100%; padding: 14px 0; background-color: #475569; color: white; border:none; border-radius:12px; font-weight:bold; cursor:pointer; font-size: 16px; transition: all 0.2s;"
                             onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
@@ -1093,16 +1208,44 @@
         let userNickname = ""; let userEmoji = ""; let currentExp = 0; let streakDays = 1; let lastDate = null;
         let quizQueue = []; let totalQuestions = 0; let completedQuestions = 0; let retryCount = 0;
         let isWaiting = false; let hasFailedCurrent = false; let isShowingStats = false;
+        let selectedTopic = 'all';
+
+        const TOPIC_TAGS = {
+            'all': null,
+            '학술': ['학술_논리', '교육_학술', '학술_윤리', '철학_인문'],
+            '수능': ['수능'],
+            '비즈니스': ['격식_비즈니스', '비즈니스', '경제_경영', '경제', '경제_금융', '사회_경제', '금융'],
+            '사회': ['사회', '사회_문화', '사회_일반', '사회_제도', '사회_직업', '사회_행사', '사회_관계', '사회_정치', '문화_예술', '문화', '문화_스포츠', '법률', '법률_제도', '스포츠', '스포츠_게임', '미디어'],
+            '감정': ['감정_심리', '심리'],
+        };
+
+        const TOPIC_DESC = {
+            'all': '모든 주제를 균등하게 출제합니다.',
+            '학술': '학술/논리 단어를 약 65% 비중으로 출제합니다.',
+            '수능': '수능 빈출 단어를 약 65% 비중으로 출제합니다.',
+            '비즈니스': '경제/비즈니스 단어를 약 65% 비중으로 출제합니다.',
+            '사회': '사회/문화 단어를 약 65% 비중으로 출제합니다.',
+            '감정': '감정/심리 단어를 약 65% 비중으로 출제합니다.',
+        };
         let totalLearnedWords = 0;
         let totalCorrectFirstTry = 0;
         let sessionCorrectFirstTry = 0;
         let equippedTitle = "🐣 아기 병아리";
         let learnedWords = {};
         let flaggedWords = {};
+        let lastActiveWord = null;
+
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.Capacitor && window.Capacitor.isNative);
 
         const sentenceEl = document.getElementById('sentence-text'); const meaningEl = document.getElementById('meaning-text');
         const inputEl = document.getElementById('answer-input'); const submitBtn = document.getElementById('submit-btn');
         const showAnswerBtn = document.getElementById('show-answer-btn'); const inputGroup = document.getElementById('input-group');
+
+        // 최초 플랫폼 환경에 따른 입력창 속성 리셋
+        if (!isMobileDevice) {
+            inputEl.readOnly = false;
+            inputEl.removeAttribute('inputmode');
+        }
         const progressEl = document.getElementById('progress'); const dashboard = document.getElementById('dashboard');
 
         document.getElementById("google-login-btn").addEventListener("click", () => {
@@ -1184,6 +1327,7 @@
                 equippedTitle = data.equippedTitle || "🐣 아기 병아리";
                 learnedWords = data.learnedWords || {};
                 flaggedWords = data.flaggedWords || {};
+                selectedTopic = data.selectedTopic || 'all';
 
                 document.getElementById('display-nickname').textContent = userNickname;
                 document.getElementById('display-emoji').textContent = userEmoji;
@@ -1230,9 +1374,9 @@
                 // 진행도가 없거나 새로 시작할 경우 홈 화면 표시
                 showHomeScreen();
 
-            } catch (error) { 
-                console.error("앱 초기화 에러:", error); 
-                alert("앱 초기화 중 오류가 발생했습니다: " + error.message); 
+            } catch (error) {
+                console.error("앱 초기화 에러:", error);
+                alert("앱 초기화 중 오류가 발생했습니다: " + error.message);
             }
         }
 
@@ -1286,7 +1430,21 @@
                     candidateWords = rawData;
                 }
 
-                quizQueue = shuffleArray(candidateWords).slice(0, target);
+                // 주제 가중치 적용
+                if (selectedTopic !== 'all' && TOPIC_TAGS[selectedTopic]) {
+                    const topicTags = TOPIC_TAGS[selectedTopic];
+                    const topicWords = candidateWords.filter(w => w.tags && w.tags.some(t => topicTags.includes(t)));
+                    const otherWords = candidateWords.filter(w => !w.tags || !w.tags.some(t => topicTags.includes(t)));
+                    const topicCount = Math.min(Math.ceil(target * 0.65), topicWords.length);
+                    const otherCount = target - topicCount;
+                    const picked = [
+                        ...shuffleArray([...topicWords]).slice(0, topicCount),
+                        ...shuffleArray([...otherWords]).slice(0, otherCount)
+                    ];
+                    quizQueue = shuffleArray(picked);
+                } else {
+                    quizQueue = shuffleArray(candidateWords).slice(0, target);
+                }
 
                 // 화면 전환
                 document.getElementById('setup-screen').style.display = 'none';
@@ -1319,7 +1477,7 @@
         }
 
         async function syncUserData() {
-            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, targetWordCount: targetWordCount, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, equippedTitle: equippedTitle, learnedWords: learnedWords }, { merge: true }); }
+            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, targetWordCount: targetWordCount, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, equippedTitle: equippedTitle, learnedWords: learnedWords, selectedTopic: selectedTopic }, { merge: true }); }
             catch (error) { }
         }
 
@@ -1348,7 +1506,7 @@
             document.getElementById('level-text').textContent = currentLevel;
             document.getElementById('exp-text').textContent = expInLevel;
             document.getElementById('exp-bar').style.width = `${(expInLevel / 200) * 100}%`;
-            
+
             // 파이어베이스 동기화는 백그라운드에서 비동기로 처리하여 메인 UI 스레드와 화면 로딩을 가로막지 않도록 합니다.
             syncUserData().catch((error) => console.error("사용자 데이터 비동기 동기화 실패:", error));
         }
@@ -1411,6 +1569,25 @@
             document.getElementById('home-badges-text').textContent = `${unlockedCount}개`; // "N개" 단일 카운트 표시
 
             document.getElementById('home-box').style.display = 'block';
+
+            // 주제 버튼 활성 상태 반영
+            document.querySelectorAll('.topic-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.topic === selectedTopic);
+            });
+            document.getElementById('topic-desc').textContent = TOPIC_DESC[selectedTopic] || '';
+
+            // 주제 버튼 클릭 이벤트 (중복 방지: 기존 리스너 제거 후 재등록)
+            document.querySelectorAll('.topic-btn').forEach(btn => {
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                newBtn.addEventListener('click', () => {
+                    selectedTopic = newBtn.dataset.topic;
+                    document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+                    newBtn.classList.add('active');
+                    document.getElementById('topic-desc').textContent = TOPIC_DESC[selectedTopic] || '';
+                    syncUserData();
+                });
+            });
         }
 
         // 독립형 업적 팝업 데이터 연동 및 스타일링 함수
@@ -1562,22 +1739,36 @@
             }
 
             const currentWord = quizQueue[0];
-            
+            lastActiveWord = currentWord;
+
             // 🛠️ 관리자(제보) 버튼 로드 시 flaggedWords에 존재 여부에 따라 상태 결정
             const flagBtn = document.getElementById('flag-word-btn');
+            const keyboardReportBtn = document.querySelector('[data-key="report"]');
             if (flaggedWords && flaggedWords[currentWord.target]) {
-                flagBtn.classList.add('active');
-                flagBtn.title = "검토 대상 지정 해제";
-                flagBtn.textContent = "⭐🛠️";
+                if (flagBtn) {
+                    flagBtn.classList.add('active');
+                    flagBtn.title = "검토 대상 지정 해제";
+                    flagBtn.textContent = "⭐🛠️";
+                }
+                if (keyboardReportBtn) {
+                    keyboardReportBtn.classList.add('active');
+                    keyboardReportBtn.textContent = "⭐ 신고됨";
+                }
             } else {
-                flagBtn.classList.remove('active');
-                flagBtn.title = "이 단어 검토 대상에 추가";
-                flagBtn.textContent = "🛠️";
+                if (flagBtn) {
+                    flagBtn.classList.remove('active');
+                    flagBtn.title = "이 단어 검토 대상에 추가";
+                    flagBtn.textContent = "🛠️";
+                }
+                if (keyboardReportBtn) {
+                    keyboardReportBtn.classList.remove('active');
+                    keyboardReportBtn.textContent = "🛠️ 신고";
+                }
             }
 
             hasFailedCurrent = currentWord.failed ? true : false;
             sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
-            
+
             // 🌟 뜻풀이(Meaning) 유동형 자동 폰트 스케일러 (Dynamic Meaning Font Scaler)
             // 뜻풀이 글자 수에 따라 폰트 크기와 줄간격을 유동적으로 조절하여 가독성을 높입니다.
             const meaningLength = currentWord.meaning.length;
@@ -1593,21 +1784,44 @@
             }
 
             meaningEl.innerHTML = `<span class="level-badge">Lv.${currentWord.level}</span>${currentWord.meaning}`;
-            
-            // 한글 조합기 버퍼 리셋 및 입력창 readonly 속성 확보
+
+            // 태그 칩 렌더링
+            const tagDisplay = document.getElementById('word-tag-display');
+            const tags = currentWord.tags || [];
+            if (tags.length > 0) {
+                tagDisplay.style.display = 'block';
+                tagDisplay.innerHTML = tags.map(t =>
+                    `<span class="word-tag-chip">${t.replace(/_/g, '/')}</span>`
+                ).join('');
+            } else {
+                tagDisplay.style.display = 'none';
+            }
+
+            // 한글 조합기 버퍼 리셋
             jamoBuffer = [];
             inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group';
-            inputEl.readOnly = true;
 
             const progress = (completedQuestions / dailyTarget) * 100;
             inputEl.disabled = false;
             submitBtn.disabled = false;
             showAnswerBtn.disabled = false;
             progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
-            
-            // 키보드 노출 설정 및 제출 레이블 복원
-            document.getElementById('custom-keyboard').style.display = 'flex';
-            document.getElementById('quiz-box').classList.add('keyboard-active');
+
+            // 플랫폼(모바일 vs 데스크톱)에 따른 맞춤형 입력 환경 설정
+            if (isMobileDevice) {
+                // 모바일 환경: 자체 가상 키보드 사용 및 input readonly화로 네이티브 키보드 팝업 차단
+                document.getElementById('custom-keyboard').style.display = 'flex';
+                document.getElementById('quiz-box').classList.add('keyboard-active');
+                inputEl.readOnly = true;
+                inputEl.setAttribute('inputmode', 'none');
+            } else {
+                // 데스크톱(웹) 환경: 가상 키보드 숨김 및 컴퓨터 물리 키보드 타건 허용
+                document.getElementById('custom-keyboard').style.display = 'none';
+                document.getElementById('quiz-box').classList.remove('keyboard-active');
+                inputEl.readOnly = false;
+                inputEl.removeAttribute('inputmode');
+                inputEl.focus(); // 🌟 새로운 문제 로드 시 자동으로 정답 입력창에 초점(Focus) 부여!
+            }
             document.getElementById('kbd-enter-btn').textContent = "제출";
             document.getElementById('kbd-enter-btn').classList.remove('next-state');
         }
@@ -1821,17 +2035,25 @@
 
         // 퀴즈 화면에서 현재 단어를 검토 대상으로 지정 (토글)
         async function toggleFlagWord() {
-            if (quizQueue.length === 0) return;
-            const currentWord = quizQueue[0];
+            // stats 화면을 보여주고 있거나 queue가 비어있는 등의 상태일 때, lastActiveWord를 우선적으로 사용합니다.
+            const currentWord = isShowingStats ? lastActiveWord : (quizQueue.length > 0 ? quizQueue[0] : lastActiveWord);
+            if (!currentWord) return;
             const target = currentWord.target;
             const flagBtn = document.getElementById('flag-word-btn');
+            const keyboardReportBtn = document.querySelector('[data-key="report"]');
 
             if (flaggedWords && flaggedWords[target]) {
                 // 이미 검토 대상이면 해제
                 delete flaggedWords[target];
-                flagBtn.classList.remove('active');
-                flagBtn.title = "이 단어 검토 대상에 추가";
-                flagBtn.textContent = "🛠️";
+                if (flagBtn) {
+                    flagBtn.classList.remove('active');
+                    flagBtn.title = "이 단어 검토 대상에 추가";
+                    flagBtn.textContent = "🛠️";
+                }
+                if (keyboardReportBtn) {
+                    keyboardReportBtn.classList.remove('active');
+                    keyboardReportBtn.textContent = "🛠️ 신고";
+                }
                 console.log(`[Flag] 검토 대상 해제: ${target}`);
             } else {
                 // 검토 대상 지정
@@ -1843,9 +2065,15 @@
                     accepts: currentWord.accepts || [],
                     flaggedAt: new Date().toISOString()
                 };
-                flagBtn.classList.add('active');
-                flagBtn.title = "검토 대상 지정 해제";
-                flagBtn.textContent = "⭐🛠️";
+                if (flagBtn) {
+                    flagBtn.classList.add('active');
+                    flagBtn.title = "검토 대상 지정 해제";
+                    flagBtn.textContent = "⭐🛠️";
+                }
+                if (keyboardReportBtn) {
+                    keyboardReportBtn.classList.add('active');
+                    keyboardReportBtn.textContent = "⭐ 신고됨";
+                }
                 console.log(`[Flag] 검토 대상 추가: ${target}`);
             }
 
@@ -1958,7 +2186,7 @@
             // 3. Firestore 데이터 동기화
             try {
                 await setDoc(userDocRef, { flaggedWords: flaggedWords }, { merge: true });
-                
+
                 // 만약 현재 풀고 있는 활성 문제라면 즉시 퀴즈 스크린에 새 수정본 렌더링
                 if (quizQueue.length > 0 && quizQueue[0].target === wordTarget) {
                     const nextBtn = document.getElementById('next-btn');
@@ -1968,7 +2196,7 @@
                         meaningEl.innerHTML = `<span class="level-badge">Lv.${quizQueue[0].level}</span>${newMeaning}`;
                     }
                 }
-                
+
                 alert(`'${wordTarget}' 단어의 뜻과 예문이 성공적으로 저장 및 실시간 반영되었습니다!`);
                 renderDevPanel();
             } catch (error) {
@@ -1983,12 +2211,20 @@
                 delete flaggedWords[wordTarget];
             }
 
-            // 퀴즈 화면에 현재 해당 단어 버튼이 노출되고 있다면 스타일 되돌림
-            if (quizQueue.length > 0 && quizQueue[0].target === wordTarget) {
+            // 퀴즈 화면에 현재 해당 단어가 노출되고 있다면(풀이 중 혹은 통계 확인 중) 스타일 되돌림
+            const currentWord = isShowingStats ? lastActiveWord : (quizQueue.length > 0 ? quizQueue[0] : lastActiveWord);
+            if (currentWord && currentWord.target === wordTarget) {
                 const flagBtn = document.getElementById('flag-word-btn');
-                flagBtn.classList.remove('active');
-                flagBtn.title = "이 단어 검토 대상에 추가";
-                flagBtn.textContent = "🛠️";
+                if (flagBtn) {
+                    flagBtn.classList.remove('active');
+                    flagBtn.title = "이 단어 검토 대상에 추가";
+                    flagBtn.textContent = "🛠️";
+                }
+                const keyboardReportBtn = document.querySelector('[data-key="report"]');
+                if (keyboardReportBtn) {
+                    keyboardReportBtn.classList.remove('active');
+                    keyboardReportBtn.textContent = "🛠️ 신고";
+                }
             }
 
             try {
@@ -2032,6 +2268,10 @@
         document.getElementById('close-dev-panel-btn').addEventListener('click', closeDevPanel);
         document.getElementById('copy-dev-json-btn').addEventListener('click', copyDevJSON);
 
+        // ES 모듈 내부 함수들을 전역 window 객체에 등록하여, HTML 동적 요소의 inline onclick 이벤트가 호출할 수 있도록 보장합니다.
+        window.removeDevWord = removeDevWord;
+        window.saveDevWord = saveDevWord;
+
         // 🛠️ 개발자 단축키 지원 (F4 또는 Alt + Q를 누르면 단어 검토 제보 토글)
         window.addEventListener('keydown', function (e) {
             // F4 키 또는 Alt + Q / Alt + q 키가 눌렸을 때
@@ -2049,6 +2289,41 @@
         showAnswerBtn.addEventListener('click', revealAnswer);
         document.getElementById('next-btn').addEventListener('click', loadQuestion);
         document.getElementById('start-study-btn').addEventListener('click', () => startSession(targetWordCount));
+        
+        // 🌟 데스크톱 웹 환경을 위한 Tab 키 양방향 순환 포커스 제어
+        inputEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    submitBtn.focus();
+                } else {
+                    showAnswerBtn.focus();
+                }
+            }
+        });
+
+        showAnswerBtn.addEventListener('keydown', function (e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    inputEl.focus();
+                } else {
+                    submitBtn.focus();
+                }
+            }
+        });
+
+        submitBtn.addEventListener('keydown', function (e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    showAnswerBtn.focus();
+                } else {
+                    inputEl.focus();
+                }
+            }
+        });
+
         inputEl.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 if (isShowingStats) {
@@ -2059,14 +2334,18 @@
             }
         });
         inputEl.addEventListener('focus', () => {
-            // 이제 readonly이므로 네이티브 포커스가 가지 않지만 오동작 차단
-            window.scrollTo(0, 0);
-            document.body.scrollTop = 0;
+            // 모바일 환경에서만 가상 키보드 오동작 방지를 위한 스크롤 차단
+            if (isMobileDevice) {
+                window.scrollTo(0, 0);
+                document.body.scrollTop = 0;
+            }
         });
 
         inputEl.addEventListener('blur', () => {
-            window.scrollTo(0, 0);
-            document.body.scrollTop = 0;
+            if (isMobileDevice) {
+                window.scrollTo(0, 0);
+                document.body.scrollTop = 0;
+            }
         });
 
         // ==========================================
@@ -2120,7 +2399,7 @@
             const choIdx = CHO_LIST.indexOf(s.cho);
             const jungIdx = JUNG_LIST.indexOf(s.jung);
             const jongIdx = s.jong ? JONG_LIST.indexOf(s.jong) : 0;
-            
+
             if (choIdx === -1 || jungIdx === -1) {
                 return s.cho + s.jung + (s.jong || '');
             }
@@ -2134,7 +2413,7 @@
             while (i < jamos.length) {
                 const char = jamos[i];
                 if (isConsonant(char)) {
-                    const next = jamos[i+1];
+                    const next = jamos[i + 1];
                     if (next && isVowel(next)) {
                         syllables.push({ cho: char, jung: '', jong: '' });
                         i++;
@@ -2147,7 +2426,7 @@
                             i++;
                             continue;
                         } else {
-                            const nextNext = jamos[i+1];
+                            const nextNext = jamos[i + 1];
                             if (nextNext && isVowel(nextNext)) {
                                 syllables.push({ cho: char, jung: '', jong: '' });
                                 i++;
@@ -2314,7 +2593,7 @@
                     Haptics.impact({ style: 'LIGHT' });
                     return;
                 }
-                
+
                 // 2. HTML5 표준 Vibration API 시도 (안드로이드 및 모바일 웹 프리뷰용)
                 if (navigator.vibrate) {
                     navigator.vibrate(10); // 10ms의 아주 가볍고 약한 진동
@@ -2334,22 +2613,22 @@
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume();
                 }
-                
+
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                
+
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                
+
                 // 네이티브 iOS 키 클릭 주파수 모델링 (부드러운 타격감)
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(130, audioCtx.currentTime); 
+                osc.frequency.setValueAtTime(130, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 0.02);
-                
+
                 // 아주 희미하고 조용하게 소리 재생 (귀에 자극적이지 않고 고급스러움)
-                gain.gain.setValueAtTime(0.012, audioCtx.currentTime); 
+                gain.gain.setValueAtTime(0.012, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.02);
-                
+
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.02);
             } catch (e) {
@@ -2378,7 +2657,7 @@
         // 키보드 자판 클릭 이벤트 등록
         document.querySelectorAll('#custom-keyboard .key-btn').forEach(btn => {
             const key = btn.getAttribute('data-key');
-            
+
             // 모바일 터치 피드백 (iOS/Android WKWebView 무지연 즉각 처리)
             btn.addEventListener('touchstart', (e) => {
                 handleKeyStart(btn, e);
@@ -2386,7 +2665,7 @@
                     startDeleteRepeat(btn);
                 }
             }, { passive: false });
-            
+
             btn.addEventListener('touchend', (e) => {
                 if (e) e.preventDefault();
                 btn.classList.remove('pressed'); // 손을 떼는 순간 지연 없이 복귀
@@ -2394,7 +2673,7 @@
                     clearDeleteRepeat();
                 }
             }, { passive: false });
-            
+
             btn.addEventListener('touchcancel', (e) => {
                 if (e) e.preventDefault();
                 btn.classList.remove('pressed');
@@ -2411,7 +2690,7 @@
                     startDeleteRepeat(btn);
                 }
             });
-            
+
             btn.addEventListener('mouseup', (e) => {
                 e.preventDefault();
                 btn.classList.remove('pressed');
@@ -2419,7 +2698,7 @@
                     clearDeleteRepeat();
                 }
             });
-            
+
             btn.addEventListener('mouseleave', () => {
                 btn.classList.remove('pressed');
                 if (key === 'backspace') {
