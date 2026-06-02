@@ -1376,9 +1376,19 @@
         function exportCleanJSON() {
             if (wordsList.length === 0) return;
 
-            // 삭제 예정 단어 제외 후 정제
+            // "수정 필요" 판정 단어 집합 (현재 reviewsDb 기준)
+            const needsEditSet = new Set(
+                Object.entries(reviewsDb)
+                    .filter(([, r]) => r.status === 'edit' || r.status === 'awkward')
+                    .map(([target]) => target)
+            );
+
+            // 삭제 예정 + 수정 필요 단어 제외 후 정제
+            const excluded = wordsList.filter(w =>
+                deletedWords.has(w.target) || needsEditSet.has(w.target)
+            );
             const cleanArray = wordsList
-                .filter(w => !deletedWords.has(w.target))
+                .filter(w => !deletedWords.has(w.target) && !needsEditSet.has(w.target))
                 .map(w => ({
                     target: w.target,
                     accepts: w.accepts || [w.target],
@@ -1388,12 +1398,17 @@
                     tags: w.tags || []
                 }));
 
-            const deletedCount = deletedWords.size;
             const jsonStr = JSON.stringify(cleanArray, null, 4);
 
             navigator.clipboard.writeText(jsonStr)
                 .then(() => {
-                    alert(`✅ 클립보드 복사 완료!\n\n포함: ${cleanArray.length}개\n제외(삭제): ${deletedCount}개\n\nwords.json 파일에 덮어쓰기 하시면 즉각 반영됩니다.`);
+                    alert(
+                        `✅ 클립보드 복사 완료!\n\n` +
+                        `포함: ${cleanArray.length}개\n` +
+                        `제외(삭제): ${deletedWords.size}개\n` +
+                        `제외(수정 필요): ${needsEditSet.size}개\n\n` +
+                        `words.json 파일에 덮어쓰기 하시면 즉각 반영됩니다.`
+                    );
                 })
                 .catch(err => {
                     console.error("클립보드 복제 실패:", err);

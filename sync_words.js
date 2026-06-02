@@ -122,23 +122,44 @@ async function main() {
     try {
         deletions = await fetchAll('word_deletions');
     } catch (err) {
-        console.warn(`   ⚠️  word_deletions 조회 실패 (Firebase 보안 규칙 확인 필요): ${err.message}`);
-        console.warn('   → Firebase Console > Firestore > Rules 에서 word_deletions 규칙을 추가해 주세요.\n');
+        console.warn(`   ⚠️  word_deletions 조회 실패: ${err.message}\n`);
     }
-    const deletedSet   = new Set(deletions.map(d => d._id));
-    const beforeLen    = words.length;
+    const deletedSet = new Set(deletions.map(d => d._id));
+    if (DRY_RUN) deletedSet.forEach(t => {
+        if (words.find(w => w.target === t)) console.log(`   🗑️  삭제: ${t}`);
+    });
 
-    if (DRY_RUN) {
-        deletedSet.forEach(t => {
-            if (words.find(w => w.target === t)) console.log(`   🗑️  삭제: ${t}`);
+    // 4. word_reviews — "수정 필요" 단어 제외
+    console.log('📡 Firestore word_reviews 조회...');
+    let reviews = [];
+    try {
+        reviews = await fetchAll('word_reviews');
+    } catch (err) {
+        console.warn(`   ⚠️  word_reviews 조회 실패: ${err.message}\n`);
+    }
+
+    // 검수자 중 한 명이라도 "수정 필요"로 판정했으면 제외
+    const needsEditSet = new Set();
+    for (const review of reviews) {
+        const reviewers = Object.keys(review).filter(k => k !== '_id');
+        const anyEdit   = reviewers.some(r => {
+            const s = review[r]?.status;
+            return s === 'edit' || s === 'awkward';
         });
+        if (anyEdit) needsEditSet.add(review._id);
     }
+    console.log(`   "수정 필요" 판정: ${needsEditSet.size}개 → 최종 제외`);
+    if (DRY_RUN) needsEditSet.forEach(t => console.log(`   ⚠️  수정 필요: ${t}`));
+    console.log();
 
-    words = words.filter(w => !deletedSet.has(w.target));
-    const deletedCount = beforeLen - words.length;
-    console.log(`   삭제: ${deletedCount}개\n`);
+    // 5. 삭제 + 수정 필요 단어 제거
+    const beforeLen = words.length;
+    words = words.filter(w => !deletedSet.has(w.target) && !needsEditSet.has(w.target));
+    const removedCount  = beforeLen - words.length;
+    const deletedCount  = [...deletedSet].filter(t => words.find ? false : true).length; // 참고용
+    console.log(`   제거 합계: ${removedCount}개 (삭제 ${deletedSet.size} + 수정 필요 ${needsEditSet.size})\n`);
 
-    // 4. 정제 후 저장
+    // 6. 정제 후 저장
     const cleaned = words.map(w => ({
         target  : w.target,
         accepts : w.accepts || [w.target],
@@ -148,14 +169,14 @@ async function main() {
         tags    : w.tags || []
     }));
 
-    console.log(`📊 최종 단어 수: ${cleaned.length}개 (수정 ${editCount}, 삭제 ${deletedCount})`);
+    console.log(`📊 최종 단어 수: ${cleaned.length}개 (수정 적용 ${editCount}, 제거 ${removedCount}개)`);
 
     if (DRY_RUN) {
         console.log('\n✋ DRY-RUN — 파일 저장 및 빌드를 건너뜁니다.');
         return;
     }
 
-    if (editCount === 0 && deletedCount === 0) {
+    if (editCount === 0 && removedCount === 0) {
         console.log('\n✅ 변경 사항 없음 — words.json을 그대로 유지합니다.');
         return;
     }
