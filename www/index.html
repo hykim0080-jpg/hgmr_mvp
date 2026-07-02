@@ -1023,7 +1023,7 @@
 
                 <!-- 🛠️ 개발자 단어 검토 버튼 -->
                 <button id="open-dev-panel-btn"
-                    style="margin-top: 12px; width: 100%; padding: 14px; font-size: 14px; background: #475569; color: white; border: none; border-radius: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(71, 85, 105, 0.15); transition: all 0.2s;"
+                    style="margin-top: 12px; width: 100%; padding: 14px; font-size: 14px; background: #475569; color: white; border: none; border-radius: 16px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(71, 85, 105, 0.15); transition: all 0.2s;"
                     onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
                     🛠️ 검토 및 수정이 필요한 단어 관리
                 </button>
@@ -1042,8 +1042,13 @@
                 <!-- 🛠️ 개발자용 단어 검토 제보 버튼 -->
                 <button id="flag-word-btn" class="flag-btn" title="이 단어 검토 대상에 추가">🛠️</button>
 
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress"></div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding-right: 52px;">
+                    <button id="quiz-home-btn" title="학습 종료하고 홈으로"
+                        style="flex-shrink: 0; width: 34px; height: 34px; border: none; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+                    <div class="progress-bar" style="flex: 1; margin-bottom: 0;">
+                        <div class="progress-fill" id="progress"></div>
+                    </div>
+                    <span id="progress-text" style="flex-shrink: 0; font-size: 13px; font-weight: 700; color: #64748b; min-width: 42px; text-align: right;">0/0</span>
                 </div>
 
                 <div id="word-tag-display" style="display:none; text-align:left; margin-bottom:8px;"></div>
@@ -1285,11 +1290,16 @@
             }
         });
 
+        // 관리자 전용 기능 노출 대상 계정
+        const ADMIN_EMAILS = ["hykim0080@gmail.com"];
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 document.getElementById("login-screen").style.display = "none";
                 document.getElementById("app-screen").style.display = "flex";
                 userDocRef = doc(db, "users", user.uid);
+                const isAdmin = !user.isAnonymous && ADMIN_EMAILS.includes(user.email);
+                document.getElementById('open-dev-panel-btn').style.display = isAdmin ? 'flex' : 'none';
                 initApp();
             } else {
                 document.getElementById("login-screen").style.display = "flex";
@@ -1806,6 +1816,7 @@
             submitBtn.disabled = false;
             showAnswerBtn.disabled = false;
             progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
+            document.getElementById('progress-text').textContent = `${completedQuestions}/${totalQuestions}`;
 
             // 플랫폼(모바일 vs 데스크톱)에 따른 맞춤형 입력 환경 설정
             if (isMobileDevice) {
@@ -1907,7 +1918,7 @@
                 }
             } catch (error) {
                 console.error("🔥 통계 로드 실패:", error);
-                statsContainer.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:14px; padding: 20px 0;">통계를 불러오지 못했습니다.</div>';
+                statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">아직 이 단어의 통계가 없어요. 첫 도전자예요! 🎉</div>';
             }
         }
 
@@ -2289,6 +2300,14 @@
         showAnswerBtn.addEventListener('click', revealAnswer);
         document.getElementById('next-btn').addEventListener('click', loadQuestion);
         document.getElementById('start-study-btn').addEventListener('click', () => startSession(targetWordCount));
+
+        // 퀴즈 중 홈으로 나가기
+        document.getElementById('quiz-home-btn').addEventListener('click', () => {
+            if (!confirm('학습을 종료하고 홈으로 돌아갈까요?\n지금까지 푼 문제의 기록은 저장돼요.')) return;
+            document.getElementById('custom-keyboard').style.display = 'none';
+            document.getElementById('quiz-box').classList.remove('keyboard-active');
+            showHomeScreen();
+        });
         
         // 🌟 데스크톱 웹 환경을 위한 Tab 키 양방향 순환 포커스 제어
         inputEl.addEventListener('keydown', function (e) {

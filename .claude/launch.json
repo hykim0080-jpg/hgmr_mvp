@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hgmr-web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", "www", "-p", "8321", "-c-1"],
+      "port": 8321
+    }
+  ]
+}
