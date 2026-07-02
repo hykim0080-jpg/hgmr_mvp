@@ -740,6 +740,37 @@
         .dev-panel-item:focus-within {
             border-color: #475569;
         }
+
+        /* 🍞 비차단 토스트 알림 (blocking alert 대체) */
+        #app-toast {
+            position: fixed;
+            top: calc(16px + env(safe-area-inset-top));
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            max-width: min(340px, calc(100vw - 40px));
+            background: rgba(30, 41, 59, 0.95);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.5;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            text-align: center;
+            word-break: keep-all;
+        }
+
+        #app-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #app-toast.toast-error { background: rgba(190, 45, 45, 0.95); }
+        #app-toast.toast-info { background: rgba(30, 41, 59, 0.95); }
     </style>
 </head>
 
@@ -1355,11 +1386,11 @@
                 signInWithPopup(auth, new GoogleAuthProvider())
                     .catch((error) => {
                         console.error("구글 로그인 에러:", error);
-                        alert("구글 로그인 실패: " + error.message);
+                        showToast("구글 로그인에 실패했어요. 잠시 후 다시 시도해 주세요.", "error");
                     });
             } catch (error) {
                 console.error("구글 로그인 실행 에러:", error);
-                alert("구글 로그인 실행 중 오류 발생: " + error.message);
+                showToast("구글 로그인 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.", "error");
             }
         });
 
@@ -1375,11 +1406,11 @@
                     })
                     .catch((error) => {
                         console.error("익명 로그인 에러:", error);
-                        alert("익명 로그인 실패:\n메시지: " + error.message + "\n코드: " + error.code);
+                        showToast("로그인에 실패했어요. 네트워크 연결을 확인해 주세요.", "error");
                     });
             } catch (error) {
                 console.error("익명 로그인 실행 에러:", error);
-                alert("익명 로그인 실행 중 오류 발생: " + error.message);
+                showToast("로그인 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.", "error");
             }
         });
 
@@ -1399,6 +1430,24 @@
                 document.getElementById("app-screen").style.display = "none";
             }
         });
+
+        // 🍞 비차단 토스트 알림: 화면을 멈추는 alert() 대신 사용
+        let toastTimer = null;
+        function showToast(message, type = 'info', duration = 3500) {
+            let el = document.getElementById('app-toast');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'app-toast';
+                document.body.appendChild(el);
+            }
+            el.textContent = message;
+            el.className = `toast-${type}`;
+            // 리플로우 강제로 연속 호출 시에도 애니메이션 재생
+            void el.offsetWidth;
+            el.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+        }
 
         function escapeHTML(str) {
             if (!str) return '';
@@ -1479,7 +1528,9 @@
 
             } catch (error) {
                 console.error("앱 초기화 에러:", error);
-                alert("앱 초기화 중 오류가 발생했습니다: " + error.message);
+                // 서버 데이터를 못 불러와도 기본값으로 홈 화면 진입 (blocking alert 금지)
+                showToast("서버에서 학습 기록을 불러오지 못했어요. 네트워크 연결을 확인해 주세요.", "error", 5000);
+                try { showHomeScreen(); } catch (e) { console.error("홈 화면 폴백 실패:", e); }
             }
         }
 
@@ -1562,7 +1613,8 @@
 
             } catch (error) {
                 console.error("단어 데이터를 불러오는데 실패했습니다:", error);
-                alert("단어 데이터를 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.");
+                showToast("단어 데이터를 불러오지 못했어요. 네트워크 확인 후 다시 시도해 주세요.", "error", 5000);
+                showHomeScreen(); // 깨진 퀴즈 화면 대신 홈으로 복귀
             }
         }
         window.startSession = startSession;
@@ -2881,7 +2933,7 @@
 
         document.getElementById('save-profile-btn').addEventListener('click', async () => {
             const newName = document.getElementById('input-nickname').value.trim();
-            if (newName === "") return alert("활동명을 입력해주세요!");
+            if (newName === "") return showToast("활동명을 입력해주세요!", "error");
             userNickname = newName;
             userEmoji = document.getElementById('input-emoji').value.trim() || "⭐";
             targetWordCount = parseInt(document.getElementById('input-target-count').value) || 30;
