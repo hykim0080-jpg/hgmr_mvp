@@ -1723,6 +1723,7 @@
                     onmouseout="this.style.transform='translateY(0)'">
                     <span>오늘의 학습 시작하기 (<span id="home-target-count-text">30</span>개)</span> ➔
                 </button>
+                <div id="review-due-text" style="display: none; text-align: center; font-size: 12px; color: #d97706; font-weight: 700; margin-top: 10px;"></div>
 
                 <!-- 🛠️ 개발자 단어 검토 버튼 -->
                 <button id="open-dev-panel-btn"
@@ -1987,16 +1988,51 @@
             '감정': '💭 감정/심리',
         };
 
-        // learnedWords 값 정규화: 구버전은 "YYYY-MM-DD" 문자열, 신버전은 {d: 마지막 학습일, c: 정답 횟수}
+        // learnedWords 값 정규화 (하위 호환 3세대):
+        //   v1: "YYYY-MM-DD" 문자열 → v2: {d, c} → v3: {d, c, w(오답 수), s(기억 단계), n(다음 복습일)}
         function learnedEntry(target) {
             const v = learnedWords[target];
             if (!v) return null;
-            return typeof v === 'string' ? { d: v, c: 1 } : v;
+            if (typeof v === 'string') return { d: v, c: 1, w: 0, s: 1, n: null };
+            return { w: 0, s: Math.min(v.c || 1, SRS_INTERVALS.length - 1), n: null, ...v };
         }
 
-        function recordLearned(target, dateStr) {
+        // 🧠 에빙하우스 망각곡선 기반 간격 반복(Spaced Repetition) 스케줄러
+        // - 기억은 학습 직후 급격히 소실되고(1일 내 최대), 성공적 회상마다 소실 속도가 느려짐
+        // - 첫 시도 정답: 기억 단계 상승 → 복습 간격을 지수적으로 확장 (1→3→7→14→30일)
+        // - 오답(한 번에 못 맞춤): 기억 단계 리셋 → 다음 날 바로 복습 (초기 급락 구간 재학습)
+        const SRS_INTERVALS = [1, 3, 7, 14, 30];
+
+        function addDaysStr(dateStr, days) {
+            const d = new Date(dateStr);
+            d.setDate(d.getDate() + days);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function recordLearned(target, dateStr, wasFirstTry = true) {
             const prev = learnedEntry(target);
-            learnedWords[target] = { d: dateStr, c: (prev ? prev.c : 0) + 1 };
+            let stage = prev ? (prev.s ?? 0) : 0;
+            let wrong = prev ? (prev.w || 0) : 0;
+            if (wasFirstTry) {
+                stage = Math.min(stage + 1, SRS_INTERVALS.length - 1);
+            } else {
+                wrong += 1;
+                stage = 0;
+            }
+            learnedWords[target] = {
+                d: dateStr,
+                c: (prev ? prev.c : 0) + 1,
+                w: wrong,
+                s: stage,
+                n: addDaysStr(dateStr, SRS_INTERVALS[stage])
+            };
+        }
+
+        // 복습 기한 도래 여부 (n이 없는 구버전 데이터는 기존 3일 규칙으로 판정)
+        function isDueForReview(entry, todayStr) {
+            if (!entry) return false;
+            if (entry.n) return entry.n <= todayStr;
+            return getDaysDifference(entry.d, todayStr) > 3;
         }
         let totalLearnedWords = 0;
         let totalCorrectFirstTry = 0;
@@ -2398,34 +2434,57 @@
                 const dd = String(today.getDate()).padStart(2, '0');
                 const todayStr = `${yyyy}-${mm}-${dd}`;
 
-                let candidateWords = rawData.filter(word => {
+                // 🧠 망각곡선 기반 세션 편성: 복습 기한 도래 단어(오답 이력 우선) + 새 단어
+                const dueWrong = [];   // 기한 도래 + 오답 이력 — 가장 취약한 기억
+                const dueNormal = [];  // 기한 도래 일반 복습
+                const freshWords = []; // 학습 기록 없는 새 단어
+                const notDue = [];     // 아직 기억 유지 기간 (부족할 때만 보충)
+                rawData.forEach(word => {
                     const entry = learnedEntry(word.target);
-                    const lastLearnedDate = entry ? entry.d : null;
-                    if (!lastLearnedDate) return true; // 맞춘 기록이 없으면 출제 대상
-                    const daysDiff = getDaysDifference(lastLearnedDate, todayStr);
-                    return daysDiff > 3; // 맞춘 지 3일이 초과된 단어만 출제 (3일 이내 맞춘 단어는 배제)
+                    if (!entry) { freshWords.push(word); return; }
+                    if (isDueForReview(entry, todayStr)) {
+                        if ((entry.w || 0) > 0) dueWrong.push({ word, entry });
+                        else dueNormal.push({ word, entry });
+                    } else {
+                        notDue.push({ word, entry });
+                    }
                 });
+                // 오답 단어: 오답 많은 순 → 기억 단계 낮은 순
+                dueWrong.sort((a, b) => (b.entry.w - a.entry.w) || ((a.entry.s || 0) - (b.entry.s || 0)));
+                // 일반 복습: 마지막 학습이 오래된 순 (기한을 많이 넘긴 기억부터)
+                dueNormal.sort((a, b) => (a.entry.d || '').localeCompare(b.entry.d || ''));
 
-                // 만약 최근 맞춘 단어를 걸러낸 후보군이 오늘 목표 문제 수보다 적다면, 기준을 해제하여 전체 단어로 보충합니다.
-                if (candidateWords.length < target) {
-                    candidateWords = rawData;
-                }
+                // 복습은 세션의 최대 40%까지 (오답 이력이 항상 앞순위)
+                const reviewPool = [...dueWrong, ...dueNormal].map(x => x.word);
+                const reviewQuota = Math.min(reviewPool.length, Math.ceil(target * 0.4));
+                const reviews = reviewPool.slice(0, reviewQuota);
 
-                // 주제 가중치 적용
+                // 나머지는 새 단어로 채우되 주제 가중치(65%) 적용
+                let newQuota = target - reviews.length;
+                let picked = [];
                 if (selectedTopic !== 'all' && TOPIC_TAGS[selectedTopic]) {
                     const topicTags = TOPIC_TAGS[selectedTopic];
-                    const topicWords = candidateWords.filter(w => w.tags && w.tags.some(t => topicTags.includes(t)));
-                    const otherWords = candidateWords.filter(w => !w.tags || !w.tags.some(t => topicTags.includes(t)));
-                    const topicCount = Math.min(Math.ceil(target * 0.65), topicWords.length);
-                    const otherCount = target - topicCount;
-                    const picked = [
+                    const topicWords = freshWords.filter(w => w.tags && w.tags.some(t => topicTags.includes(t)));
+                    const otherWords = freshWords.filter(w => !w.tags || !w.tags.some(t => topicTags.includes(t)));
+                    const topicCount = Math.min(Math.ceil(newQuota * 0.65), topicWords.length);
+                    picked = [
                         ...shuffleArray([...topicWords]).slice(0, topicCount),
-                        ...shuffleArray([...otherWords]).slice(0, otherCount)
+                        ...shuffleArray([...otherWords]).slice(0, newQuota - topicCount)
                     ];
-                    quizQueue = shuffleArray(picked);
                 } else {
-                    quizQueue = shuffleArray(candidateWords).slice(0, target);
+                    picked = shuffleArray([...freshWords]).slice(0, newQuota);
                 }
+
+                // 부족분 보충: ① 남은 복습 풀 ② 아직 기한 안 된 단어 (오래된 학습 순)
+                let queue = [...reviews, ...picked];
+                if (queue.length < target) {
+                    queue = queue.concat(reviewPool.slice(reviewQuota, reviewQuota + (target - queue.length)));
+                }
+                if (queue.length < target) {
+                    notDue.sort((a, b) => (a.entry.d || '').localeCompare(b.entry.d || ''));
+                    queue = queue.concat(notDue.map(x => x.word).slice(0, target - queue.length));
+                }
+                quizQueue = shuffleArray(queue);
 
                 // 화면 전환
                 document.getElementById('setup-screen').style.display = 'none';
@@ -2561,6 +2620,29 @@
             document.getElementById('home-box').style.display = 'block';
 
             updateShardCount();
+
+            // 🧠 오늘 복습 기한이 도래한 단어 수 안내
+            {
+                const now = new Date();
+                const todayStr2 = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                let dueCount = 0, dueWrongCount = 0;
+                Object.keys(learnedWords).forEach(t => {
+                    const e = learnedEntry(t);
+                    if (isDueForReview(e, todayStr2)) {
+                        dueCount++;
+                        if ((e.w || 0) > 0) dueWrongCount++;
+                    }
+                });
+                const el = document.getElementById('review-due-text');
+                if (dueCount > 0) {
+                    el.textContent = dueWrongCount > 0
+                        ? `🔁 복습할 단어 ${dueCount}개 (놓쳤던 단어 ${dueWrongCount}개 포함)`
+                        : `🔁 복습할 단어 ${dueCount}개가 기다리고 있어요`;
+                    el.style.display = 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            }
 
             // 홈 진입 시 잔여 하랑이 모션 오버레이 정리 (안전장치)
             const motionBox = document.getElementById('harang-motion-box');
@@ -2970,7 +3052,7 @@
                 const mm = String(today.getMonth() + 1).padStart(2, '0');
                 const dd = String(today.getDate()).padStart(2, '0');
                 const todayStr = `${yyyy}-${mm}-${dd}`;
-                recordLearned(currentWord.target, todayStr);
+                recordLearned(currentWord.target, todayStr, !hasFailedCurrent);
 
                 quizQueue.shift(); completedQuestions++;
                 updateDashboard();
@@ -3011,7 +3093,7 @@
                 const mm = String(today.getMonth() + 1).padStart(2, '0');
                 const dd = String(today.getDate()).padStart(2, '0');
                 const todayStr = `${yyyy}-${mm}-${dd}`;
-                recordLearned(currentWord.target, todayStr);
+                recordLearned(currentWord.target, todayStr, !hasFailedCurrent);
 
                 quizQueue.shift(); completedQuestions++;
                 updateDashboard();
@@ -4027,7 +4109,11 @@
             const listEl = document.getElementById('vocab-list');
             listEl.innerHTML = `
                 <div style="text-align: center; padding: 10px 4px;">
-                    <div style="display: inline-block; background: #ecfdf5; color: #059669; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px; margin-bottom: 14px;">정답 ${e.c}회</div>
+                    <div style="display: flex; gap: 6px; justify-content: center; margin-bottom: 14px;">
+                        <span style="background: #ecfdf5; color: #059669; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px;">정답 ${e.c}회</span>
+                        ${(e.w || 0) > 0 ? `<span style="background: #fef2f2; color: #dc2626; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px;">오답 ${e.w}회</span>` : ''}
+                        ${e.n ? `<span style="background: #f0f9ff; color: #0284c7; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px;">복습 ${e.n.slice(5).replace('-', '/')}</span>` : ''}
+                    </div>
                     <div style="font-size: 32px; font-weight: 800; color: #1e293b; margin-bottom: 14px;">${escapeHTML(t)}</div>
                     <div style="font-size: 16px; color: #334155; line-height: 1.7; word-break: keep-all;">${escapeHTML(w ? w.meaning : '뜻 정보 없음')}</div>
                     ${synonyms.length ? `<div style="font-size: 13px; color: #94a3b8; margin-top: 12px;">유의어: ${escapeHTML(synonyms.join(', '))}</div>` : ''}
