@@ -3419,6 +3419,7 @@
             document.getElementById('exit-confirm-modal').style.display = 'none';
             document.getElementById('custom-keyboard').style.display = 'none';
             document.getElementById('quiz-box').classList.remove('keyboard-active');
+            quizQueue = []; // 세션 종료 — 잔여 큐로 인한 '퀴즈 진행 중' 오판 방지 (서버의 이어하기 기록은 유지)
             showHomeScreen();
         });
         
@@ -3929,6 +3930,12 @@
             });
         });
 
+        // 퀴즈가 '실제 화면에 떠 있는 상태'인지 판정 (종료 후 잔여 큐 오판 방지)
+        function isQuizActive() {
+            return quizQueue && quizQueue.length > 0
+                && document.getElementById('quiz-box').style.display !== 'none';
+        }
+
         // 프로필·학습 설정 시트 열기 (프로필 아바타·헤더 프로필 칩 공용)
         function openProfileSheet() {
             document.getElementById('input-nickname').value = userNickname;
@@ -3944,7 +3951,7 @@
             logoutBtn.textContent = isAnon ? '로그인' : '로그아웃';
             logoutBtn.style.color = isAnon ? '#10b981' : '#ef4444';
             // 퀴즈 진행 중이면 가상 키보드 숨김
-            if (quizQueue && quizQueue.length > 0) {
+            if (isQuizActive()) {
                 document.getElementById('custom-keyboard').style.display = 'none';
                 document.getElementById('quiz-box').classList.remove('keyboard-active');
             }
@@ -3965,7 +3972,7 @@
         document.getElementById('close-profile-edit-btn').addEventListener('click', () => {
             document.getElementById('profile-edit-modal').style.display = 'none';
             // 퀴즈 중 닫으면 가상 키보드 복구
-            if (quizQueue && quizQueue.length > 0 && !isShowingStats) {
+            if (isQuizActive() && !isShowingStats) {
                 document.getElementById('custom-keyboard').style.display = 'flex';
                 document.getElementById('quiz-box').classList.add('keyboard-active');
             }
@@ -3986,7 +3993,7 @@
             document.getElementById('profile-edit-modal').style.display = 'none';
 
             // 퀴즈 진행 중이면 학습으로 복귀, 아니면 홈 표시 갱신
-            if (quizQueue && quizQueue.length > 0) {
+            if (isQuizActive()) {
                 if (!isShowingStats) {
                     document.getElementById('custom-keyboard').style.display = 'flex';
                     document.getElementById('quiz-box').classList.add('keyboard-active');
