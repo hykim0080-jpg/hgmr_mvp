@@ -2576,11 +2576,15 @@
             catch (error) { }
         }
 
+        function sanitizeStatKey(userAnswer) {
+            const cleaned = (userAnswer || "").trim().substring(0, 30);
+            return cleaned.replace(/[\.\#\$\/\[\]]/g, "") || "알수없음";
+        }
+
         async function recordWordStat(wordTarget, userAnswer) {
             const statRef = doc(db, "word_stats", wordTarget);
             try {
-                const cleanedAnswer = (userAnswer || "").trim().substring(0, 30);
-                const safeAnswer = cleanedAnswer.replace(/[\.\#\$\/\[\]]/g, "") || "알수없음";
+                const safeAnswer = sanitizeStatKey(userAnswer);
 
                 await setDoc(statRef, {
                     answers: {
@@ -2964,7 +2968,7 @@
 
 
         // 🌟 수정된 통계 보여주기 함수 (가로 배치 적용)
-        async function showInlineStats(currentWordObj) {
+        async function showInlineStats(currentWordObj, recordedAnswer) {
             isShowingStats = true;
             const statsContainer = document.getElementById('inline-stats-container');
             const nextBtn = document.getElementById('next-btn');
@@ -2989,12 +2993,22 @@
             statsContainer.style.display = 'block';
 
             try {
-                const statRef = doc(db, "word_stats", word);
-                const docSnap = await getDoc(statRef);
+                // 서버 통계 조회 (실패해도 아래에서 내 답안으로 최소 1개 보장)
+                let answers = {};
+                try {
+                    const docSnap = await getDoc(doc(db, "word_stats", word));
+                    if (docSnap.exists()) answers = docSnap.data().answers || {};
+                } catch (fetchErr) {
+                    console.warn("통계 조회 실패 — 내 답안만 표시:", fetchErr);
+                }
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const answers = data.answers || {};
+                // 🌟 방금 제출한 내 답안을 실시간 반영: 서버에 아직 없거나 조회 실패여도 최소 1개는 보이도록
+                if (recordedAnswer) {
+                    const myKey = sanitizeStatKey(recordedAnswer);
+                    if (!answers[myKey]) answers[myKey] = 1;
+                }
+
+                if (Object.keys(answers).length > 0) {
                     // 실제 데이터 기반 total 계산
                     const total = Object.values(answers).reduce((sum, count) => sum + count, 0);
                     const sortedAnswers = Object.entries(answers).sort((a, b) => b[1] - a[1]).slice(0, 5);
@@ -3039,25 +3053,12 @@
                     });
                     statsContainer.innerHTML = html;
                 } else {
-                    statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">아직 통계 데이터가 없습니다.</div>';
+                    statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">아직 통계 데이터가 없어요.</div>';
                 }
             } catch (error) {
                 console.error("🔥 통계 로드 실패:", error);
-                statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">아직 이 단어의 통계가 없어요. 첫 도전자예요! 🎉</div>';
+                statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">통계를 표시할 수 없어요.</div>';
             }
-        }
-
-        function handleReinsertion(wordObj) {
-            // 🌟 3에서 6 사이의 랜덤한 간격 결정
-            const minGap = 3;
-            const maxGap = 6;
-            const gap = Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
-
-            // 현재 남은 문제 수보다 간격이 길면 맨 마지막에 넣음
-            const insertIndex = Math.min(quizQueue.length, gap);
-            quizQueue.splice(insertIndex, 0, { ...wordObj, failed: true });
-
-            syncProgress(); // 복습 예약된 큐 상태 저장
         }
 
         // 🌟 async를 붙여서 '기다림(await)' 기능을 쓸 수 있게 만듭니다.
@@ -3109,7 +3110,7 @@
                 quizQueue.shift(); completedQuestions++;
                 updateDashboard();
                 showHarangMotion('clap', 1800, lastShardGain); // 🦭 물범 박수 + 조각 획득
-                showInlineStats(currentWord);
+                showInlineStats(currentWord, userAnswer);
 
             }
             // 2. 유의어인 경우 (사용자가 입력한 답과 의도한 답을 함께 표시)
@@ -3150,7 +3151,7 @@
                 quizQueue.shift(); completedQuestions++;
                 updateDashboard();
                 showHarangMotion('clap', 1800, lastShardGain); // 🦭 물범 박수 + 조각 획득
-                showInlineStats(currentWord);
+                showInlineStats(currentWord, userAnswer);
 
             }
             // 3. 오답인 경우
@@ -3167,7 +3168,8 @@
                 if (!hasFailedCurrent) {
                     hasFailedCurrent = true;
                     retryCount++;
-                    handleReinsertion(currentWord);
+                    // 놓친 단어는 이번 세션에 다시 넣지 않고, SRS가 최소 하루 뒤로 복습 예약
+                    // (정답을 맞히면 checkAnswer의 recordLearned(..., false)가 내일로 스케줄)
                 }
                 isWaiting = false; // 다시 입력할 수 있도록 잠금 해제
             }
@@ -3189,10 +3191,13 @@
             if (!hasFailedCurrent) {
                 hasFailedCurrent = true;
                 retryCount++;
-                handleReinsertion(currentWord);
             }
+            // 포기한(정답 본) 단어도 학습 기록으로 남겨 SRS가 최소 하루 뒤 복습 예약
+            const gaveUpToday = (() => { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; })();
+            recordLearned(currentWord.target, gaveUpToday, false);
+
             quizQueue.shift();
-            showInlineStats(currentWord);
+            showInlineStats(currentWord, "모르겠어요");
         }
 
         // ==========================================
@@ -4144,15 +4149,25 @@
 
             const firstDay = new Date(calYear, calMonth, 1).getDay();
             const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
+            const pad = (n) => String(n).padStart(2, '0');
+            const dateStr = (d) => `${calYear}-${pad(calMonth + 1)}-${pad(d)}`;
             for (let i = 0; i < firstDay; i++) html += '<div></div>';
             for (let day = 1; day <= lastDay; day++) {
-                const dStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dStr = dateStr(day);
                 const isAttended = attended.has(dStr);
                 const isToday = dStr === todayStr;
-                let style = 'width: 32px; height: 32px; margin: 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; font-weight: 600; color: #475569; box-sizing: border-box;';
+                const weekday = (firstDay + day - 1) % 7;
+
+                // 🔗 같은 주(가로)에서 다음 날도 출석이면 두 원을 잇는 연결 바 (연속 학습 강조)
+                const connectRight = isAttended && weekday !== 6 && day + 1 <= lastDay && attended.has(dateStr(day + 1));
+                const connector = connectRight
+                    ? '<div style="position: absolute; top: 50%; left: 50%; transform: translateY(-50%); width: calc(100% + 4px); height: 18px; background: #10b981; z-index: 0;"></div>'
+                    : '';
+
+                let style = 'position: relative; z-index: 1; width: 32px; height: 32px; margin: 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; font-weight: 600; color: #475569; box-sizing: border-box;';
                 if (isAttended) style += 'background: #10b981; color: white; font-weight: 800;';
                 if (isToday) style += 'border: 2px solid #3b82f6;';
-                html += `<div style="padding: 2px 0;"><div style="${style}">${day}</div></div>`;
+                html += `<div style="padding: 2px 0; position: relative;">${connector}<div style="${style}">${day}</div></div>`;
             }
             grid.innerHTML = html;
         }
