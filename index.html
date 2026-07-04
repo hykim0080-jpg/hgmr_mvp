@@ -919,6 +919,13 @@
             display: none;
         }
 
+        @keyframes shardFloat {
+            0% { opacity: 0; transform: translateY(10px) scale(0.8); }
+            25% { opacity: 1; transform: translateY(0) scale(1); }
+            75% { opacity: 1; transform: translateY(-6px); }
+            100% { opacity: 0; transform: translateY(-14px); }
+        }
+
         @keyframes harangPop {
             0% { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.85); }
             12% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
@@ -928,8 +935,8 @@
 
         /* 프로필 하랑이 포즈·목도리 색 선택 */
         .pose-opt {
-            width: 54px;
-            height: 54px;
+            width: 62px;
+            height: 62px;
             border-radius: 14px;
             border: 2px solid #e2e8f0;
             background: #f8fafc;
@@ -955,6 +962,61 @@
         .scarf-swatch.selected {
             border-color: #3B4252;
             transform: scale(1.15);
+        }
+
+        /* 칭호 선택 리스트 (프로필 설정 모달) */
+        .title-opt {
+            width: 100%;
+            padding: 11px 12px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 14px;
+            font-weight: 700;
+            color: #334155;
+            cursor: pointer;
+            text-align: center;
+            box-sizing: border-box;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .title-opt.selected {
+            border-color: #10B981;
+            background: #ECFDF5;
+            color: #065f46;
+        }
+
+        .title-opt.locked {
+            opacity: 0.45;
+            cursor: default;
+        }
+
+        /* 1회 학습 단어 수 칩 (학습 설정 모달) */
+        .count-chip {
+            flex: 1;
+            padding: 12px 0;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 15px;
+            font-weight: 800;
+            color: #64748b;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .count-chip.selected {
+            border-color: #10B981;
+            background: #ECFDF5;
+            color: #065f46;
+        }
+
+        /* 좁은 화면에서 헤더 요소 압축: 워드마크는 유지하고 프로필 칩을 축소 */
+        @media (max-width: 430px) {
+            #display-nickname { display: none; }
+            #edit-profile-trigger { padding: 6px 9px; gap: 4px; }
+            #header-shard-chip, #header-word-shard-chip { padding: 5px 8px; }
+            #header-wordmark { font-size: 19px; }
         }
 
         /* 🍞 비차단 토스트 알림 (blocking alert 대체) */
@@ -1203,7 +1265,7 @@
     <!-- 🦭 이메일 로그인 화면 (Screen 2) -->
     <div id="email-login-screen">
         <div style="display: flex; align-items: center; gap: 8px;">
-            <button id="email-back-btn" style="width: 36px; height: 36px; border: none; background: none; font-size: 24px; color: #2A2F3A; margin-left: -10px; cursor: pointer;">‹</button>
+            <button id="email-back-btn" aria-label="뒤로 가기" style="width: 36px; height: 36px; border: none; background: none; font-size: 24px; color: #2A2F3A; margin-left: -10px; cursor: pointer;">‹</button>
             <svg viewBox="0 0 200 200" style="width: 26px; height: 26px;" aria-hidden="true">
                 <polygon points="100,20 152,86 100,180 48,86" fill="#34D399"></polygon>
                 <polygon points="100,20 48,86 100,86" fill="#6EE7B7"></polygon>
@@ -1222,6 +1284,8 @@
             <input id="email-input" class="hm-input" type="email" placeholder="이메일" autocomplete="email">
             <input id="password-input" class="hm-input" type="password" placeholder="비밀번호" autocomplete="current-password">
             <button id="email-submit-btn" class="hm-login-submit" style="margin-top: 4px;">로그인</button>
+            <button id="password-reset-btn"
+                style="background: none; border: none; font-size: 13px; color: #7A8494; cursor: pointer; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px;">비밀번호를 잊었나요?</button>
         </div>
         <div style="display: flex; align-items: center; gap: 10px; margin: 22px 0;">
             <div style="flex: 1; height: 1px; background: #E5E7EB;"></div>
@@ -1263,46 +1327,70 @@
         <!-- 🌟 상단 네비게이션 헤더 바 (iOS Safe Area 지원) -->
         <header
             style="display: flex; justify-content: space-between; align-items: center; padding: calc(12px + env(safe-area-inset-top)) 20px 12px 20px; background: white; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 100; box-sizing: border-box; width: 100%;">
-            <div
-                style="font-size: 20px; font-weight: 900; background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px;">
-                한글마루</div>
+            <div style="display: flex; align-items: center; gap: 7px;">
+                <svg viewBox="0 0 200 200" style="width: 22px; height: 22px;" aria-hidden="true">
+                    <polygon points="100,20 152,86 100,180 48,86" fill="#34D399"></polygon>
+                    <polygon points="100,20 48,86 100,86" fill="#6EE7B7"></polygon>
+                    <text x="100" y="110" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-weight="900" font-size="52" fill="#FFFFFF">ㅎ</text>
+                </svg>
+                <span id="header-wordmark" style="font-family: 'Jua', sans-serif; font-size: 21px; color: #2A2F3A; white-space: nowrap;">한글마루</span>
+            </div>
             <div style="display: flex; align-items: center; gap: 8px;">
-                <div id="edit-profile-trigger"
-                    style="cursor: pointer; display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0; transition: all 0.2s;"
-                    onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
-                    <span id="display-emoji" style="display: inline-flex; width: 22px; height: 22px; align-items: center;"><svg viewBox="10 10 300 300" style="width: 100%; height: 100%;"><use id="header-harang-use" href="#fr-idle-1"></use></svg></span>
-                    <span id="display-nickname"
-                        style="font-weight: bold; color: #334155; font-size: 13px;">로딩중...</span>
-                    <span style="font-size: 11px; color: #94a3b8;">✏️</span>
+                <div id="header-word-shard-chip" title="모은 낱말 조각 (첫 학습 단어)"
+                    style="display: flex; align-items: center; gap: 5px; background: #ecfdf5; padding: 6px 11px; border-radius: 20px; border: 1px solid #a7f3d0;">
+                    <svg viewBox="0 0 200 200" style="width: 15px; height: 15px;" aria-hidden="true">
+                        <polygon points="100,20 152,86 100,180 48,86" fill="#34D399"></polygon>
+                        <polygon points="100,20 48,86 100,86" fill="#6EE7B7"></polygon>
+                    </svg>
+                    <span id="header-word-shard-count" style="font-size: 13px; font-weight: 800; color: #059669;">0</span>
                 </div>
-                <button id="logout-btn"
-                    style="padding: 6px 12px; font-size: 12px; background-color: transparent; color: #ef4444; border: 1px solid #fee2e2; border-radius: 20px; cursor: pointer; font-weight: bold; height: auto; line-height: 1.2; transition: all 0.2s;"
-                    onmouseover="this.style.background='#fef2f2'"
-                    onmouseout="this.style.background='transparent'">로그아웃</button>
+                <div id="header-shard-chip" title="보유한 지혜 조각 (재화)"
+                    style="display: flex; align-items: center; gap: 5px; background: #f0f9ff; padding: 6px 11px; border-radius: 20px; border: 1px solid #bae6fd;">
+                    <svg viewBox="0 0 200 200" style="width: 15px; height: 15px;" aria-hidden="true">
+                        <polygon points="100,20 152,86 100,180 48,86" fill="#38BDF8"></polygon>
+                        <polygon points="100,20 48,86 100,86" fill="#7DD3FC"></polygon>
+                    </svg>
+                    <span id="header-shard-count" style="font-size: 13px; font-weight: 800; color: #0284c7;">0</span>
+                </div>
+            <div id="edit-profile-trigger"
+                style="cursor: pointer; display: flex; align-items: center; gap: 6px; background: #f8fafc; padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0; transition: all 0.2s;"
+                onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
+                <span id="display-emoji" style="display: inline-flex; width: 22px; height: 22px; align-items: center;"><svg viewBox="10 10 300 300" style="width: 100%; height: 100%;"><use id="header-harang-use" href="#fr-idle-1"></use></svg></span>
+                <span id="display-nickname"
+                    style="font-weight: bold; color: #334155; font-size: 13px; white-space: nowrap; max-width: 76px; overflow: hidden; text-overflow: ellipsis;">로딩중...</span>
+                <span style="font-size: 11px; color: #94a3b8;">✏️</span>
+            </div>
             </div>
         </header>
 
-        <div id="profile-modal"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
-            <div
-                style="background: white; padding: 30px; border-radius: 20px; width: 280px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
-                <h3 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 20px;">프로필 및 학습 설정</h3>
-                <div style="margin-bottom: 20px;">
+        <!-- 🦭 프로필 설정 시트 (홈 화면 프로필 아바타 터치로 진입, 풀스크린) -->
+        <div id="profile-edit-modal"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 1000; flex-direction: column; animation: slideUp 0.25s ease;">
+            <!-- 시트 헤더 -->
+            <div style="display: flex; align-items: center; gap: 10px; padding: calc(14px + env(safe-area-inset-top)) 20px 14px; border-bottom: 1px solid #f1f5f9; flex-shrink: 0;">
+                <button id="close-profile-edit-btn" title="닫기" aria-label="프로필 설정 닫기"
+                    style="width: 34px; height: 34px; border: none; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+                <h3 style="margin: 0; color: #1e293b; font-size: 18px;">프로필 설정</h3>
+            </div>
+
+            <!-- 스크롤 콘텐츠 -->
+            <div style="flex: 1; overflow-y: auto; padding: 24px 24px 12px; text-align: center; max-width: 480px; width: 100%; margin: 0 auto; box-sizing: border-box;">
+                <div style="margin-bottom: 26px;">
                     <label
-                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">프로필
+                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 10px; font-weight: bold;">프로필
                         하랑이</label>
-                    <div id="pose-picker" style="display: flex; justify-content: center; gap: 8px;">
+                    <div id="pose-picker" style="display: flex; justify-content: center; gap: 10px;">
                         <button class="pose-opt" data-pose="idle" title="기본"><svg viewBox="10 10 300 300"><use href="#fr-idle-1"></use></svg></button>
                         <button class="pose-opt" data-pose="clap" title="물범 박수"><svg viewBox="10 10 300 300"><use href="#fr-clap-3"></use></svg></button>
                         <button class="pose-opt" data-pose="party" title="파티"><svg viewBox="10 0 300 310"><use href="#fr-lv-3"></use></svg></button>
                         <button class="pose-opt" data-pose="sad" title="눈물"><svg viewBox="10 10 300 300"><use href="#fr-wrong-1"></use></svg></button>
                     </div>
                 </div>
-                <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 26px;">
                     <label
-                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">목도리
+                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 10px; font-weight: bold;">목도리
                         색</label>
-                    <div id="scarf-picker" style="display: flex; justify-content: center; gap: 10px;">
+                    <div id="scarf-picker" style="display: flex; justify-content: center; gap: 12px;">
                         <button class="scarf-swatch" data-color="#10B981" style="background: #10B981;" title="에메랄드"></button>
                         <button class="scarf-swatch" data-color="#3B82F6" style="background: #3B82F6;" title="파랑"></button>
                         <button class="scarf-swatch" data-color="#F472B6" style="background: #F472B6;" title="분홍"></button>
@@ -1310,50 +1398,50 @@
                         <button class="scarf-swatch" data-color="#8B5CF6" style="background: #8B5CF6;" title="보라"></button>
                     </div>
                 </div>
-                <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 26px;">
                     <label
-                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">닉네임
+                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 10px; font-weight: bold;">닉네임
                         (활동명)</label>
                     <input type="text" id="input-nickname" placeholder="이름을 입력하세요"
-                        style="width: 85%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align: center; font-weight: bold; outline: none;">
+                        style="width: 100%; padding: 13px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align: center; font-weight: bold; outline: none; box-sizing: border-box;">
                 </div>
+                <div style="margin-bottom: 20px; text-align: left;">
+                    <label
+                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 10px; font-weight: bold; text-align: center;">나의
+                        칭호 설정</label>
+                    <!-- 접힌 상태: 현재 칭호 + 펼치기 -->
+                    <button id="title-collapse-btn"
+                        style="width: 100%; padding: 13px 38px; border-radius: 12px; border: 2px solid #e2e8f0; background: #f8fafc; font-size: 15px; font-weight: 700; color: #334155; cursor: pointer; position: relative; text-align: center; box-sizing: border-box;">
+                        <span id="title-collapse-label">🐣 아기 병아리</span>
+                        <span id="title-collapse-arrow" style="color: #94a3b8; font-size: 12px; position: absolute; right: 14px; top: 50%; transform: translateY(-50%);">▼</span>
+                    </button>
+                    <div id="title-picker" style="display: none; flex-direction: column; gap: 8px; margin-top: 8px;">
+                        <!-- JS에서 동적으로 칭호 옵션 렌더링 -->
+                    </div>
+                </div>
+
+                <!-- 1회 학습 단어 수 -->
                 <div style="margin-bottom: 20px;">
                     <label
-                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">나의
-                        칭호 설정</label>
-                    <select id="input-title"
-                        style="width: 85%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align-last: center; font-weight: bold; outline: none; background: white; cursor: pointer;">
-                        <!-- JS에서 동적으로 해제된 칭호 옵션 추가 -->
-                    </select>
-                </div>
-                <div style="margin-bottom: 25px;">
-                    <label
-                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 8px; font-weight: bold;">1회
+                        style="display: block; font-size: 13px; color: #64748b; margin-bottom: 10px; font-weight: bold;">1회
                         학습 단어 수</label>
-                    <select id="input-target-count"
-                        style="width: 85%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; text-align-last: center; font-weight: bold; outline: none; background: white; cursor: pointer;">
-                        <option value="10">10개</option>
-                        <option value="20">20개</option>
-                        <option value="30">30개</option>
-                        <option value="40">40개</option>
-                        <option value="50">50개</option>
-                    </select>
-                    <span style="display: block; font-size: 11px; color: #94a3b8; margin-top: 6px;">※ 다음 학습 세션부터
-                        적용됩니다.</span>
+                    <div id="target-count-picker" style="display: flex; justify-content: center; gap: 6px;">
+                        <button class="count-chip" data-count="10">10</button>
+                        <button class="count-chip" data-count="20">20</button>
+                        <button class="count-chip" data-count="30">30</button>
+                        <button class="count-chip" data-count="40">40</button>
+                        <button class="count-chip" data-count="50">50</button>
+                    </div>
+                    <span style="display: block; font-size: 11px; color: #94a3b8; margin-top: 8px; text-align: center;">※ 다음 학습 세션부터 적용됩니다.</span>
                 </div>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button id="close-modal-btn"
-                        style="flex: 1; padding: 12px 0; background-color: #f1f5f9; color: #64748b; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">취소</button>
-                    <button id="save-profile-btn"
-                        style="flex: 1; padding: 12px 0; background-color: #10b981; color: white; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">저장</button>
-                </div>
-                <!-- 🏠 홈으로 돌아가기 버튼 (퀴즈 진행 중에만 노출됨) -->
-                <div id="modal-home-container"
-                    style="display: none; margin-top: 12px; border-top: 2px solid #f1f5f9; padding-top: 12px;">
-                    <button id="modal-home-btn"
-                        style="width: 100%; padding: 12px 0; background-color: #3b82f6; color: white; border:none; border-radius:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">🏠
-                        홈으로 이동</button>
-                </div>
+            </div>
+
+            <!-- 하단 고정 저장 버튼 -->
+            <div style="padding: 12px 24px calc(16px + env(safe-area-inset-bottom)); border-top: 1px solid #f1f5f9; flex-shrink: 0; max-width: 480px; width: 100%; margin: 0 auto; box-sizing: border-box;">
+                <button id="save-profile-edit-btn"
+                    style="width: 100%; padding: 15px 0; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 14px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">저장</button>
+                <button id="logout-btn"
+                    style="width: 100%; background: none; border: none; font-size: 14px; font-weight: 700; color: #ef4444; cursor: pointer; padding: 14px 0 2px; text-align: center;">로그아웃</button>
             </div>
         </div>
 
@@ -1436,6 +1524,38 @@
             </div>
         </div>
 
+        <!-- 🚪 로그아웃 확인 모달 -->
+        <div id="logout-confirm-modal" class="home-modal-overlay"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 2100; backdrop-filter: blur(2px);">
+            <div style="background: white; padding: 28px 24px; border-radius: 20px; width: 290px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.25s ease;">
+                <svg viewBox="10 10 300 300" style="width: 84px; height: 84px; margin: 0 auto 10px; display: block;" aria-hidden="true"><use href="#fr-wrong-1"></use></svg>
+                <h3 id="logout-modal-title" style="margin: 0 0 8px 0; color: #1e293b; font-size: 17px;">로그아웃할까요?</h3>
+                <p id="logout-modal-desc" style="margin: 0 0 20px 0; font-size: 13px; color: #64748b; line-height: 1.6;">학습 기록은 계정에 안전하게<br>저장되어 있어요.</p>
+                <div style="display: flex; gap: 10px;">
+                    <button id="logout-cancel-btn"
+                        style="flex: 1; padding: 13px 0; background: #f1f5f9; color: #64748b; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer;">돌아가기</button>
+                    <button id="logout-confirm-btn"
+                        style="flex: 1; padding: 13px 0; background: #ef4444; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);">로그아웃</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ▶️ 학습 이어하기 확인 모달 -->
+        <div id="resume-confirm-modal" class="home-modal-overlay"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 2100; backdrop-filter: blur(2px);">
+            <div style="background: white; padding: 28px 24px; border-radius: 20px; width: 290px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.25s ease;">
+                <svg viewBox="10 10 300 300" style="width: 84px; height: 84px; margin: 0 auto 10px; display: block;" aria-hidden="true"><use href="#fr-idle-1"></use></svg>
+                <h3 style="margin: 0 0 8px 0; color: #1e293b; font-size: 17px;">풀던 문제가 있어요!</h3>
+                <p id="resume-modal-desc" style="margin: 0 0 20px 0; font-size: 13px; color: #64748b; line-height: 1.6;">지난 학습을 이어서 할까요?</p>
+                <div style="display: flex; gap: 10px;">
+                    <button id="resume-cancel-btn"
+                        style="flex: 1; padding: 13px 0; background: #f1f5f9; color: #64748b; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer;">새로 시작</button>
+                    <button id="resume-confirm-btn"
+                        style="flex: 1; padding: 13px 0; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">이어서 풀기</button>
+                </div>
+            </div>
+        </div>
+
         <!-- 🎯 중점 학습 주제 선택 모달 -->
         <div id="topic-modal" class="home-modal-overlay"
             style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
@@ -1462,9 +1582,9 @@
             <div style="background: white; padding: 26px 22px; border-radius: 20px; width: 310px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
                 <h3 style="margin: 0 0 16px 0; color: #1e293b; font-size: 18px;">📅 출석 달력</h3>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <button id="cal-prev-btn" style="border: none; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold;">‹</button>
+                    <button id="cal-prev-btn" aria-label="이전 달" style="border: none; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold;">‹</button>
                     <strong id="cal-month-label" style="color: #1e293b; font-size: 15px;">-</strong>
-                    <button id="cal-next-btn" style="border: none; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold;">›</button>
+                    <button id="cal-next-btn" aria-label="다음 달" style="border: none; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold;">›</button>
                 </div>
                 <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;"></div>
                 <div style="display: flex; justify-content: center; gap: 14px; margin-top: 14px; font-size: 11px; color: #64748b;">
@@ -1480,7 +1600,7 @@
         <div id="vocab-modal" class="home-modal-overlay"
             style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
             <div style="background: white; padding: 24px 18px; border-radius: 20px; width: 320px; max-width: calc(100vw - 40px); text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; max-height: 80vh; position: relative;">
-                <button id="close-vocab-btn" title="닫기"
+                <button id="close-vocab-btn" title="닫기" aria-label="낱말카드 닫기"
                     style="position: absolute; top: 14px; left: 14px; width: 30px; height: 30px; border: none; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
                 <h3 style="margin: 0 0 4px 0; color: #1e293b; font-size: 18px;">🗂️ 학습한 어휘</h3>
                 <p id="vocab-count-label" style="margin: 0 0 14px 0; font-size: 12px; color: #94a3b8;">-</p>
@@ -1507,8 +1627,8 @@
                 <!-- 아바타 히어로 영역 -->
                 <div
                     style="display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; position: relative;">
-                    <div class="avatar-glow"
-                        style="width: 100px; height: 100px; border-radius: 50%; background: #ECFDF5; display: flex; justify-content: center; align-items: center; border: 4px solid white; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25); position: relative;">
+                    <div class="avatar-glow" id="home-avatar-btn" title="프로필 설정"
+                        style="width: 100px; height: 100px; border-radius: 50%; background: #ECFDF5; display: flex; justify-content: center; align-items: center; border: 4px solid white; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25); position: relative; cursor: pointer;">
                         <svg id="home-harang" viewBox="10 10 300 300" style="width: 88px; height: 88px;" aria-label="프로필 하랑이"><use id="home-harang-use" href="#fr-idle-1"></use></svg>
                         <div id="home-level-badge"
                             style="position: absolute; bottom: -8px; background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25); white-space: nowrap;">
@@ -1528,7 +1648,7 @@
                         새싹</span>
                     <h2 style="color: #1e293b; margin: 0 0 6px 0; font-weight: 800; font-size: 24px;"><span
                             id="home-nickname">사용자</span>님</h2>
-                    <p style="color: #64748b; font-size: 13px; margin: 0; font-weight: 500;">오늘도 한글마루에서 지혜를 모아볼까요? 📖
+                    <p style="color: #64748b; font-size: 13px; margin: 0; font-weight: 500;">오늘도 하랑이와 지혜 조각을 모아볼까요?
                     </p>
                 </div>
 
@@ -1623,10 +1743,10 @@
             </div>
             <div class="quiz-container" id="quiz-box">
                 <!-- 🛠️ 개발자용 단어 검토 제보 버튼 -->
-                <button id="flag-word-btn" class="flag-btn" title="이 단어 신고하기 (오류 검토 요청)">🚩</button>
+                <button id="flag-word-btn" class="flag-btn" title="이 단어 신고하기 (오류 검토 요청)" aria-label="단어 신고">🚩</button>
 
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding-right: 52px;">
-                    <button id="quiz-home-btn" title="학습 종료하고 홈으로"
+                    <button id="quiz-home-btn" title="학습 종료하고 홈으로" aria-label="학습 종료하고 홈으로"
                         style="flex-shrink: 0; width: 34px; height: 34px; border: none; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
                     <div class="progress-bar" style="flex: 1; margin-bottom: 0;">
                         <div class="progress-fill" id="progress"></div>
@@ -1713,9 +1833,26 @@
                     <use href="#fr-lv-3" style="animation: s3of3 0.9s infinite;"></use>
                 </svg>
                 <h2>🎉 오늘의 미션 완료!</h2>
-                <div class="stats">
-                    현재 누적 경험치: <strong style="color:#f59e0b;"><span id="final-exp">0</span> EXP</strong><br>
-                    재학습한 단어 수: <strong id="retry-count">0</strong>개
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 320px; margin: 18px auto;">
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px;">
+                        <span style="font-size: 11px; color: #64748b; font-weight: bold; display: block;">오늘 학습한 단어</span>
+                        <strong style="font-size: 20px; color: #059669;"><span id="result-words">0</span>개</strong>
+                    </div>
+                    <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 14px; padding: 12px;">
+                        <span style="font-size: 11px; color: #0284c7; font-weight: bold; display: block;">지혜 조각 (재화)</span>
+                        <strong style="font-size: 20px; color: #0284c7;">+<span id="result-shards">0</span></strong>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px;">
+                        <span style="font-size: 11px; color: #64748b; font-weight: bold; display: block;">연속 학습</span>
+                        <strong style="font-size: 20px; color: #d97706;"><span id="result-streak">1</span>일차</strong>
+                    </div>
+                    <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 14px; padding: 12px;">
+                        <span style="font-size: 11px; color: #059669; font-weight: bold; display: block;">새 낱말 조각</span>
+                        <strong style="font-size: 20px; color: #059669;">+<span id="result-newwords">0</span></strong>
+                    </div>
+                </div>
+                <div class="stats" style="font-size: 13px; color: #94a3b8;">
+                    다시 도전한 단어: <strong id="retry-count">0</strong>개 · 누적 경험치: <strong id="final-exp" style="color:#f59e0b;">0</strong> EXP
                 </div>
                 <button onclick="goToHome()">홈으로 돌아가기</button>
             </div>
@@ -1763,7 +1900,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, increment, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDSSvJSfL0B8lRflALTZvKjcoDRsYE01Sg",
@@ -1803,6 +1940,14 @@
         let avatarPose = 'idle';
         let scarfColor = '#10B981';
         const POSE_FRAME = { idle: '#fr-idle-1', clap: '#fr-clap-3', party: '#fr-lv-3', sad: '#fr-wrong-1' };
+
+        function updateShardCount() {
+            const blueEl = document.getElementById('header-shard-count');
+            if (blueEl) blueEl.textContent = Math.max(parseInt(blueShards) || 0, 0).toLocaleString();
+            // 초록 낱말 조각 = 첫 학습한 단어 수 (learnedWords가 곧 컬렉션)
+            const greenEl = document.getElementById('header-word-shard-count');
+            if (greenEl) greenEl.textContent = Object.keys(learnedWords || {}).length.toLocaleString();
+        }
 
         function applyAvatar() {
             const frame = POSE_FRAME[avatarPose] || POSE_FRAME.idle;
@@ -1856,6 +2001,12 @@
         let totalLearnedWords = 0;
         let totalCorrectFirstTry = 0;
         let sessionCorrectFirstTry = 0;
+        // 🔷 파란 지혜 조각(재화): 정답마다 +1, 3연속 정답마다 +1 보너스
+        let blueShards = 0;
+        let sessionBlueShards = 0;
+        let sessionNewWords = 0;   // 이번 세션 첫 학습(초록 낱말 조각) 수
+        let comboCount = 0;        // 세션 내 연속 정답
+        let lastShardGain = null;  // 정답 연출에 전달할 획득 내역
         let equippedTitle = "🐣 아기 병아리";
         let learnedWords = {};
         let flaggedWords = {};
@@ -1989,8 +2140,20 @@
             }
         });
 
+        // 비밀번호 재설정 메일 발송
+        document.getElementById('password-reset-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email-input').value.trim();
+            if (!email) return showToast('먼저 이메일을 입력해 주세요.', 'error');
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showToast('비밀번호 재설정 메일을 보냈어요. 메일함을 확인해 주세요!', 'info', 5000);
+            } catch (e) {
+                showToast(e.code === 'auth/invalid-email' ? '이메일 형식이 올바르지 않아요.' : '메일 발송에 실패했어요. 잠시 후 다시 시도해 주세요.', 'error');
+            }
+        });
+
         // ===== 🦭 하랑이 모션 오버레이 (정답 박수 / 오답 위로) =====
-        function showHarangMotion(kind, duration = 1800) {
+        function showHarangMotion(kind, duration = 1800, gain = null) {
             let box = document.getElementById('harang-motion-box');
             if (!box) {
                 box = document.createElement('div');
@@ -2000,7 +2163,25 @@
             const frames = kind === 'clap'
                 ? [['#fr-clap-1', 's1of2 0.3s infinite'], ['#fr-clap-3', 's2of2 0.3s infinite']]
                 : [['#fr-wrong-1', 's1of2 1.6s infinite'], ['#fr-wrong-2', 's2of2 1.6s infinite']];
-            box.innerHTML = `<svg viewBox="0 0 320 320" style="width:100%;height:100%;">${frames.map(([h, a]) => `<use href="${h}" style="animation:${a};"></use>`).join('')}</svg>`;
+            // 정답이면 획득 배지 표시: 🔷 지혜 조각(재화) / 🟢 낱말 조각(첫 학습) / 콤보 보너스
+            let shardBadge = '';
+            if (kind === 'clap' && gain) {
+                const badges = [];
+                badges.push(`<div style="display:flex; align-items:center; gap:3px; background:#f0f9ff; border:1.5px solid #bae6fd; border-radius:999px; padding:4px 10px;">
+                    <svg viewBox="0 0 200 200" style="width:16px;height:16px;"><polygon points="100,20 152,86 100,180 48,86" fill="#38BDF8"></polygon><polygon points="100,20 48,86 100,86" fill="#7DD3FC"></polygon></svg>
+                    <span style="font-size:13px; font-weight:800; color:#0284c7;">+${gain.blue}</span></div>`);
+                if (gain.green) {
+                    badges.push(`<div style="display:flex; align-items:center; gap:3px; background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:999px; padding:4px 10px;">
+                    <svg viewBox="0 0 200 200" style="width:16px;height:16px;"><polygon points="100,20 152,86 100,180 48,86" fill="#34D399"></polygon><polygon points="100,20 48,86 100,86" fill="#6EE7B7"></polygon></svg>
+                    <span style="font-size:13px; font-weight:800; color:#059669;">+${gain.green}</span></div>`);
+                }
+                if (gain.combo) {
+                    badges.push(`<div style="background:#fef3c7; border:1.5px solid #fcd34d; border-radius:999px; padding:4px 10px;">
+                    <span style="font-size:12px; font-weight:800; color:#b45309;">🔥 ${gain.combo}연속!</span></div>`);
+                }
+                shardBadge = `<div style="position:absolute; top:-10px; right:-42px; display:flex; flex-direction:column; gap:4px; align-items:flex-start; animation:shardFloat 1.7s ease forwards;">${badges.join('')}</div>`;
+            }
+            box.innerHTML = `<svg viewBox="0 0 320 320" style="width:100%;height:100%;">${frames.map(([h, a]) => `<use href="${h}" style="animation:${a};"></use>`).join('')}</svg>${shardBadge}`;
             box.style.display = 'block';
             box.style.animation = `harangPop ${duration}ms ease forwards`;
             if (box._hideTimer) clearTimeout(box._hideTimer);
@@ -2063,6 +2244,7 @@
                 targetWordCount = parseInt(data.targetWordCount) || 30;
                 totalLearnedWords = parseInt(data.totalLearnedWords) || 0;
                 totalCorrectFirstTry = parseInt(data.totalCorrectFirstTry) || 0;
+                blueShards = (data.blueShards !== undefined) ? (parseInt(data.blueShards) || 0) : totalCorrectFirstTry;
                 equippedTitle = data.equippedTitle || "🐣 아기 병아리";
                 learnedWords = data.learnedWords || {};
                 flaggedWords = data.flaggedWords || {};
@@ -2094,10 +2276,23 @@
 
                 // 🌟 기존 학습 진행도가 있는지 확인
                 if (data.current_session && data.current_session.quizQueue.length > 0) {
-                    if (confirm("이전에 학습하던 내용이 있습니다. 이어서 하시겠습니까?")) {
+                    // 앱 자체 디자인의 이어하기 확인 모달 (네이티브 confirm 금지)
+                    const done = parseInt(data.current_session.completedQuestions) || 0;
+                    const target = parseInt(data.current_session.dailyTarget) || 30;
+                    document.getElementById('resume-modal-desc').innerHTML = `${done}/${target} 문제까지 풀었어요.<br>지난 학습을 이어서 할까요?`;
+                    document.getElementById('resume-confirm-modal').style.display = 'flex';
+                    showHomeScreen(); // 모달 뒤 배경은 홈 화면
+
+                    const wantResume = await new Promise(resolve => {
+                        document.getElementById('resume-confirm-btn').onclick = () => resolve(true);
+                        document.getElementById('resume-cancel-btn').onclick = () => resolve(false);
+                    });
+                    document.getElementById('resume-confirm-modal').style.display = 'none';
+
+                    if (wantResume) {
                         quizQueue = data.current_session.quizQueue;
-                        dailyTarget = parseInt(data.current_session.dailyTarget) || 30;
-                        completedQuestions = parseInt(data.current_session.completedQuestions) || 0;
+                        dailyTarget = target;
+                        completedQuestions = done;
                         sessionCorrectFirstTry = parseInt(data.current_session.sessionCorrectFirstTry) || 0; // 이어서 풀기 시 첫 시도 정답 복원
                         totalQuestions = dailyTarget;
 
@@ -2189,6 +2384,7 @@
             completedQuestions = 0;
             totalQuestions = target; // 진행률 바 계산을 위한 총 목표치
             sessionCorrectFirstTry = 0; // 세션 내 첫 시도 정답 수 초기화
+            sessionBlueShards = 0; sessionNewWords = 0; comboCount = 0; // 조각·콤보 초기화
 
             try {
                 const response = await fetch('words.json');
@@ -2268,7 +2464,7 @@
         }
 
         async function syncUserData() {
-            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, avatarPose: avatarPose, scarfColor: scarfColor, targetWordCount: targetWordCount, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, equippedTitle: equippedTitle, learnedWords: learnedWords, selectedTopic: selectedTopic }, { merge: true }); }
+            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, avatarPose: avatarPose, scarfColor: scarfColor, targetWordCount: targetWordCount, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, blueShards: blueShards, equippedTitle: equippedTitle, learnedWords: learnedWords, selectedTopic: selectedTopic }, { merge: true }); }
             catch (error) { }
         }
 
@@ -2292,6 +2488,7 @@
 
 
         async function updateDashboard() {
+            updateShardCount();
             const currentLevel = Math.floor(currentExp / 200) + 1; const expInLevel = currentExp % 200;
             document.getElementById('streak-text').textContent = `${streakDays}일차`;
             document.getElementById('level-text').textContent = currentLevel;
@@ -2362,6 +2559,12 @@
             document.getElementById('home-badges-text').textContent = `${unlockedCount}개`; // "N개" 단일 카운트 표시
 
             document.getElementById('home-box').style.display = 'block';
+
+            updateShardCount();
+
+            // 홈 진입 시 잔여 하랑이 모션 오버레이 정리 (안전장치)
+            const motionBox = document.getElementById('harang-motion-box');
+            if (motionBox) { motionBox.style.display = 'none'; motionBox.style.animation = ''; }
 
             // 히어로 주제 칩에 현재 선택 주제 반영
             updateTopicChip();
@@ -2497,6 +2700,7 @@
 
                 totalLearnedWords = (parseInt(totalLearnedWords) || 0) + addedWordsCount;
                 totalCorrectFirstTry = (parseInt(totalCorrectFirstTry) || 0) + addedCorrectCount;
+                sessionCorrectFirstTry = 0; // 누적 합산 완료 — 헤더 조각 카운터 이중 계산 방지
 
                 // 3. UI 업데이트
                 dashboard.style.display = 'none';
@@ -2504,12 +2708,17 @@
                 document.getElementById('result-box').style.display = 'block';
                 document.getElementById('final-exp').textContent = currentExp;
                 document.getElementById('retry-count').textContent = retryCount;
+                document.getElementById('result-words').textContent = completedQuestions;
+                document.getElementById('result-shards').textContent = sessionBlueShards;
+                document.getElementById('result-newwords').textContent = sessionNewWords;
+                document.getElementById('result-streak').textContent = streakDays;
 
                 // 4. Firestore 비동기 단일 쓰기로 통합 (경합 조건 및 유실 완벽 해소)
                 try {
                     await setDoc(userDocRef, {
                         current_session: null,
                         exp: currentExp,
+                        blueShards: blueShards,
                         streak: streakDays,
                         last_date: lastDate,
                         nickname: userNickname,
@@ -2740,6 +2949,17 @@
                 inputEl.value = currentWord.target;
                 sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#10b981; font-weight:800;">${currentWord.target}</span>`);
 
+                // 🔷 조각 획득: 첫 학습 여부는 기록 전에 판정
+                const isFirstLearn = !learnedWords[currentWord.target];
+                if (isFirstLearn) sessionNewWords++;
+                comboCount++;
+                const comboBonus = (comboCount % 3 === 0) ? 1 : 0;
+                const blueGain = 1 + comboBonus;
+                blueShards += blueGain;
+                sessionBlueShards += blueGain;
+                lastShardGain = { blue: blueGain, green: isFirstLearn ? 1 : 0, combo: comboBonus ? comboCount : 0 };
+                updateShardCount();
+
                 if (!hasFailedCurrent) {
                     currentExp += 20;
                     sessionCorrectFirstTry++;
@@ -2754,7 +2974,7 @@
 
                 quizQueue.shift(); completedQuestions++;
                 updateDashboard();
-                showHarangMotion('clap'); // 🦭 물범 박수
+                showHarangMotion('clap', 1800, lastShardGain); // 🦭 물범 박수 + 조각 획득
                 showInlineStats(currentWord);
 
             }
@@ -2770,6 +2990,17 @@
                 // 유의어는 파란색 계열로 표시
                 sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${currentWord.target}</span>`);
 
+                // 🔷 조각 획득: 첫 학습 여부는 기록 전에 판정
+                const isFirstLearn = !learnedWords[currentWord.target];
+                if (isFirstLearn) sessionNewWords++;
+                comboCount++;
+                const comboBonus = (comboCount % 3 === 0) ? 1 : 0;
+                const blueGain = 1 + comboBonus;
+                blueShards += blueGain;
+                sessionBlueShards += blueGain;
+                lastShardGain = { blue: blueGain, green: isFirstLearn ? 1 : 0, combo: comboBonus ? comboCount : 0 };
+                updateShardCount();
+
                 if (!hasFailedCurrent) {
                     currentExp += 20;
                     sessionCorrectFirstTry++;
@@ -2784,7 +3015,7 @@
 
                 quizQueue.shift(); completedQuestions++;
                 updateDashboard();
-                showHarangMotion('clap'); // 🦭 물범 박수
+                showHarangMotion('clap', 1800, lastShardGain); // 🦭 물범 박수 + 조각 획득
                 showInlineStats(currentWord);
 
             }
@@ -2793,6 +3024,7 @@
                 inputGroup.classList.remove('wrong', 'show-answer', 'synonym');
                 void inputGroup.offsetWidth; // 애니메이션 리셋을 위한 트릭
                 inputGroup.classList.add('wrong');
+                comboCount = 0; // 연속 정답 끊김
                 showHarangMotion('wrong', 1400); // 🦭 같이 아쉬워하기
                 inputEl.value = '';
                 jamoBuffer = []; // 🌟 자체 한글 가상 키보드 버퍼를 비워 처음부터 새로운 답을 입력할 수 있게 함
@@ -2810,6 +3042,7 @@
         async function revealAnswer() {
             if (quizQueue.length === 0 || isWaiting) return;
             isWaiting = true; const currentWord = quizQueue[0];
+            comboCount = 0; // 연속 정답 끊김
 
             // 정답 보기를 누른 포기 행동을 오답 통계에 '정답 보기(모름)'로 실시간 가산 기록
             await recordWordStat(currentWord.target, "모르겠어요");
@@ -3563,14 +3796,20 @@
             });
         });
 
-        document.getElementById('edit-profile-trigger').addEventListener('click', () => {
-            document.getElementById('input-nickname').value = userNickname;
-            refreshProfilePickers();
-            document.getElementById('input-target-count').value = targetWordCount;
+        // 해제된 칭호 목록을 앱 디자인의 선택 리스트로 렌더링 (프로필 설정 모달용)
+        let tempTitle = "🐣 아기 병아리";
 
-            // 해제된 칭호 드롭다운 옵션 동적 채우기
-            const titleSelect = document.getElementById('input-title');
-            titleSelect.innerHTML = '';
+        function setTitlePickerOpen(open) {
+            document.getElementById('title-picker').style.display = open ? 'flex' : 'none';
+            document.getElementById('title-collapse-arrow').textContent = open ? '▲' : '▼';
+        }
+
+        function buildTitleOptions() {
+            const picker = document.getElementById('title-picker');
+            picker.innerHTML = '';
+            tempTitle = equippedTitle;
+            document.getElementById('title-collapse-label').textContent = equippedTitle;
+            setTitlePickerOpen(false); // 기본은 접힌 상태
 
             const currentLevel = Math.floor(currentExp / 200) + 1;
             const titles = [
@@ -3583,58 +3822,89 @@
             ];
 
             titles.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t.name;
-                opt.textContent = t.unlocked ? t.name : `${t.name} (잠김 🔒)`;
-                opt.disabled = !t.unlocked;
-                if (t.name === equippedTitle) {
-                    opt.selected = true;
+                const btn = document.createElement('button');
+                btn.className = 'title-opt' + (t.unlocked ? '' : ' locked') + (t.name === equippedTitle ? ' selected' : '');
+                btn.textContent = t.unlocked ? t.name : `${t.name} 🔒`;
+                if (t.unlocked) {
+                    btn.addEventListener('click', () => {
+                        tempTitle = t.name;
+                        picker.querySelectorAll('.title-opt').forEach(b => b.classList.toggle('selected', b === btn));
+                        // 선택 즉시 라벨 갱신 후 접기
+                        document.getElementById('title-collapse-label').textContent = t.name;
+                        setTitlePickerOpen(false);
+                    });
                 }
-                titleSelect.appendChild(opt);
+                picker.appendChild(btn);
             });
+        }
 
-            // 퀴즈 진행 중일 때만 홈으로 가기 버튼 노출 및 자체 가상 키보드 숨김
+        // 1회 학습 단어 수 칩 선택
+        let tempTargetCount = 30;
+        document.querySelectorAll('#target-count-picker .count-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                tempTargetCount = parseInt(btn.dataset.count);
+                document.querySelectorAll('#target-count-picker .count-chip').forEach(b => b.classList.toggle('selected', b === btn));
+            });
+        });
+
+        // 프로필·학습 설정 시트 열기 (프로필 아바타·헤더 프로필 칩 공용)
+        function openProfileSheet() {
+            document.getElementById('input-nickname').value = userNickname;
+            refreshProfilePickers();
+            buildTitleOptions();
+            tempTargetCount = targetWordCount;
+            document.querySelectorAll('#target-count-picker .count-chip').forEach(b => {
+                b.classList.toggle('selected', parseInt(b.dataset.count) === targetWordCount);
+            });
+            // 익명 사용자는 로그아웃 대신 '로그인' 노출
+            const isAnon = auth.currentUser && auth.currentUser.isAnonymous;
+            const logoutBtn = document.getElementById('logout-btn');
+            logoutBtn.textContent = isAnon ? '로그인' : '로그아웃';
+            logoutBtn.style.color = isAnon ? '#10b981' : '#ef4444';
+            // 퀴즈 진행 중이면 가상 키보드 숨김
             if (quizQueue && quizQueue.length > 0) {
-                document.getElementById('modal-home-container').style.display = 'block';
                 document.getElementById('custom-keyboard').style.display = 'none';
                 document.getElementById('quiz-box').classList.remove('keyboard-active');
-            } else {
-                document.getElementById('modal-home-container').style.display = 'none';
             }
+            document.getElementById('profile-edit-modal').style.display = 'flex';
+        }
 
-            document.getElementById('profile-modal').style.display = 'flex';
+        document.getElementById('edit-profile-trigger').addEventListener('click', openProfileSheet);
+
+        // 칭호 접기/펼치기 토글
+        document.getElementById('title-collapse-btn').addEventListener('click', () => {
+            const isOpen = document.getElementById('title-picker').style.display !== 'none';
+            setTitlePickerOpen(!isOpen);
         });
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
-            document.getElementById('profile-modal').style.display = 'none';
-            // 모달을 닫을 때 퀴즈 진행 중이고 결과/통계 화면이 아니라면 가상 키보드 복구
+
+        // 홈 화면 프로필 아바타 → 같은 시트
+        document.getElementById('home-avatar-btn').addEventListener('click', openProfileSheet);
+
+        document.getElementById('close-profile-edit-btn').addEventListener('click', () => {
+            document.getElementById('profile-edit-modal').style.display = 'none';
+            // 퀴즈 중 닫으면 가상 키보드 복구
             if (quizQueue && quizQueue.length > 0 && !isShowingStats) {
                 document.getElementById('custom-keyboard').style.display = 'flex';
                 document.getElementById('quiz-box').classList.add('keyboard-active');
             }
         });
 
-        document.getElementById('modal-home-btn').addEventListener('click', () => {
-            document.getElementById('profile-modal').style.display = 'none';
-            goToHome();
-        });
-
-        document.getElementById('save-profile-btn').addEventListener('click', async () => {
+        // 통합 저장: 프로필(닉네임·포즈·목도리·칭호) + 학습 설정(단어 수)
+        document.getElementById('save-profile-edit-btn').addEventListener('click', async () => {
             const newName = document.getElementById('input-nickname').value.trim();
             if (newName === "") return showToast("활동명을 입력해주세요!", "error");
             userNickname = newName;
             avatarPose = tempAvatarPose;
             scarfColor = tempScarfColor;
-            targetWordCount = parseInt(document.getElementById('input-target-count').value) || 30;
-            equippedTitle = document.getElementById('input-title').value || "🐣 아기 병아리";
+            equippedTitle = tempTitle || "🐣 아기 병아리";
+            targetWordCount = tempTargetCount || 30;
 
             document.getElementById('display-nickname').textContent = userNickname;
             applyAvatar();
-            await syncUserData();
+            document.getElementById('profile-edit-modal').style.display = 'none';
 
-            // 퀴즈 진행 중인 경우 학습으로 바로 복귀, 아닌 경우 홈화면 업데이트
+            // 퀴즈 진행 중이면 학습으로 복귀, 아니면 홈 표시 갱신
             if (quizQueue && quizQueue.length > 0) {
-                document.getElementById('display-nickname').textContent = userNickname;
-                // 저장하고 닫을 때 퀴즈 진행 중이고 결과/통계 화면이 아니라면 가상 키보드 복구
                 if (!isShowingStats) {
                     document.getElementById('custom-keyboard').style.display = 'flex';
                     document.getElementById('quiz-box').classList.add('keyboard-active');
@@ -3643,8 +3913,12 @@
                 showHomeScreen();
             }
 
-            document.getElementById('profile-modal').style.display = 'none';
+            await syncUserData();
+            showToast('저장되었어요! 🦭');
         });
+
+
+
 
         // 🌟 업적 팝업 모달 이벤트 리스너 연결
         // ===== 홈 화면 통계 카드 모달 (주제 선택 / 출석 달력 / 낱말카드 / 상세 통계) =====
@@ -3845,8 +4119,25 @@
             document.getElementById('achievement-modal').style.display = 'none';
         });
 
+        // 로그아웃/로그인: 자체 확인 모달 (네이티브 confirm 금지)
         document.getElementById("logout-btn").addEventListener("click", () => {
-            if (confirm("로그아웃 하시겠습니까?")) signOut(auth).then(() => location.reload());
+            const isAnon = auth.currentUser && auth.currentUser.isAnonymous;
+            document.getElementById('logout-modal-title').textContent = isAnon ? '로그인 화면으로 갈까요?' : '로그아웃할까요?';
+            document.getElementById('logout-modal-desc').innerHTML = isAnon
+                ? '계정을 만들면 학습 기록이<br>안전하게 보관돼요. (익명 기록은 이전되지 않아요)'
+                : '학습 기록은 계정에 안전하게<br>저장되어 있어요.';
+            const confirmBtn = document.getElementById('logout-confirm-btn');
+            confirmBtn.textContent = isAnon ? '로그인하기' : '로그아웃';
+            confirmBtn.style.background = isAnon ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : '#ef4444';
+            document.getElementById('logout-confirm-modal').style.display = 'flex';
+        });
+        document.getElementById('logout-cancel-btn').addEventListener('click', () => {
+            document.getElementById('logout-confirm-modal').style.display = 'none';
+        });
+        document.getElementById('logout-confirm-btn').addEventListener('click', () => {
+            document.getElementById('logout-confirm-modal').style.display = 'none';
+            document.getElementById('profile-edit-modal').style.display = 'none';
+            signOut(auth).then(() => location.reload());
         });
         // 서비스 워커는 현재 비활성. 과거에 등록된 좀비 SW가 옛 캐시를 서빙하며
         // 최신 빌드를 가리는 문제를 막기 위해 능동적으로 해제·캐시 삭제한다.
