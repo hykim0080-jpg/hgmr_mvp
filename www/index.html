@@ -271,13 +271,15 @@
             flex-direction: column;
             gap: 8px;
             /* 🌟 네이티브에 가깝게 줄 간격 확대 */
-            background: rgba(243, 244, 246, 0.92);
-            /* 애플 순정 키보드 특유의 회색조 반투명 글래스 */
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            background: rgba(243, 244, 246, 0.96);
+            /* 애플 순정 키보드 특유의 회색조 반투명 글래스 — 블러 강도를 낮춰 리페인트 비용 절감(반응속도) */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transform: translateX(-50%) translateZ(0);
+            /* GPU 레이어 승격으로 키 애니메이션 시 블러 재계산 방지 */
             padding: 16px 8px calc(16px + env(safe-area-inset-bottom)) 8px;
             /* 🌟 상단 및 좌우 패딩을 넓혀 네이티브 크기로 증대 */
-            border-radius: 20px 20px 0 0;
+            border-radius: 28px 28px 0 0;
             /* 상단 좌우 모서리만 둥글게 처리하여 화면 바닥 안착 극대화 */
             border-top: 1px solid rgba(255, 255, 255, 0.4);
             box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.08);
@@ -307,6 +309,25 @@
             display: none !important;
         }
 
+        /* 🫧 키 팝: 누른 자모가 키 위로 떠오르는 미리보기 (iOS 순정 타건감) */
+        #key-pop {
+            position: fixed;
+            display: none;
+            width: 54px;
+            height: 58px;
+            transform: translateX(-50%);
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.22), 0 0 0 0.5px rgba(15, 23, 42, 0.06);
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: 700;
+            color: #0f172a;
+            z-index: 1200;
+            pointer-events: none;
+        }
+
         .keyboard-row {
             display: flex;
             justify-content: center;
@@ -327,7 +348,8 @@
             /* 🌟 자판 세로 길이를 54px 네이티브 수준으로 대폭 확대 */
             background: #ffffff;
             border: none;
-            border-radius: 6px;
+            border-radius: 14px;
+            /* 🌟 둥글둥글한 스퀘어클 키캡 */
             font-size: clamp(17px, 5.2vw, 22px);
             /* 🌟 시인성 극대화를 위해 자판 글꼴을 큼직하게 조정 */
             font-weight: 600;
@@ -336,7 +358,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 1.5px 3px rgba(15, 23, 42, 0.12);
             cursor: pointer;
             transition: background 0.12s ease-out;
             /* 🌟 뗄 때 부드러운 복원 */
@@ -394,7 +416,7 @@
             background-color: #10b981 !important;
             /* 선명하고 고급스러운 초록색 */
             color: #ffffff !important;
-            box-shadow: 0 1px 3px rgba(16, 185, 129, 0.4) !important;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35) !important;
             transition: none !important;
             /* 🌟 누를 때는 딜레이 없이 즉각(0ms) 점등 */
         }
@@ -2028,6 +2050,33 @@
             };
         }
 
+        // 📝 용언 어미 분리: 어미는 문장에 미리 표시하고 어간·어근만 입력받는다
+        //    (회상 대상은 어간이며, '-다'는 사전 표기용 어미일 뿐이기 때문)
+        //    - 형용사: '-하다/-되다/-다' 자동 분리 → "____하다" / "____다"
+        //    - 동사: 기본형 종결이 어색하므로 데이터의 ending 필드(예: "는")로
+        //      관형형 문장을 사용 → "____는" (어간 표기가 보존되는 어미만 사용)
+        //    ※ 현재 데이터의 '-다' 종결 target 64개는 전부 용언임을 전수 확인함
+        function splitVerbEnding(word) {
+            const target = word.target;
+            // ending 필드가 명시돼 있으면 그것을 따름 — 빈 문자열("")이면 분리하지 않음
+            //   (예: '바다' 같은 '-다' 명사를 나중에 추가할 때 ending: ""로 자동 분리 차단)
+            if (word.ending !== undefined) {
+                return word.ending === ''
+                    ? { stem: target, suffix: '' }
+                    : { stem: target.replace(/다$/, ''), suffix: word.ending };
+            }
+            if (/하다$/.test(target) && target.length > 2) return { stem: target.slice(0, -2), suffix: '하다' };
+            if (/되다$/.test(target) && target.length > 2) return { stem: target.slice(0, -2), suffix: '되다' };
+            if (/다$/.test(target) && target.length > 1) return { stem: target.slice(0, -1), suffix: '다' };
+            return { stem: target, suffix: '' };
+        }
+
+        // 유의어 accepts에도 같은 규칙 적용해 채점용 어간 목록 생성
+        function acceptedStems(word) {
+            const list = (word.accepts || []).map(a => splitVerbEnding({ target: a, ending: word.ending }).stem);
+            return [...new Set(list)];
+        }
+
         // 복습 기한 도래 여부 (n이 없는 구버전 데이터는 기존 3일 규칙으로 판정)
         function isDueForReview(entry, todayStr) {
             if (!entry) return false;
@@ -2846,7 +2895,8 @@
             }
 
             hasFailedCurrent = currentWord.failed ? true : false;
-            sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>');
+            const { suffix: vSuffix } = splitVerbEnding(currentWord);
+            sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>' + vSuffix);
 
             // 🌟 문장 유동형 폰트 스케일러 준비: 새 문제마다 크기 원복 후 fitQuizToKeyboard가 재계산
             sentenceEl.style.fontSize = '';
@@ -3023,13 +3073,15 @@
             // 데이터 저장 대기
             await recordWordStat(currentWord.target, userAnswer);
 
-            // 1. 완전 정답인 경우
-            if (userAnswer === currentWord.target) {
+            const { stem: vStem, suffix: vSuffix } = splitVerbEnding(currentWord);
+
+            // 1. 완전 정답인 경우 (용언은 어간만 입력받음 — 기본형 전체 입력도 허용)
+            if (userAnswer === vStem || userAnswer === currentWord.target) {
                 inputGroup.classList.remove('wrong', 'show-answer', 'synonym');
                 inputGroup.classList.add('correct');
 
-                inputEl.value = currentWord.target;
-                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#10b981; font-weight:800;">${currentWord.target}</span>`);
+                inputEl.value = vStem;
+                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#10b981; font-weight:800;">${vStem}</span>` + vSuffix);
 
                 // 🔷 조각 획득: 첫 학습 여부는 기록 전에 판정
                 const isFirstLearn = !learnedWords[currentWord.target];
@@ -3061,7 +3113,7 @@
 
             }
             // 2. 유의어인 경우 (사용자가 입력한 답과 의도한 답을 함께 표시)
-            else if (currentWord.accepts && currentWord.accepts.includes(userAnswer)) {
+            else if ((currentWord.accepts && currentWord.accepts.includes(userAnswer)) || acceptedStems(currentWord).includes(userAnswer)) {
                 inputGroup.classList.remove('wrong', 'show-answer', 'correct');
                 inputGroup.classList.add('synonym');
 
@@ -3070,7 +3122,7 @@
                 inputEl.placeholder = "유의어이므로 정답 처리되었습니다!";
 
                 // 유의어는 파란색 계열로 표시
-                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${currentWord.target}</span>`);
+                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${vStem}</span>` + vSuffix);
 
                 // 🔷 조각 획득: 첫 학습 여부는 기록 전에 판정
                 const isFirstLearn = !learnedWords[currentWord.target];
@@ -3130,8 +3182,9 @@
             await recordWordStat(currentWord.target, "모르겠어요");
 
             inputGroup.classList.remove('wrong', 'correct', 'synonym'); inputGroup.classList.add('show-answer');
-            inputEl.value = currentWord.target; inputEl.disabled = true;
-            sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${currentWord.target}</span>`);
+            const { stem: rStem, suffix: rSuffix } = splitVerbEnding(currentWord);
+            inputEl.value = rStem; inputEl.disabled = true;
+            sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${rStem}</span>` + rSuffix);
 
             if (!hasFailedCurrent) {
                 hasFailedCurrent = true;
@@ -3770,12 +3823,36 @@
         }
 
         // 🌟 키 입력 즉각 처리 함수 (0ms 지연)
+        // 🫧 키 팝: 자모 키를 누르는 동안 키 위에 큰 글자 미리보기 (iOS 순정 방식)
+        let keyPopEl = null;
+        const KEY_POP_EXCLUDE = new Set(['shift', 'backspace', 'space', 'enter']);
+
+        function showKeyPop(btn) {
+            const key = btn.getAttribute('data-key');
+            if (!key || KEY_POP_EXCLUDE.has(key)) return;
+            if (!keyPopEl) {
+                keyPopEl = document.createElement('div');
+                keyPopEl.id = 'key-pop';
+                document.body.appendChild(keyPopEl);
+            }
+            const r = btn.getBoundingClientRect();
+            keyPopEl.textContent = btn.textContent; // 쌍자음 시프트 상태도 그대로 반영
+            keyPopEl.style.left = `${r.left + r.width / 2}px`;
+            keyPopEl.style.top = `${r.top - 62}px`;
+            keyPopEl.style.display = 'flex';
+        }
+
+        function hideKeyPop() {
+            if (keyPopEl) keyPopEl.style.display = 'none';
+        }
+
         function handleKeyStart(btn, e) {
             if (e) {
                 // touchstart의 경우 기본 click 이벤트 생성을 차단하여 300ms 지연 및 이중 트리거 원천 차단
                 e.preventDefault();
             }
             btn.classList.add('pressed');
+            showKeyPop(btn); // 🫧 누른 글자 미리보기
             triggerHaptic(); // 즉시 햅틱 반응 실행
             playClickSound(); // 🌟 실시간 합성 타건음 즉각 재생 (키감 극대화)
 
@@ -3802,6 +3879,7 @@
             btn.addEventListener('touchend', (e) => {
                 if (e) e.preventDefault();
                 btn.classList.remove('pressed'); // 손을 떼는 순간 지연 없이 복귀
+                hideKeyPop();
                 if (key === 'backspace') {
                     clearDeleteRepeat();
                 }
@@ -3810,6 +3888,7 @@
             btn.addEventListener('touchcancel', (e) => {
                 if (e) e.preventDefault();
                 btn.classList.remove('pressed');
+                hideKeyPop();
                 if (key === 'backspace') {
                     clearDeleteRepeat();
                 }
@@ -3827,6 +3906,7 @@
             btn.addEventListener('mouseup', (e) => {
                 e.preventDefault();
                 btn.classList.remove('pressed');
+                hideKeyPop();
                 if (key === 'backspace') {
                     clearDeleteRepeat();
                 }
@@ -3834,6 +3914,7 @@
 
             btn.addEventListener('mouseleave', () => {
                 btn.classList.remove('pressed');
+                hideKeyPop();
                 if (key === 'backspace') {
                     clearDeleteRepeat();
                 }
