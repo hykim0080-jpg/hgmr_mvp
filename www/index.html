@@ -3061,6 +3061,16 @@
             }
         }
 
+        // 🔁 세션 내 재출제: 오답 단어를 같은 세션 3~6문제 뒤에 다시 넣어 즉시 복습
+        function handleReinsertion(wordObj) {
+            const minGap = 3;
+            const maxGap = 6;
+            const gap = Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
+            const insertIndex = Math.min(quizQueue.length, gap);
+            quizQueue.splice(insertIndex, 0, { ...wordObj, failed: true });
+            syncProgress(); // 복습 예약된 큐 상태 저장
+        }
+
         // 🌟 async를 붙여서 '기다림(await)' 기능을 쓸 수 있게 만듭니다.
         // 🌟 정답 및 유의어 판별 로직 (피드백 강화 버전)
         async function checkAnswer() {
@@ -3168,8 +3178,7 @@
                 if (!hasFailedCurrent) {
                     hasFailedCurrent = true;
                     retryCount++;
-                    // 놓친 단어는 이번 세션에 다시 넣지 않고, SRS가 최소 하루 뒤로 복습 예약
-                    // (정답을 맞히면 checkAnswer의 recordLearned(..., false)가 내일로 스케줄)
+                    handleReinsertion(currentWord); // 같은 세션 내 재출제 (즉시 복습)
                 }
                 isWaiting = false; // 다시 입력할 수 있도록 잠금 해제
             }
@@ -3191,6 +3200,7 @@
             if (!hasFailedCurrent) {
                 hasFailedCurrent = true;
                 retryCount++;
+                handleReinsertion(currentWord); // 같은 세션 내 재출제 (즉시 복습)
             }
             // 포기한(정답 본) 단어도 학습 기록으로 남겨 SRS가 최소 하루 뒤 복습 예약
             const gaveUpToday = (() => { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; })();
