@@ -1297,17 +1297,24 @@
         </div>
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 36px;">
             <div>
-                <h1 style="margin: 0; font-size: 26px; font-weight: 900; line-height: 1.35; color: #1F242E;">다시 만나서<br>반가워요</h1>
-                <p style="margin: 6px 0 0; font-size: 14px; color: #7A8494;">하랑이가 기다리고 있었어요</p>
+                <h1 id="auth-title" style="margin: 0; font-size: 26px; font-weight: 900; line-height: 1.35; color: #1F242E;">다시 만나서<br>반가워요</h1>
+                <p id="auth-subtitle" style="margin: 6px 0 0; font-size: 14px; color: #7A8494;">하랑이가 기다리고 있었어요</p>
             </div>
             <svg viewBox="0 0 320 320" style="width: 88px; height: 88px;" aria-hidden="true"><use href="#fr-idle-1"></use></svg>
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 32px;">
-            <input id="email-input" class="hm-input" type="email" placeholder="이메일" autocomplete="email">
-            <input id="password-input" class="hm-input" type="password" placeholder="비밀번호" autocomplete="current-password">
+            <input id="email-input" class="hm-input" type="email" placeholder="이메일" autocomplete="email" inputmode="email" autocapitalize="none">
+            <input id="password-input" class="hm-input" type="password" placeholder="비밀번호 (6자 이상)" autocomplete="current-password">
+            <!-- 회원가입 모드에서만 노출: 비밀번호 확인 -->
+            <input id="password-confirm-input" class="hm-input" type="password" placeholder="비밀번호 확인" autocomplete="new-password" style="display: none;">
             <button id="email-submit-btn" class="hm-login-submit" style="margin-top: 4px;">로그인</button>
             <button id="password-reset-btn"
                 style="background: none; border: none; font-size: 13px; color: #7A8494; cursor: pointer; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px;">비밀번호를 잊었나요?</button>
+        </div>
+        <!-- 로그인 ↔ 회원가입 전환 -->
+        <div style="text-align: center; margin-top: 18px; font-size: 14px; color: #7A8494;">
+            <span id="auth-switch-label">아직 계정이 없나요?</span>
+            <button id="auth-switch-btn" style="background: none; border: none; font-size: 14px; font-weight: 700; color: #10B981; cursor: pointer; padding: 0 0 0 4px;">회원가입</button>
         </div>
         <div style="display: flex; align-items: center; gap: 10px; margin: 22px 0;">
             <div style="flex: 1; height: 1px; background: #E5E7EB;"></div>
@@ -1923,7 +1930,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, increment, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInWithCredential, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDSSvJSfL0B8lRflALTZvKjcoDRsYE01Sg",
@@ -1967,9 +1974,11 @@
         function updateShardCount() {
             const blueEl = document.getElementById('header-shard-count');
             if (blueEl) blueEl.textContent = Math.max(parseInt(blueShards) || 0, 0).toLocaleString();
-            // 초록 낱말 조각 = 첫 학습한 단어 수 (learnedWords가 곧 컬렉션)
+            // 초록 낱말 조각 = 학습한 어휘 수 = learnedWords 컬렉션 크기 (단일 진실 소스)
+            // totalLearnedWords도 여기서 동일하게 맞춰 '학습 어휘' 카드·업적과 불일치 방지
+            totalLearnedWords = masteredCount();
             const greenEl = document.getElementById('header-word-shard-count');
-            if (greenEl) greenEl.textContent = Object.keys(learnedWords || {}).length.toLocaleString();
+            if (greenEl) greenEl.textContent = totalLearnedWords.toLocaleString();
         }
 
         function applyAvatar() {
@@ -2015,8 +2024,15 @@
         function learnedEntry(target) {
             const v = learnedWords[target];
             if (!v) return null;
-            if (typeof v === 'string') return { d: v, c: 1, w: 0, s: 1, n: null };
-            return { w: 0, s: Math.min(v.c || 1, SRS_INTERVALS.length - 1), n: null, ...v };
+            // m: 첫 시도 정답 이력(=마스터). 구버전 데이터는 과거 정답 시에만 기록됐으므로 c>0이면 m=true로 간주
+            if (typeof v === 'string') return { d: v, c: 1, w: 0, s: 1, n: null, m: true };
+            const mDefault = (v.c || 0) > 0;
+            return { w: 0, s: Math.min(v.c || 1, SRS_INTERVALS.length - 1), n: null, m: mDefault, ...v };
+        }
+
+        // 학습 어휘 = 첫 시도에 정답을 맞춘 적이 있는 단어(m=true). 초록 조각·카드·업적 공통 기준
+        function masteredCount() {
+            return Object.keys(learnedWords).filter(t => { const e = learnedEntry(t); return e && e.m; }).length;
         }
 
         // 🧠 에빙하우스 망각곡선 기반 간격 반복(Spaced Repetition) 스케줄러
@@ -2035,15 +2051,21 @@
             const prev = learnedEntry(target);
             let stage = prev ? (prev.s ?? 0) : 0;
             let wrong = prev ? (prev.w || 0) : 0;
+            let mastered = prev ? !!prev.m : false;
+            let correct = prev ? (prev.c || 0) : 0;
             if (wasFirstTry) {
                 stage = Math.min(stage + 1, SRS_INTERVALS.length - 1);
+                mastered = true;   // 첫 시도 정답 → 마스터(학습 어휘로 집계)
+                correct += 1;      // c = 첫 시도 정답 횟수
             } else {
                 wrong += 1;
                 stage = 0;
+                // 오답 후 정답/정답 보기: SRS만 갱신, 마스터·정답 횟수는 그대로
             }
             learnedWords[target] = {
+                m: mastered,
                 d: dateStr,
-                c: (prev ? prev.c : 0) + 1,
+                c: correct,
                 w: wrong,
                 s: stage,
                 n: addDaysStr(dateStr, SRS_INTERVALS[stage])
@@ -2114,22 +2136,32 @@
         }
         const progressEl = document.getElementById('progress'); const dashboard = document.getElementById('dashboard');
 
-        document.getElementById("google-login-btn").addEventListener("click", () => {
-            console.log("구글 로그인 버튼 클릭됨!");
+        async function doGoogleLogin() {
+            if (!auth) { showToast("로그인 준비 중이에요. 잠시 후 다시 시도해 주세요.", "error"); return; }
+            const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
             try {
-                if (!auth) {
-                    throw new Error("Firebase Auth 객체가 초기화되지 않았습니다.");
+                if (isNative) {
+                    // 네이티브 앱: 팝업 대신 OS 제공 구글 로그인 시트 사용 (skipNativeAuth → idToken을 JS SDK에 전달)
+                    const FirebaseAuthentication = window.Capacitor.Plugins.FirebaseAuthentication;
+                    const result = await FirebaseAuthentication.signInWithGoogle();
+                    const idToken = result?.credential?.idToken;
+                    if (!idToken) throw new Error("구글 자격 증명을 받지 못했습니다.");
+                    const credential = GoogleAuthProvider.credential(idToken);
+                    await signInWithCredential(auth, credential);
+                } else {
+                    // 웹 브라우저: 기존 팝업 방식
+                    await signInWithPopup(auth, new GoogleAuthProvider());
                 }
-                signInWithPopup(auth, new GoogleAuthProvider())
-                    .catch((error) => {
-                        console.error("구글 로그인 에러:", error);
-                        showToast("구글 로그인에 실패했어요. 잠시 후 다시 시도해 주세요.", "error");
-                    });
             } catch (error) {
-                console.error("구글 로그인 실행 에러:", error);
-                showToast("구글 로그인 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.", "error");
+                console.error("구글 로그인 에러:", error);
+                // 사용자가 시트를 닫은 경우는 조용히 무시
+                const code = error?.code || '';
+                if (code.includes('cancel') || code.includes('popup-closed') || error?.message?.includes('cancel')) return;
+                showToast("구글 로그인에 실패했어요. 잠시 후 다시 시도해 주세요.", "error");
             }
-        });
+        }
+
+        document.getElementById("google-login-btn").addEventListener("click", doGoogleLogin);
 
         document.getElementById("anon-login-btn").addEventListener("click", () => {
             console.log("익명 로그인 버튼 클릭됨!");
@@ -2184,7 +2216,7 @@
             document.documentElement.classList.toggle('auth-mint', showId === 'login-screen');
         }
 
-        document.getElementById('email-start-btn').addEventListener('click', () => switchAuthScreen('login-screen', 'email-login-screen'));
+        document.getElementById('email-start-btn').addEventListener('click', () => { setAuthMode('login'); switchAuthScreen('login-screen', 'email-login-screen'); });
         document.getElementById('email-back-btn').addEventListener('click', () => switchAuthScreen('email-login-screen', 'login-screen'));
         document.getElementById('email-google-btn').addEventListener('click', () => document.getElementById('google-login-btn').click());
         document.getElementById('email-guest-btn').addEventListener('click', () => document.getElementById('anon-login-btn').click());
@@ -2200,28 +2232,68 @@
             }
         }
 
+        // ===== 이메일 로그인 / 회원가입 모드 전환 =====
+        let authMode = 'login'; // 'login' | 'signup'
+
+        function setAuthMode(mode) {
+            authMode = mode;
+            const isSignup = mode === 'signup';
+            document.getElementById('auth-title').innerHTML = isSignup ? '처음 오셨네요!<br>계정을 만들어요' : '다시 만나서<br>반가워요';
+            document.getElementById('auth-subtitle').textContent = isSignup ? '하랑이와 함께 시작해요' : '하랑이가 기다리고 있었어요';
+            document.getElementById('password-confirm-input').style.display = isSignup ? 'block' : 'none';
+            document.getElementById('password-input').setAttribute('autocomplete', isSignup ? 'new-password' : 'current-password');
+            document.getElementById('email-submit-btn').textContent = isSignup ? '회원가입' : '로그인';
+            document.getElementById('password-reset-btn').style.display = isSignup ? 'none' : 'block';
+            document.getElementById('auth-switch-label').textContent = isSignup ? '이미 계정이 있나요?' : '아직 계정이 없나요?';
+            document.getElementById('auth-switch-btn').textContent = isSignup ? '로그인' : '회원가입';
+            document.getElementById('password-confirm-input').value = '';
+        }
+
+        document.getElementById('auth-switch-btn').addEventListener('click', () => {
+            setAuthMode(authMode === 'login' ? 'signup' : 'login');
+        });
+
         document.getElementById('email-submit-btn').addEventListener('click', async () => {
             const email = document.getElementById('email-input').value.trim();
             const pw = document.getElementById('password-input').value;
+            const pwConfirm = document.getElementById('password-confirm-input').value;
             if (!email || !pw) return showToast('이메일과 비밀번호를 입력해 주세요.', 'error');
+
             const btn = document.getElementById('email-submit-btn');
-            btn.disabled = true; btn.textContent = '로그인 중...';
-            try {
-                await signInWithEmailAndPassword(auth, email, pw);
-            } catch (e) {
-                if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
-                    // 처음 온 이메일이면 자동으로 계정 생성 (기존 계정의 비밀번호 오류면 already-in-use로 떨어짐)
-                    try {
-                        await createUserWithEmailAndPassword(auth, email, pw);
-                        showToast('새 계정을 만들었어요. 환영해요! 🦭');
-                    } catch (e2) {
-                        showToast(e2.code === 'auth/email-already-in-use' ? '비밀번호가 올바르지 않아요.' : mapAuthError(e2), 'error');
+
+            if (authMode === 'signup') {
+                // 회원가입: 비밀번호 확인 + 최소 길이 검증
+                if (pw.length < 6) return showToast('비밀번호는 6자 이상이어야 해요.', 'error');
+                if (pw !== pwConfirm) return showToast('비밀번호가 서로 달라요. 다시 확인해 주세요.', 'error');
+                btn.disabled = true; btn.textContent = '가입 중...';
+                try {
+                    await createUserWithEmailAndPassword(auth, email, pw);
+                    showToast('가입 완료! 환영해요 🦭');
+                } catch (e) {
+                    if (e.code === 'auth/email-already-in-use') {
+                        showToast('이미 가입된 이메일이에요. 로그인해 주세요.', 'error');
+                        setAuthMode('login');
+                    } else {
+                        showToast(mapAuthError(e), 'error');
                     }
-                } else {
-                    showToast(mapAuthError(e), 'error');
+                } finally {
+                    btn.disabled = false; btn.textContent = '회원가입';
                 }
-            } finally {
-                btn.disabled = false; btn.textContent = '로그인';
+            } else {
+                // 로그인
+                btn.disabled = true; btn.textContent = '로그인 중...';
+                try {
+                    await signInWithEmailAndPassword(auth, email, pw);
+                } catch (e) {
+                    // 최신 Firebase는 미가입·비번오류를 모두 invalid-credential로 반환 → 가입 유도
+                    if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                        showToast('이메일 또는 비밀번호가 올바르지 않아요. 처음이라면 회원가입해 주세요.', 'error', 4500);
+                    } else {
+                        showToast(mapAuthError(e), 'error');
+                    }
+                } finally {
+                    btn.disabled = false; btn.textContent = '로그인';
+                }
             }
         });
 
@@ -2327,11 +2399,12 @@
                 avatarPose = data.avatarPose || 'idle';
                 scarfColor = data.scarfColor || '#10B981';
                 targetWordCount = parseInt(data.targetWordCount) || 30;
-                totalLearnedWords = parseInt(data.totalLearnedWords) || 0;
                 totalCorrectFirstTry = parseInt(data.totalCorrectFirstTry) || 0;
                 blueShards = (data.blueShards !== undefined) ? (parseInt(data.blueShards) || 0) : totalCorrectFirstTry;
                 equippedTitle = data.equippedTitle || "🐣 아기 병아리";
                 learnedWords = data.learnedWords || {};
+                // 학습 어휘 수 = 첫 시도 정답한 단어 수 (masteredCount)
+                totalLearnedWords = masteredCount();
                 flaggedWords = data.flaggedWords || {};
                 selectedTopic = data.selectedTopic || 'all';
 
@@ -2830,10 +2903,10 @@
                 lastDate = todayStr;
 
                 // 2. 누적 학습 단어 수 및 첫 시도 정답 누적 (안전한 정수형 강제 캐스팅 가산)
-                const addedWordsCount = parseInt(dailyTarget) || parseInt(completedQuestions) || 30;
                 const addedCorrectCount = parseInt(sessionCorrectFirstTry) || 0;
 
-                totalLearnedWords = (parseInt(totalLearnedWords) || 0) + addedWordsCount;
+                // 학습 어휘 수 = 첫 시도 정답한 단어 수 (masteredCount) — 초록 조각과 항상 동일
+                totalLearnedWords = masteredCount();
                 totalCorrectFirstTry = (parseInt(totalCorrectFirstTry) || 0) + addedCorrectCount;
                 sessionCorrectFirstTry = 0; // 누적 합산 완료 — 헤더 조각 카운터 이중 계산 방지
 
@@ -3095,14 +3168,15 @@
                 sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#10b981; font-weight:800;">${vStem}</span>` + vSuffix);
 
                 // 🔷 조각 획득: 첫 학습 여부는 기록 전에 판정
-                const isFirstLearn = !learnedWords[currentWord.target];
-                if (isFirstLearn) sessionNewWords++;
+                const prevEntry = learnedEntry(currentWord.target);
+                const newlyMastered = !hasFailedCurrent && !(prevEntry && prevEntry.m);
+                if (newlyMastered) sessionNewWords++;
                 comboCount++;
                 const comboBonus = (comboCount % 3 === 0) ? 1 : 0;
                 const blueGain = 1 + comboBonus;
                 blueShards += blueGain;
                 sessionBlueShards += blueGain;
-                lastShardGain = { blue: blueGain, green: isFirstLearn ? 1 : 0, combo: comboBonus ? comboCount : 0 };
+                lastShardGain = { blue: blueGain, green: newlyMastered ? 1 : 0, combo: comboBonus ? comboCount : 0 };
                 updateShardCount();
 
                 if (!hasFailedCurrent) {
@@ -3136,14 +3210,15 @@
                 sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${vStem}</span>` + vSuffix);
 
                 // 🔷 조각 획득: 첫 학습 여부는 기록 전에 판정
-                const isFirstLearn = !learnedWords[currentWord.target];
-                if (isFirstLearn) sessionNewWords++;
+                const prevEntry = learnedEntry(currentWord.target);
+                const newlyMastered = !hasFailedCurrent && !(prevEntry && prevEntry.m);
+                if (newlyMastered) sessionNewWords++;
                 comboCount++;
                 const comboBonus = (comboCount % 3 === 0) ? 1 : 0;
                 const blueGain = 1 + comboBonus;
                 blueShards += blueGain;
                 sessionBlueShards += blueGain;
-                lastShardGain = { blue: blueGain, green: isFirstLearn ? 1 : 0, combo: comboBonus ? comboCount : 0 };
+                lastShardGain = { blue: blueGain, green: newlyMastered ? 1 : 0, combo: comboBonus ? comboCount : 0 };
                 updateShardCount();
 
                 if (!hasFailedCurrent) {
@@ -4245,7 +4320,7 @@
         async function openVocabModal() {
             openHomeModal('vocab-modal');
             const listEl = document.getElementById('vocab-list');
-            const targets = Object.keys(learnedWords);
+            const targets = Object.keys(learnedWords).filter(t => { const e = learnedEntry(t); return e && e.m; });
             document.getElementById('vocab-count-label').textContent = `지금까지 ${targets.length}개의 단어를 학습했어요 · 카드를 누르면 뜻이 보여요`;
             if (targets.length === 0) {
                 listEl.innerHTML = '<div style="text-align: center; color: #94a3b8; font-size: 13px; padding: 30px 0;">아직 학습한 단어가 없어요.<br>오늘의 학습을 시작해 보세요! 🌱</div>';

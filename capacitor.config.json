@@ -1,5 +1,11 @@
 {
   "appId": "com.hgmr.app",
   "appName": "한글마루",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": ["google.com"]
+    }
+  }
 }

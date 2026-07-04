@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "212108763277",
+    "project_id": "hgmr-9109e",
+    "storage_bucket": "hgmr-9109e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212108763277:android:1617346e0cd40c395102c4",
+        "android_client_info": {
+          "package_name": "com.hgmr.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "212108763277-vg0e4lqp4uphi42vl26pgmnd2vv7jkbm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hgmr.app",
+            "certificate_hash": "774a9c01d619afa8c7cf4c614eb2fddb4f0b2785"
+          }
+        },
+        {
+          "client_id": "212108763277-g4o98sd5j5p3bl5fdrrgq4dpvrar68o4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPwKjJcyTe2fir-7SbTCMyJ_xo7tcMfNo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "212108763277-g4o98sd5j5p3bl5fdrrgq4dpvrar68o4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "212108763277-u8ngbudcq5g6i5u51460ru1gm87mn7p7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.hyk.hgmr"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
