@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; background:#F1F3F6; font-family:'Noto Sans KR',sans-serif; }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; box-sizing:border-box; padding:56px 40px; display:flex; flex-direction:column; align-items:center; gap:48px;">
+
+  <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+    <div style="font-size:13px; letter-spacing:2px; font-weight:700; color:#9AA3B2;">HANGEUL MARU · APP ICON</div>
+    <div style="font-size:26px; font-weight:900; color:#2A303C;">한글마루 · 하랑이</div>
+  </div>
+
+  <!-- Hero icon -->
+  <div style="display:flex; align-items:flex-end; gap:44px; flex-wrap:wrap; justify-content:center;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+      <div style="filter:drop-shadow(0 24px 48px rgba(16,120,80,0.34));">
+        <svg viewBox="0 0 320 320" width="300" height="300" style="display:block;">
+          <defs>
+            <clipPath id="sq"><rect x="0" y="0" width="320" height="320" rx="72"></rect></clipPath>
+            <radialGradient id="bg" cx="50%" cy="34%" r="82%">
+              <stop offset="0%" stop-color="#22C77E"></stop>
+              <stop offset="58%" stop-color="#10B981"></stop>
+              <stop offset="100%" stop-color="#0B9C68"></stop>
+            </radialGradient>
+          </defs>
+          <g clip-path="url(#sq)">
+            <rect x="0" y="0" width="320" height="320" fill="url(#bg)"></rect>
+            <!-- soft top glow -->
+            <ellipse cx="160" cy="30" rx="200" ry="120" fill="#FFFFFF" opacity="0.14"></ellipse>
+            <!-- Harang face, scaled up so features fill the frame -->
+            <g transform="translate(160 168) scale(1.78) translate(-160 -168)">
+              <!-- ears (behind head) -->
+              <path d="M96,96 C82,70 96,58 116,72 C126,80 128,98 122,112 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+              <path d="M224,96 C238,70 224,58 204,72 C194,80 192,98 198,112 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+              <path d="M104,88 C96,74 104,68 114,76 C120,81 121,92 118,101 Z" fill="#F8B9C5"></path>
+              <path d="M216,88 C224,74 216,68 206,76 C200,81 199,92 202,101 Z" fill="#F8B9C5"></path>
+              <!-- head -->
+              <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+              <!-- face shading spots -->
+              <ellipse cx="94" cy="118" rx="12" ry="7.5" fill="#AEB6C2" opacity="0.5" transform="rotate(-32 94 118)"></ellipse>
+              <ellipse cx="226" cy="118" rx="12" ry="7.5" fill="#AEB6C2" opacity="0.5" transform="rotate(32 226 118)"></ellipse>
+              <!-- blush -->
+              <circle cx="102" cy="184" r="13" fill="#F8B9C5" opacity="0.85"></circle>
+              <circle cx="218" cy="184" r="13" fill="#F8B9C5" opacity="0.85"></circle>
+              <!-- eyes -->
+              <circle cx="124" cy="150" r="17" fill="#262B36"></circle>
+              <circle cx="196" cy="150" r="17" fill="#262B36"></circle>
+              <circle cx="118.5" cy="143.5" r="6" fill="#FFFFFF"></circle>
+              <circle cx="190.5" cy="143.5" r="6" fill="#FFFFFF"></circle>
+              <circle cx="129" cy="157" r="2.6" fill="#FFFFFF" opacity="0.9"></circle>
+              <circle cx="201" cy="157" r="2.6" fill="#FFFFFF" opacity="0.9"></circle>
+              <!-- nose -->
+              <path d="M150,170 C154,165 166,165 170,170 C167,178 153,178 150,170 Z" fill="#3B4252"></path>
+              <!-- mouth -->
+              <path d="M151,184 Q160,192 169,184" fill="none" stroke="#3B4252" stroke-width="3.2" stroke-linecap="round"></path>
+              <!-- whiskers -->
+              <path d="M86,160 L112,164 M86,172 L112,171" stroke="#C6CDD9" stroke-width="2.6" stroke-linecap="round"></path>
+              <path d="M234,160 L208,164 M234,172 L208,171" stroke="#C6CDD9" stroke-width="2.6" stroke-linecap="round"></path>
+            </g>
+            <!-- inner edge highlight -->
+            <rect x="2.5" y="2.5" width="315" height="315" rx="70" fill="none" stroke="#FFFFFF" stroke-width="3" opacity="0.16"></rect>
+          </g>
+        </svg>
+      </div>
+      <div style="font-size:13px; color:#9AA3B2; font-weight:500;">1024 × 1024 · 마스터</div>
+    </div>
+  </div>
+
+  <!-- Size previews on a homescreen-ish strip -->
+  <div style="display:flex; align-items:flex-end; gap:34px; padding:28px 40px; background:#FFFFFF; border:1px solid #E7EAEF; border-radius:24px;">
+    <sc-for list="{{ sizes }}" as="sz" hint-placeholder-count="4">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <div style="filter:drop-shadow(0 8px 18px rgba(16,120,80,0.24));">
+          <svg viewBox="0 0 320 320" width="{{ sz.px }}" height="{{ sz.px }}" style="display:block;">
+            <use href="#__iconuse"></use>
+          </svg>
+        </div>
+        <div style="font-size:12px; color:#9AA3B2; font-weight:600;">{{ sz.label }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- hidden symbol reused by size previews -->
+  <svg width="0" height="0" style="position:absolute;" aria-hidden="true">
+    <symbol id="__iconuse" viewBox="0 0 320 320">
+      <defs>
+        <clipPath id="sq2"><rect x="0" y="0" width="320" height="320" rx="72"></rect></clipPath>
+        <radialGradient id="bg2" cx="50%" cy="34%" r="82%">
+          <stop offset="0%" stop-color="#22C77E"></stop>
+          <stop offset="58%" stop-color="#10B981"></stop>
+          <stop offset="100%" stop-color="#0B9C68"></stop>
+        </radialGradient>
+      </defs>
+      <g clip-path="url(#sq2)">
+        <rect x="0" y="0" width="320" height="320" fill="url(#bg2)"></rect>
+        <ellipse cx="160" cy="30" rx="200" ry="120" fill="#FFFFFF" opacity="0.14"></ellipse>
+        <g transform="translate(160 168) scale(1.78) translate(-160 -168)">
+          <path d="M96,96 C82,70 96,58 116,72 C126,80 128,98 122,112 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+          <path d="M224,96 C238,70 224,58 204,72 C194,80 192,98 198,112 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+          <path d="M104,88 C96,74 104,68 114,76 C120,81 121,92 118,101 Z" fill="#F8B9C5"></path>
+          <path d="M216,88 C224,74 216,68 206,76 C200,81 199,92 202,101 Z" fill="#F8B9C5"></path>
+          <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+          <ellipse cx="94" cy="118" rx="12" ry="7.5" fill="#AEB6C2" opacity="0.5" transform="rotate(-32 94 118)"></ellipse>
+          <ellipse cx="226" cy="118" rx="12" ry="7.5" fill="#AEB6C2" opacity="0.5" transform="rotate(32 226 118)"></ellipse>
+          <circle cx="102" cy="184" r="13" fill="#F8B9C5" opacity="0.85"></circle>
+          <circle cx="218" cy="184" r="13" fill="#F8B9C5" opacity="0.85"></circle>
+          <circle cx="124" cy="150" r="17" fill="#262B36"></circle>
+          <circle cx="196" cy="150" r="17" fill="#262B36"></circle>
+          <circle cx="118.5" cy="143.5" r="6" fill="#FFFFFF"></circle>
+          <circle cx="190.5" cy="143.5" r="6" fill="#FFFFFF"></circle>
+          <circle cx="129" cy="157" r="2.6" fill="#FFFFFF" opacity="0.9"></circle>
+          <circle cx="201" cy="157" r="2.6" fill="#FFFFFF" opacity="0.9"></circle>
+          <path d="M150,170 C154,165 166,165 170,170 C167,178 153,178 150,170 Z" fill="#3B4252"></path>
+          <path d="M151,184 Q160,192 169,184" fill="none" stroke="#3B4252" stroke-width="3.2" stroke-linecap="round"></path>
+          <path d="M86,160 L112,164 M86,172 L112,171" stroke="#C6CDD9" stroke-width="2.6" stroke-linecap="round"></path>
+          <path d="M234,160 L208,164 M234,172 L208,171" stroke="#C6CDD9" stroke-width="2.6" stroke-linecap="round"></path>
+        </g>
+      </g>
+    </symbol>
+  </svg>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      sizes: [
+        { px: 120, label: '180pt' },
+        { px: 84,  label: '120pt' },
+        { px: 60,  label: '87pt' },
+        { px: 40,  label: '58pt' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
