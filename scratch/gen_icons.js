@@ -34,8 +34,7 @@ const FACE = `
 
 const GLOW = `<ellipse cx="160" cy="30" rx="200" ry="120" fill="#FFFFFF" opacity="0.14"/>`;
 
-// iOS/레거시 전체 아이콘 — 초록 배경 위 하랑이(여백 있는 균형 구성, 적응형과 통일)
-// scale 0.82로 얼굴을 프레임 중앙에 배치해 브랜드 그린이 항상 보이게 함
+// iOS/레거시 전체 아이콘 — 디자인 원본대로 얼굴이 프레임을 꽉 채우는 확대형(scale 1.78)
 function fullIcon(clip) {
   const defs = `<defs>${GRADIENT}${clip.def || ''}</defs>`;
   const cp = clip.attr || '';
@@ -44,7 +43,7 @@ ${defs}
 <g ${cp}>
   <rect x="0" y="0" width="320" height="320" fill="url(#bg)"/>
   ${GLOW}
-  <g transform="translate(160 160) scale(0.82) translate(-160 -174)">${FACE}</g>
+  <g transform="translate(160 168) scale(1.78) translate(-160 -168)">${FACE}</g>
 </g>
 </svg>`;
 }
@@ -60,9 +59,9 @@ const BG_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
 ${GLOW}
 </svg>`;
 
-// Android 적응형 전경 (얼굴만, 세이프존에 맞춰 축소 + 투명 배경)
+// Android 적응형 전경 (얼굴만, 확대형 scale 1.78 + 투명 배경) — iOS와 동일한 확대 룩
 const FG_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
-<g transform="translate(160 160) scale(0.82) translate(-160 -174)">${FACE}</g>
+<g transform="translate(160 168) scale(1.78) translate(-160 -168)">${FACE}</g>
 </svg>`;
 
 async function render(svg, size, outPath, opaque) {
