@@ -249,6 +249,17 @@
             vertical-align: middle;
         }
 
+        .review-badge {
+            background-color: #f59e0b;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
         .input-group {
             display: flex;
             gap: 8px;
@@ -2579,7 +2590,7 @@
                 // 복습은 세션의 최대 40%까지 (오답 이력이 항상 앞순위)
                 const reviewPool = [...dueWrong, ...dueNormal].map(x => x.word);
                 const reviewQuota = Math.min(reviewPool.length, Math.ceil(target * 0.4));
-                const reviews = reviewPool.slice(0, reviewQuota);
+                const reviews = reviewPool.slice(0, reviewQuota).map(w => ({ ...w, isReview: true }));
 
                 // 나머지는 새 단어로 채우되 주제 가중치(65%) 적용
                 let newQuota = target - reviews.length;
@@ -2600,11 +2611,11 @@
                 // 부족분 보충: ① 남은 복습 풀 ② 아직 기한 안 된 단어 (오래된 학습 순)
                 let queue = [...reviews, ...picked];
                 if (queue.length < target) {
-                    queue = queue.concat(reviewPool.slice(reviewQuota, reviewQuota + (target - queue.length)));
+                    queue = queue.concat(reviewPool.slice(reviewQuota, reviewQuota + (target - queue.length)).map(w => ({ ...w, isReview: true })));
                 }
                 if (queue.length < target) {
                     notDue.sort((a, b) => (a.entry.d || '').localeCompare(b.entry.d || ''));
-                    queue = queue.concat(notDue.map(x => x.word).slice(0, target - queue.length));
+                    queue = queue.concat(notDue.map(x => ({ ...x.word, isReview: true })).slice(0, target - queue.length));
                 }
                 quizQueue = shuffleArray(queue);
 
@@ -2971,7 +2982,9 @@
                 }
             }
 
-            hasFailedCurrent = currentWord.failed ? true : false;
+            // 매 등장은 새 문제로 취급 — 재출제 문항도 한 번에 맞추면 첫 시도 정답(학습 어휘 집계),
+            // 다시 틀리면 또 재출제되어 한 번에 맞출 때까지 세션 내 반복
+            hasFailedCurrent = false;
             const { suffix: vSuffix } = splitVerbEnding(currentWord);
             sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:#94a3b8; border-bottom: 2px dashed #cbd5e1;">____</span>' + vSuffix);
 
@@ -2998,11 +3011,12 @@
             // 태그 칩 렌더링
             const tagDisplay = document.getElementById('word-tag-display');
             const tags = currentWord.tags || [];
-            if (tags.length > 0) {
+            const reviewChip = currentWord.isReview ? '<span class="review-badge">복습</span>' : '';
+            const tagChips = tags.map(t => `<span class="word-tag-chip">${t.replace(/_/g, '/')}</span>`).join('');
+            if (reviewChip || tagChips) {
                 tagDisplay.style.display = 'block';
-                tagDisplay.innerHTML = tags.map(t =>
-                    `<span class="word-tag-chip">${t.replace(/_/g, '/')}</span>`
-                ).join('');
+                // 복습 배지를 단어 유형 칩 앞(왼쪽)에 배치
+                tagDisplay.innerHTML = reviewChip + tagChips;
             } else {
                 tagDisplay.style.display = 'none';
             }
@@ -3041,13 +3055,17 @@
 
 
         // 🌟 수정된 통계 보여주기 함수 (가로 배치 적용)
-        async function showInlineStats(currentWordObj, recordedAnswer) {
+        async function showInlineStats(currentWordObj, recordedAnswer, isRecovery = false) {
             isShowingStats = true;
             const statsContainer = document.getElementById('inline-stats-container');
             const nextBtn = document.getElementById('next-btn');
             const submitBtn = document.getElementById('submit-btn');
             const showAnswerBtn = document.getElementById('show-answer-btn');
             const word = currentWordObj.target; const accepts = currentWordObj.accepts || [];
+            // 재출제(아까 놓친) 단어를 이번엔 한 번에 맞힌 경우 축하 배너 (풀기 전이 아닌 정답 후)
+            const recoveryBanner = isRecovery
+                ? '<div style="display:flex; align-items:center; gap:8px; background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:12px; padding:10px 14px; margin-bottom:14px;"><span style="font-size:18px;">🎉</span><span style="font-size:14px; font-weight:800; color:#059669;">아까 놓쳤던 단어를 다시 맞혔어요!</span></div>'
+                : '';
 
             // 🌟 버튼 전환: 제출/정답 숨기고 다음 버튼 띄우기
             submitBtn.style.display = 'none';
@@ -3124,13 +3142,13 @@
                             </div>
                         `;
                     });
-                    statsContainer.innerHTML = html;
+                    statsContainer.innerHTML = recoveryBanner + html;
                 } else {
-                    statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">아직 통계 데이터가 없어요.</div>';
+                    statsContainer.innerHTML = recoveryBanner + '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">아직 통계 데이터가 없어요.</div>';
                 }
             } catch (error) {
                 console.error("🔥 통계 로드 실패:", error);
-                statsContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">통계를 표시할 수 없어요.</div>';
+                statsContainer.innerHTML = recoveryBanner + '<div style="text-align:center; color:#64748b; font-size:14px; padding: 20px 0;">통계를 표시할 수 없어요.</div>';
             }
         }
 
@@ -3140,7 +3158,7 @@
             const maxGap = 6;
             const gap = Math.floor(Math.random() * (maxGap - minGap + 1)) + minGap;
             const insertIndex = Math.min(quizQueue.length, gap);
-            quizQueue.splice(insertIndex, 0, { ...wordObj, failed: true });
+            quizQueue.splice(insertIndex, 0, { ...wordObj, _reinserted: true });
             syncProgress(); // 복습 예약된 큐 상태 저장
         }
 
@@ -3194,7 +3212,7 @@
                 quizQueue.shift(); completedQuestions++;
                 updateDashboard();
                 showHarangMotion('clap', 1800, lastShardGain); // 🦭 물범 박수 + 조각 획득
-                showInlineStats(currentWord, userAnswer);
+                showInlineStats(currentWord, userAnswer, !!currentWord._reinserted && !hasFailedCurrent);
 
             }
             // 2. 유의어인 경우 (사용자가 입력한 답과 의도한 답을 함께 표시)
@@ -3236,7 +3254,7 @@
                 quizQueue.shift(); completedQuestions++;
                 updateDashboard();
                 showHarangMotion('clap', 1800, lastShardGain); // 🦭 물범 박수 + 조각 획득
-                showInlineStats(currentWord, userAnswer);
+                showInlineStats(currentWord, userAnswer, !!currentWord._reinserted && !hasFailedCurrent);
 
             }
             // 3. 오답인 경우

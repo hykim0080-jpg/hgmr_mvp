@@ -9,7 +9,9 @@
     "merge-words": "node merge_words.js",
     "update-accepts": "node update_accepts.js",
     "sync-words": "node sync_words.js",
-    "sync-words:dry": "node sync_words.js --dry"
+    "sync-words:dry": "node sync_words.js --dry",
+    "check-words": "node check_words.js",
+    "check-words:fix": "node check_words.js --fix"
   },
   "repository": {
     "type": "git",
