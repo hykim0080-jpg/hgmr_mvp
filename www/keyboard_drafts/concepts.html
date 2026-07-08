@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한글마루 키보드 컨셉 시안</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; padding: 24px 0 60px; background: #eef1f5; font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; display: flex; flex-direction: column; align-items: center; gap: 36px; }
+  .concept { width: 400px; }
+  .concept h2 { margin: 0 0 2px; font-size: 17px; color: #1e293b; }
+  .concept p { margin: 0 0 10px; font-size: 12px; color: #64748b; line-height: 1.5; }
+  .kb { border-radius: 26px 26px 0 0; padding: 12px 8px 14px; position: relative; overflow: hidden; }
+  .row { display: flex; justify-content: center; gap: 6px; margin-bottom: 7px; position: relative; z-index: 2; }
+  .k { border: none; font-size: 19px; font-weight: 800; height: 52px; flex: 1; max-width: 36px; cursor: pointer; padding: 0; position: relative; }
+  .k.fn { max-width: 52px; font-size: 15px; }
+  .k.space { max-width: 200px; flex: 2.6; font-size: 14px; }
+  .k.submit { max-width: 96px; flex: 1.4; font-size: 15px; color: #fff; }
+
+  /* ===== A. 조약돌 해변 ===== */
+  .kb-pebble { background: linear-gradient(180deg, #fdf6ec 0%, #f5e9d7 100%); border-top: 1px solid #fff; }
+  .kb-pebble .k { background: #fffdf8; color: #6b5d4f; box-shadow: 0 3px 0 #e3d5c0, 0 5px 8px rgba(107,93,79,.10); }
+  .kb-pebble .k:nth-child(odd)  { border-radius: 46% 54% 52% 48% / 52% 48% 54% 46%; }
+  .kb-pebble .k:nth-child(even) { border-radius: 54% 46% 48% 52% / 46% 54% 46% 54%; }
+  .kb-pebble .k:nth-child(3n)   { border-radius: 50% 50% 44% 56% / 56% 44% 52% 48%; }
+  .kb-pebble .k.fn { background: #efe3cf; color: #8a7a66; }
+  .kb-pebble .k.space { border-radius: 60px / 34px; letter-spacing: 4px; }
+  .kb-pebble .k.submit { background: linear-gradient(135deg, #34d399, #10b981); box-shadow: 0 3px 0 #0b9c68, 0 5px 8px rgba(16,185,129,.25); border-radius: 52% 48% 50% 50% / 48% 52% 46% 54%; }
+  .kb-pebble .paw { position: absolute; font-size: 11px; color: #d9c6a8; z-index: 1; }
+
+  /* ===== B. 빙하 얼음 ===== */
+  .kb-ice { background: linear-gradient(180deg, #dcecf7 0%, #c4dcef 100%); border-top: 1px solid rgba(255,255,255,.8); }
+  .kb-ice .k { border-radius: 13px; color: #27516e; background: linear-gradient(180deg, #ffffff 0%, #eaf4fb 55%, #d8e9f5 100%); border: 1px solid rgba(255,255,255,.9); box-shadow: 0 3px 6px rgba(66,116,152,.18), inset 0 1.5px 0 #ffffff; }
+  .kb-ice .k::after { content: ''; position: absolute; top: 4px; left: 5px; width: 38%; height: 9px; background: rgba(255,255,255,.85); border-radius: 8px; transform: rotate(-4deg); }
+  .kb-ice .k.fn { background: linear-gradient(180deg, #e6f1f9, #cfe2f0); color: #567893; }
+  .kb-ice .k.space { border-radius: 15px; }
+  .kb-ice .k.submit { background: linear-gradient(150deg, #6EE7B7 0%, #10b981 60%, #0b9c68 100%); border: 1px solid rgba(255,255,255,.6); }
+  .kb-ice .k.submit::after { background: rgba(255,255,255,.5); }
+  .kb-ice .snow { position: absolute; color: rgba(255,255,255,.75); font-size: 10px; z-index: 1; }
+
+  /* ===== C. 말랑 젤리 ===== */
+  .kb-jelly { background: #fff7ef; border-top: 1px solid #fff; }
+  .kb-jelly .k { border-radius: 18px; height: 54px; background: #fffdfa; color: #7c6f64; border-bottom: 4px solid #e8dccd; transition: transform .05s, border-bottom-width .05s; }
+  .kb-jelly .k.vowel { background: #e9fbf3; color: #0f8a63; border-bottom-color: #bfe8d6; }
+  .kb-jelly .k.fn { background: #ffeede; color: #c07a4b; border-bottom-color: #f3d3b8; }
+  .kb-jelly .k.space { background: #eaf6ff; color: #4a7ba6; border-bottom-color: #c9e2f4; border-radius: 22px; }
+  .kb-jelly .k.submit { background: linear-gradient(180deg, #4ade80, #10b981); border-bottom: 4px solid #0b7a55; border-radius: 20px; }
+  .kb-jelly .k:active { transform: translateY(3px); border-bottom-width: 1px; }
+
+  /* ===== D. 바다 물결 ===== */
+  .kb-wave-wrap { position: relative; }
+  .kb-wave-wrap svg.wave { display: block; width: 100%; height: 26px; margin-bottom: -1px; }
+  .kb-wave { background: linear-gradient(180deg, #bfe8f2 0%, #8fd0e6 100%); border-radius: 0; padding-top: 4px; }
+  .kb-wave .k { border-radius: 50%; height: 50px; max-width: 34px; background: radial-gradient(circle at 32% 28%, #ffffff 0%, #f2fafd 55%, #dbeef7 100%); color: #2a6f8e; box-shadow: 0 4px 8px rgba(42,111,142,.22), inset 0 -2px 4px rgba(150,200,220,.35); }
+  .kb-wave .k.fn { border-radius: 26px; background: radial-gradient(circle at 32% 28%, #e3f4fa, #bfe0ee); color: #4b7d96; }
+  .kb-wave .k.space { border-radius: 30px; max-width: 190px; background: radial-gradient(circle at 30% 25%, #ffffff, #e8f6fb 70%, #d2ebf5); }
+  .kb-wave .k.submit { border-radius: 28px; background: linear-gradient(150deg, #ff9a8b, #f76b5c); box-shadow: 0 4px 8px rgba(247,107,92,.35); }
+  .kb-wave .bubble { position: absolute; border-radius: 50%; background: rgba(255,255,255,.35); z-index: 1; }
+  .seal-peek { position: absolute; right: 26px; top: -21px; z-index: 3; }
+</style>
+</head>
+<body>
+
+<!-- ===== A ===== -->
+<div class="concept">
+  <h2>A. 조약돌 해변 🏖</h2>
+  <p>하랑이가 사는 바닷가의 조약돌을 주워 만든 키보드. 키마다 미묘하게 다른 유기적 곡률 + 모래빛 배경 + 물범 발자국.</p>
+  <div class="kb kb-pebble">
+    <span class="paw" style="top:8px; left:14px;">🐾</span>
+    <span class="paw" style="bottom:10px; right:20px; transform:rotate(24deg);">🐾</span>
+    <div class="row"><button class="k">ㅂ</button><button class="k">ㅈ</button><button class="k">ㄷ</button><button class="k">ㄱ</button><button class="k">ㅅ</button><button class="k">ㅛ</button><button class="k">ㅕ</button><button class="k">ㅑ</button><button class="k">ㅐ</button><button class="k">ㅔ</button></div>
+    <div class="row"><button class="k">ㅁ</button><button class="k">ㄴ</button><button class="k">ㅇ</button><button class="k">ㄹ</button><button class="k">ㅎ</button><button class="k">ㅗ</button><button class="k">ㅓ</button><button class="k">ㅏ</button><button class="k">ㅣ</button></div>
+    <div class="row"><button class="k fn">⇧</button><button class="k">ㅋ</button><button class="k">ㅌ</button><button class="k">ㅊ</button><button class="k">ㅍ</button><button class="k">ㅠ</button><button class="k">ㅜ</button><button class="k">ㅡ</button><button class="k fn">⌫</button></div>
+    <div class="row"><button class="k space">스페이스</button><button class="k submit">제출</button></div>
+  </div>
+</div>
+
+<!-- ===== B ===== -->
+<div class="concept">
+  <h2>B. 빙하 얼음 🧊</h2>
+  <p>하프물범의 고향, 북극 빙하에서 잘라온 얼음 키. 윗면의 광택 하이라이트가 눌릴 때마다 반짝. 제출 키는 지혜 조각의 초록 보석.</p>
+  <div class="kb kb-ice">
+    <span class="snow" style="top:10px; left:22px;">❄</span>
+    <span class="snow" style="top:34px; right:30px;">❄</span>
+    <span class="snow" style="bottom:16px; left:44%;">❄</span>
+    <div class="row"><button class="k">ㅂ</button><button class="k">ㅈ</button><button class="k">ㄷ</button><button class="k">ㄱ</button><button class="k">ㅅ</button><button class="k">ㅛ</button><button class="k">ㅕ</button><button class="k">ㅑ</button><button class="k">ㅐ</button><button class="k">ㅔ</button></div>
+    <div class="row"><button class="k">ㅁ</button><button class="k">ㄴ</button><button class="k">ㅇ</button><button class="k">ㄹ</button><button class="k">ㅎ</button><button class="k">ㅗ</button><button class="k">ㅓ</button><button class="k">ㅏ</button><button class="k">ㅣ</button></div>
+    <div class="row"><button class="k fn">⇧</button><button class="k">ㅋ</button><button class="k">ㅌ</button><button class="k">ㅊ</button><button class="k">ㅍ</button><button class="k">ㅠ</button><button class="k">ㅜ</button><button class="k">ㅡ</button><button class="k fn">⌫</button></div>
+    <div class="row"><button class="k space">스페이스</button><button class="k submit">제출</button></div>
+  </div>
+</div>
+
+<!-- ===== C ===== -->
+<div class="concept">
+  <h2>C. 말랑 젤리 🍮</h2>
+  <p>폭신하게 눌리는 3D 젤리 키. 모음은 민트, 자음은 아이보리, 기능키는 피치 — 색으로 자연스럽게 자모 학습 보조. 누르면 실제로 쑥 들어가는 촉감.</p>
+  <div class="kb kb-jelly">
+    <div class="row"><button class="k">ㅂ</button><button class="k">ㅈ</button><button class="k">ㄷ</button><button class="k">ㄱ</button><button class="k">ㅅ</button><button class="k vowel">ㅛ</button><button class="k vowel">ㅕ</button><button class="k vowel">ㅑ</button><button class="k vowel">ㅐ</button><button class="k vowel">ㅔ</button></div>
+    <div class="row"><button class="k">ㅁ</button><button class="k">ㄴ</button><button class="k">ㅇ</button><button class="k">ㄹ</button><button class="k">ㅎ</button><button class="k vowel">ㅗ</button><button class="k vowel">ㅓ</button><button class="k vowel">ㅏ</button><button class="k vowel">ㅣ</button></div>
+    <div class="row"><button class="k fn">⇧</button><button class="k">ㅋ</button><button class="k">ㅌ</button><button class="k">ㅊ</button><button class="k">ㅍ</button><button class="k vowel">ㅠ</button><button class="k vowel">ㅜ</button><button class="k vowel">ㅡ</button><button class="k fn">⌫</button></div>
+    <div class="row"><button class="k space">스페이스</button><button class="k submit">제출</button></div>
+  </div>
+</div>
+
+<!-- ===== D ===== -->
+<div class="concept">
+  <h2>D. 바다 물결 🌊</h2>
+  <p>키보드가 바다가 되고, 키는 물 위에 뜬 공기방울. 물결 너머로 하랑이가 빼꼼 — 답을 기다리는 응원단. 제출 키는 산호색.</p>
+  <div class="kb-wave-wrap">
+    <div class="seal-peek">
+      <svg width="64" height="46" viewBox="0 0 64 46">
+        <path d="M32,4 C48,4 56,16 56,30 C56,42 46,46 32,46 C18,46 8,42 8,30 C8,16 16,4 32,4 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="2.4"/>
+        <circle cx="24" cy="24" r="3.4" fill="#262B36"/><circle cx="40" cy="24" r="3.4" fill="#262B36"/>
+        <circle cx="22.8" cy="22.8" r="1.1" fill="#fff"/><circle cx="38.8" cy="22.8" r="1.1" fill="#fff"/>
+        <path d="M29.5,30 C30.3,29 33.7,29 34.5,30 C34,32.2 30,32.2 29.5,30 Z" fill="#3B4252"/>
+        <circle cx="17" cy="29" r="2.6" fill="#F8B9C5"/><circle cx="47" cy="29" r="2.6" fill="#F8B9C5"/>
+      </svg>
+    </div>
+    <svg class="wave" viewBox="0 0 400 26" preserveAspectRatio="none">
+      <path d="M0,20 C30,4 60,4 95,16 C130,26 165,26 200,14 C235,4 270,4 305,16 C340,26 372,24 400,12 L400,26 L0,26 Z" fill="#bfe8f2"/>
+    </svg>
+    <div class="kb kb-wave">
+      <span class="bubble" style="width:14px;height:14px;top:16px;left:18px;"></span>
+      <span class="bubble" style="width:8px;height:8px;top:44px;right:24px;"></span>
+      <span class="bubble" style="width:10px;height:10px;bottom:20px;left:38%;"></span>
+      <div class="row"><button class="k">ㅂ</button><button class="k">ㅈ</button><button class="k">ㄷ</button><button class="k">ㄱ</button><button class="k">ㅅ</button><button class="k">ㅛ</button><button class="k">ㅕ</button><button class="k">ㅑ</button><button class="k">ㅐ</button><button class="k">ㅔ</button></div>
+      <div class="row"><button class="k">ㅁ</button><button class="k">ㄴ</button><button class="k">ㅇ</button><button class="k">ㄹ</button><button class="k">ㅎ</button><button class="k">ㅗ</button><button class="k">ㅓ</button><button class="k">ㅏ</button><button class="k">ㅣ</button></div>
+      <div class="row"><button class="k fn">⇧</button><button class="k">ㅋ</button><button class="k">ㅌ</button><button class="k">ㅊ</button><button class="k">ㅍ</button><button class="k">ㅠ</button><button class="k">ㅜ</button><button class="k">ㅡ</button><button class="k fn">⌫</button></div>
+      <div class="row"><button class="k space">스페이스</button><button class="k submit">제출</button></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
