@@ -1,0 +1,65 @@
+rules_version = '2';
+
+// 한글마루 Firestore 보안 규칙
+// Firebase 콘솔 → Firestore Database → 규칙 에 이 내용을 붙여넣고 [게시]
+// 관리자 이메일은 index.html / admin.html 의 ADMIN_EMAILS 와 반드시 동일하게 유지할 것
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── 헬퍼 ──────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isSignedIn()
+          && request.auth.token.email == "hykim0080@gmail.com"
+          && request.auth.token.email_verified == true;
+    }
+
+    // ── 사용자 개인 문서 ─────────────────────────────────
+    // 본인 문서만 읽기/쓰기 (진행도·학습기록·조각·닉네임 등)
+    match /users/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── 단어별 답안 통계 (익명 포함 누구나 집계에 기여) ───
+    // 오염 방지: 로그인 상태에서만, answers/total 필드 외 조작 차단
+    match /word_stats/{word} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn()
+          && request.resource.data.keys().hasOnly(['answers', 'total']);
+    }
+
+    // ── 문제 난이도 전역 보정 (어휘 고도) ────────────────
+    // 로그인 유저의 increment 기여만 허용, 읽기는 누구나(세션 편성용)
+    match /meta/item_ratings {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    // ── 단어 신고함 ──────────────────────────────────────
+    // 제출: 로그인 유저(익명 포함) / 열람·삭제: 관리자만
+    match /word_reports/{word} {
+      allow create, update: if isSignedIn();
+      allow read, delete: if isAdmin();
+    }
+
+    // ── 관리자 검수 컬렉션 (실서비스 words.json에 반영됨) ─
+    // 반드시 관리자 전용 — 여기가 뚫리면 전 문제 변조 가능
+    match /word_edits/{word} {
+      allow read, write: if isAdmin();
+    }
+    match /word_deletions/{word} {
+      allow read, write: if isAdmin();
+    }
+    match /word_reviews/{word} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── 그 외 전부 차단 (명시되지 않은 컬렉션 기본 거부) ──
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

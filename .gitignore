@@ -1,0 +1,7 @@
+
+# 로컬 비밀 (Gemini 등)
+.env
+
+# 관리자 패널 (로컬 전용 — public 배포 금지)
+admin.html
+www/admin.html
