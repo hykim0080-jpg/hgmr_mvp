@@ -3163,6 +3163,8 @@
         let placementEstHistory = [];
         let placementPromptShown = false; // 이번 앱 실행에서 안내를 이미 띄웠는지
         const PLACEMENT_MAX = 20, PLACEMENT_MIN = 15;
+        const PLACEMENT_RETRIES = 3;   // 오답 시 재입력 기회 (초과하면 정답 공개 후 다음)
+        let placementWrong = 0;        // 현재 문항의 누적 오답 수
 
         function maybeShowPlacementIntro() {
             if (placementDone || placementPromptShown || !userDocRef) return;
@@ -3208,6 +3210,7 @@
             isPlacement = true;
             placementPool = [...allWordsCache];
             placementCount = 0;
+            placementWrong = 0;
             placementEstHistory = [];
             vocabRating = 1200; vocabRatingN = 0; sessionRatingDelta = 0;
             completedQuestions = 0; totalQuestions = PLACEMENT_MAX;
@@ -3221,18 +3224,19 @@
         }
 
         // 배치고사 응답 처리 — 문항당 1회 시도 (오답 연출은 그대로 유지)
-        async function handlePlacementAnswer(currentWord, userAnswer) {
+        async function handlePlacementAnswer(currentWord, userAnswer, giveUp = false) {
             await recordWordStat(currentWord.target, userAnswer);
             const { stem: vStem, suffix: vSuffix } = splitVerbEnding(currentWord);
             const stems = acceptedStems(currentWord);
-            const isCorrect = userAnswer === currentWord.target || userAnswer === vStem
-                || (currentWord.accepts && currentWord.accepts.includes(userAnswer)) || stems.includes(userAnswer);
+            const isCorrect = !giveUp && (userAnswer === currentWord.target || userAnswer === vStem
+                || (currentWord.accepts && currentWord.accepts.includes(userAnswer)) || stems.includes(userAnswer));
             const t = new Date();
             const todayStr = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
 
             if (isCorrect) {
+                const firstTry = placementWrong === 0; // 한 번에 맞히면 낱말 조각으로 수집
                 ratePlacement(currentWord, 1);
-                recordLearned(currentWord.target, todayStr, true); // 맞힌 단어는 낱말 조각으로 남음
+                recordLearned(currentWord.target, todayStr, firstTry);
                 inputGroup.classList.remove('wrong', 'show-answer', 'synonym');
                 inputGroup.classList.add('correct');
                 inputEl.value = vStem;
@@ -3240,25 +3244,41 @@
                 showHarangMotion('clap', 1400);
                 updateShardCount();
                 placementAdvance();
-            } else {
-                ratePlacement(currentWord, 0);
-                recordLearned(currentWord.target, todayStr, false); // 놓친 단어는 내일 복습 예약
-                // 오답 연출 유지 후, 정답 공개하고 다음으로 (배치고사는 문항당 1회 시도)
+                return;
+            }
+
+            // 오답
+            placementWrong++;
+            if (!giveUp && placementWrong <= PLACEMENT_RETRIES) {
+                // 재입력 기회 부여 — 오답 연출 후 입력창 비우고 재시도 (아직 채점/공개 안 함)
                 inputGroup.classList.remove('correct', 'show-answer', 'synonym');
                 void inputGroup.offsetWidth;
                 inputGroup.classList.add('wrong');
                 showHarangMotion('wrong', 1200);
-                setTimeout(() => {
-                    inputGroup.classList.remove('wrong');
-                    inputGroup.classList.add('show-answer');
-                    inputEl.value = vStem;
-                    sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${vStem}</span>` + vSuffix);
-                    placementAdvance();
-                }, 900);
+                inputEl.value = '';
+                jamoBuffer = [];
+                isWaiting = false;
+                return;
             }
+
+            // 재입력 기회 소진(또는 정답 보기) → 정답 공개 후 다음 (재도전 없음)
+            ratePlacement(currentWord, 0);
+            recordLearned(currentWord.target, todayStr, false); // 놓친 단어는 내일 복습 예약
+            inputGroup.classList.remove('correct', 'show-answer', 'synonym');
+            void inputGroup.offsetWidth;
+            inputGroup.classList.add('wrong');
+            showHarangMotion('wrong', 1200);
+            setTimeout(() => {
+                inputGroup.classList.remove('wrong');
+                inputGroup.classList.add('show-answer');
+                inputEl.value = vStem;
+                sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${vStem}</span>` + vSuffix);
+                placementAdvance();
+            }, 900);
         }
 
         function placementAdvance() {
+            placementWrong = 0; // 다음 문항을 위해 오답 카운터 초기화
             quizQueue.shift();
             completedQuestions++;
             document.getElementById('progress-text').textContent = `${completedQuestions}/${totalQuestions}`;
@@ -3791,7 +3811,7 @@
             isWaiting = true; const currentWord = quizQueue[0];
 
             // 🦭 배치고사 모드: 정답 보기 = 오답 처리 후 정답 공개
-            if (isPlacement) { await handlePlacementAnswer(currentWord, '모르겠어요'); return; }
+            if (isPlacement) { await handlePlacementAnswer(currentWord, '모르겠어요', true); return; }
 
             comboCount = 0; // 연속 정답 끊김
 
