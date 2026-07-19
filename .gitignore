@@ -5,3 +5,8 @@
 # 관리자 패널 (로컬 전용 — public 배포 금지)
 admin.html
 www/admin.html
+
+words.backup.*.json
+.DS_Store
+word_reports_export*.json
+serviceAccountKey.json

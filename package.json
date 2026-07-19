@@ -11,7 +11,9 @@
     "sync-words": "node sync_words.js",
     "sync-words:dry": "node sync_words.js --dry",
     "check-words": "node check_words.js",
-    "check-words:fix": "node check_words.js --fix"
+    "check-words:fix": "node check_words.js --fix",
+    "admin": "npx serve . -l 4000",
+    "fetch-reports": "node fetch_reports.js"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,7 @@
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
     "@capacitor/ios": "^8.3.4",
+    "firebase-admin": "^14.1.0",
     "node-fetch": "^2.7.0"
   },
   "dependencies": {

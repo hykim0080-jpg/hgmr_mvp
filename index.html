@@ -424,6 +424,21 @@
             filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.22));
         }
 
+        @keyframes ctaFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .cta-fade-in { animation: ctaFadeIn 0.55s cubic-bezier(.22, 1, .36, 1) both; }
+
+        /* 통계 등장 동안 하랑이 SVG 애니메이션 정지 → 메인 렌더 스레드 확보(끊김 방지) */
+        #harang-companion.anim-freeze svg,
+        #harang-companion.anim-freeze use { animation-play-state: paused !important; }
+
+        @keyframes startPulse {
+            0%, 100% { opacity: 0.55; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-3px); }
+        }
+
         @keyframes hcBob {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(3px); }
@@ -486,18 +501,83 @@
             position: fixed;
             bottom: 0;
             left: 50%;
-            transform: translateX(-50%);
             width: 100%;
             max-width: 480px;
             height: var(--kb-height, 330px);
-            overflow-y: auto;
             margin: 0 !important;
+            padding: 18px 18px 0 !important;
             box-sizing: border-box;
             border: none;
             border-top: 1px solid var(--border);
             border-radius: 26px 26px 0 0;
-            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
-            z-index: 1000;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1001;   /* 키보드(1000)보다 위 — 키보드 하강과 통계 등장이 겹쳐도 통계가 자연스럽게 덮음 */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            /* 🌟 등장 연출: opacity + transform만 사용 (컴포지터 전용 → 레이아웃/페인트 0)
+               ⚠️ 중앙정렬 translateX(-50%)는 모든 상태에서 반드시 유지할 것 */
+            transform: translateX(-50%) translateY(14px) translateZ(0);
+            opacity: 0;
+            transition: transform 0.34s cubic-bezier(.16, .84, .28, 1),
+                        opacity 0.26s ease-out;
+            will-change: transform, opacity;
+        }
+        #inline-stats-container.kb-slot.slid-in {
+            transform: translateX(-50%) translateY(0) translateZ(0);
+            opacity: 1;
+        }
+        /* 연출이 끝나면 will-change 해제 — 레이어 상시 승격으로 인한 메모리 낭비 방지 */
+        #inline-stats-container.kb-slot.slid-in.anim-done {
+            will-change: auto;
+        }
+        /* 시스템 '동작 줄이기' 설정 존중 — 모션 없이 즉시 표시 */
+        @media (prefers-reduced-motion: reduce) {
+            #inline-stats-container.kb-slot {
+                transition: none;
+                transform: translateX(-50%);
+            }
+            #inline-stats-container.kb-slot.slid-in {
+                transform: translateX(-50%);
+            }
+        }
+        /* 통계 본문은 스크롤, 다음 버튼은 하단 고정 */
+        #inline-stats-container.kb-slot .stats-scroll {
+            flex: 1 1 auto;
+            min-height: 0;   /* 🌟 플렉스 자식이 내용만큼 커지지 않고 스크롤되도록 (버튼 하단 고정 보장) */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        #next-btn.stats-next {
+            flex: none !important;
+            width: 100%;
+            margin: 12px 0 0;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            /* 홈 인디케이터/안전영역 회피 */
+            margin-bottom: max(10px, env(safe-area-inset-bottom));
+            animation: none;
+        }
+
+        /* 🌟 키보드 슬라이드 전환 (통계 ↔ 키보드) */
+        #custom-keyboard {
+            transition: transform 0.34s cubic-bezier(.45, 0, .75, .55), opacity 0.3s ease;
+            will-change: transform, opacity;
+        }
+        #custom-keyboard.kb-sliding-out {
+            transform: translateX(-50%) translateY(112%) translateZ(0) !important;
+            opacity: 0;
+            /* 하강 중엔 유리 블러 끔 — 매 프레임 blur 재계산 방지 (끊김 주범) */
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        @keyframes kbSlideIn {
+            from { transform: translateX(-50%) translateY(112%) translateZ(0); opacity: 0; }
+            to   { transform: translateX(-50%) translateY(0) translateZ(0); opacity: 1; }
+        }
+        #custom-keyboard.kb-sliding-in {
+            animation: kbSlideIn 0.42s cubic-bezier(.16, .84, .28, 1);
         }
 
         #quiz-box.keyboard-active {
@@ -969,6 +1049,20 @@
             color: white;
             border-color: #10b981;
             box-shadow: 0 3px 10px rgba(16, 185, 129, 0.25);
+        }
+
+        /* 학습 분석 요약 피드 카드 — 클릭(터치) 순간에만 눌림 효과, 손을 떼면 즉시 원상복귀
+           (기존 인라인 onmouseout이 'white'로 되돌려 다크모드에서 하얗게 굳던 버그의 대체) */
+        .feed-stat-card {
+            background: var(--surface);
+            transition: background 0.15s ease, transform 0.12s ease;
+        }
+        @media (hover: hover) {
+            .feed-stat-card:hover { background: var(--bg-muted); }
+        }
+        .feed-stat-card:active {
+            background: var(--bg-muted);
+            transform: scale(0.97);
         }
 
         /* 문제 좌상단 태그 뱃지 */
@@ -1581,10 +1675,14 @@
         </svg>
         <div class="hm-wordmark">한글마루</div>
         <div style="flex: 1;"></div>
-        <div style="width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px;">
+        <div id="login-btn-group" style="width: 100%; max-width: 360px; display: none; flex-direction: column; gap: 12px;">
             <button id="email-start-btn" class="hm-btn hm-btn-primary">이메일로 시작하기</button>
             <button id="google-login-btn" class="hm-btn hm-btn-white"><span class="hm-g-circle">G</span>Google로 계속하기</button>
             <button id="anon-login-btn" class="hm-ghost">로그인 없이 둘러보기</button>
+        </div>
+        <!-- 이미 로그인된 세션: 시작 화면 프롬프트 (터치하여 시작) -->
+        <div id="start-prompt" style="display: none; width: 100%; max-width: 360px; text-align: center;">
+            <div style="font-size: 16px; font-weight: 800; color: var(--brand-text); animation: startPulse 1.8s ease-in-out infinite;">화면을 터치하여 시작하기</div>
         </div>
     </div>
 
@@ -1969,7 +2067,7 @@
         <!-- 🏔 배치고사 결과 모달 -->
         <div id="placement-result-modal" class="home-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(2px);">
             <div style="background: var(--surface); padding: 24px 22px; border-radius: 20px; width: 90%; max-width: 330px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.25s ease; box-sizing: border-box;">
-                <svg viewBox="0 0 320 320" style="width: 140px; height: 140px; margin: 0 auto; display: block;" aria-label="축하하는 하랑이">
+                <svg viewBox="0 -32 320 352" style="width: 140px; height: 154px; margin: 0 auto; display: block; overflow: visible;" aria-label="축하하는 하랑이">
                     <use href="#fr-lv-1" style="animation: s1of3 0.9s infinite;"></use>
                     <use href="#fr-lv-2" style="animation: s2of3 0.9s infinite;"></use>
                     <use href="#fr-lv-3" style="animation: s3of3 0.9s infinite;"></use>
@@ -2172,8 +2270,8 @@
                     <!-- 2x2 모바일 통계 그리드 -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
                         <div id="home-streak-card"
-                            style="background: var(--surface); border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.01);"
-                            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">
+                            class="feed-stat-card"
+                            style="border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
                                 style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">연속
                                 학습</span>
@@ -2181,8 +2279,8 @@
                                 id="home-streak-text">-일차</strong>
                         </div>
                         <div id="home-words-card"
-                            style="background: var(--surface); border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.01);"
-                            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">
+                            class="feed-stat-card"
+                            style="border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
                                 style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">학습
                                 어휘</span>
@@ -2190,8 +2288,8 @@
                                 id="home-words-text">0개</strong>
                         </div>
                         <div id="home-accuracy-card"
-                            style="background: var(--surface); border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.01);"
-                            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">
+                            class="feed-stat-card"
+                            style="border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
                                 style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">평균
                                 정답률</span>
@@ -2199,8 +2297,8 @@
                                 id="home-accuracy-text">-</strong>
                         </div>
                         <div id="home-badges-card"
-                            style="background: var(--surface); border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.01);"
-                            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'">
+                            class="feed-stat-card"
+                            style="border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
                                 style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">업적
                                 달성</span>
@@ -2309,15 +2407,11 @@
 
                 <!-- 정답 통계: 입력 박스 아래(키보드가 사라진 자리)에 표시 — 위 요소들이 밀리지 않아 하랑이 좌표 고정 -->
                 <div id="inline-stats-container"
-                    style="display: none; margin-top: 22px; text-align: left; background: var(--bg-subtle); padding: 24px; border-radius: 16px; border: 2px solid var(--border-strong); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); animation: slideUp 0.3s ease;">
+                    style="display: none; margin-top: 22px; text-align: left; background: var(--bg-subtle); padding: 24px; border-radius: 16px; border: 2px solid var(--border-strong); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
                 </div>
 
                 <!-- 🌟 인앱 자체 한글 키보드 마크업 (모던 iOS 글래스 스타일) -->
                 <div id="custom-keyboard" style="display: none;">
-                    <!-- 🧊 빙하 장식 눈결정 (터치 무시) -->
-                    <span style="position: absolute; top: 8px; left: 20px; font-size: 11px; color: var(--kbd-snow); pointer-events: none; user-select: none;" aria-hidden="true">❄</span>
-                    <span style="position: absolute; top: 30px; right: 26px; font-size: 9px; color: var(--kbd-snow); pointer-events: none; user-select: none;" aria-hidden="true">❄</span>
-                    <span style="position: absolute; bottom: 14px; left: 44%; font-size: 10px; color: var(--kbd-snow); pointer-events: none; user-select: none;" aria-hidden="true">❄</span>
                     <!-- First Row -->
                     <div class="keyboard-row">
                         <button class="key-btn" data-key="ㅂ">ㅂ</button>
@@ -2361,9 +2455,10 @@
                         <button class="key-btn enter-btn" id="kbd-enter-btn" data-key="enter">제출</button>
                     </div>
                 </div>
+            </div><!-- /quiz-box — result-box는 반드시 형제 요소여야 함 (quiz-box를 숨겨도 완료 창이 보이도록) -->
 
             <div class="quiz-container result-screen" id="result-box">
-                <svg viewBox="0 0 320 320" style="width: 180px; height: 180px; margin: 0 auto; display: block;" aria-label="축하하는 하랑이">
+                <svg viewBox="0 -32 320 352" style="width: 180px; height: 198px; margin: 0 auto; display: block; overflow: visible;" aria-label="축하하는 하랑이">
                     <use href="#fr-lv-1" style="animation: s1of3 0.9s infinite;"></use>
                     <use href="#fr-lv-2" style="animation: s2of3 0.9s infinite;"></use>
                     <use href="#fr-lv-3" style="animation: s3of3 0.9s infinite;"></use>
@@ -2411,11 +2506,18 @@
                             style="margin: 0; color: var(--text-primary); font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
                             <svg class="ui-ic" viewBox="0 0 24 24" style="width:16px;height:16px;" aria-hidden="true"><use href="#ic-wrench"></use></svg> 검토 단어 제어판
                         </h3>
-                        <button id="copy-dev-json-btn"
-                            style="padding: 6px 12px; font-size: 12px; background-color: var(--bg-muted); color: var(--text-sub); border: 1px solid var(--border-strong); border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;"
-                            onmouseover="this.style.background='#cbd5e1'" onmouseout="this.style.background='#f1f5f9'">
-                            <svg class="ui-ic" viewBox="0 0 24 24" style="width:14px;height:14px;" aria-hidden="true"><use href="#ic-clipboard"></use></svg> JSON 복사
-                        </button>
+                        <div style="display: flex; gap: 6px;">
+                            <button id="export-reports-btn"
+                                style="padding: 6px 12px; font-size: 12px; background-color: var(--bg-muted); color: var(--text-sub); border: 1px solid var(--border-strong); border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.background='#cbd5e1'" onmouseout="this.style.background='#f1f5f9'">
+                                <svg class="ui-ic" viewBox="0 0 24 24" style="width:14px;height:14px;" aria-hidden="true"><use href="#ic-save"></use></svg> 신고 내보내기
+                            </button>
+                            <button id="copy-dev-json-btn"
+                                style="padding: 6px 12px; font-size: 12px; background-color: var(--bg-muted); color: var(--text-sub); border: 1px solid var(--border-strong); border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.background='#cbd5e1'" onmouseout="this.style.background='#f1f5f9'">
+                                <svg class="ui-ic" viewBox="0 0 24 24" style="width:14px;height:14px;" aria-hidden="true"><use href="#ic-clipboard"></use></svg> JSON 복사
+                            </button>
+                        </div>
                     </div>
 
                     <!-- 모달 바디 (목록 스크롤 영역) -->
@@ -2501,6 +2603,7 @@
         }
         let quizQueue = []; let totalQuestions = 0; let completedQuestions = 0; let retryCount = 0;
         let isWaiting = false; let hasFailedCurrent = false; let isShowingStats = false;
+        let kbHideTimer = null; // 키보드 하강 완료 후 숨김 타이머 핸들 (문제 전환 시 취소용)
         let selectedTopic = 'all';
 
         const TOPIC_TAGS = {
@@ -2796,21 +2899,74 @@
         // 관리자 전용 기능 노출 대상 계정
         const ADMIN_EMAILS = ["hykim0080@gmail.com"];
 
+        let initialAuthResolved = false;  // 첫 콜백 = 지속 세션 여부 판별
+        let startGateActive = false;
+
+        // 로그인 상태에서 실제 앱 진입 (데이터 로드 + 홈)
+        function enterApp(user) {
+            startGateActive = false;
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("email-login-screen").style.display = "none";
+            document.getElementById("app-screen").style.display = "flex";
+            document.documentElement.classList.remove('auth-mint');
+            userDocRef = doc(db, "users", user.uid);
+            const isAdmin = !user.isAnonymous && ADMIN_EMAILS.includes(user.email);
+            document.getElementById('open-dev-panel-btn').style.display = isAdmin ? 'flex' : 'none';
+            initApp();
+        }
+
+        // 이미 로그인된 세션 → 로그인 화면 UI를 시작 화면으로 (버튼 숨김 + 터치하여 시작)
+        function showStartGate(user) {
+            startGateActive = true;
+            document.getElementById("email-login-screen").style.display = "none";
+            document.getElementById("app-screen").style.display = "none";
+            document.getElementById("login-screen").style.display = "flex";
+            document.documentElement.classList.add('auth-mint');
+            document.getElementById('login-btn-group').style.display = 'none';
+            const prompt = document.getElementById('start-prompt');
+            prompt.style.display = 'block';
+            prompt.classList.remove('cta-fade-in'); void prompt.offsetWidth; prompt.classList.add('cta-fade-in');
+            const start = () => {
+                if (!startGateActive) return;
+                document.getElementById('login-screen').removeEventListener('click', start);
+                enterApp(user);
+            };
+            document.getElementById('login-screen').addEventListener('click', start);
+        }
+
+        // 초기 스플래시(문구·버튼 없는 브랜드 화면)를 최소 시간 보여준 뒤 CTA 등장
+        const SPLASH_MIN_MS = 650;
+        const pageStartTs = performance.now();
+        function afterSplash(fn) {
+            setTimeout(fn, Math.max(0, SPLASH_MIN_MS - (performance.now() - pageStartTs)));
+        }
+        function showLoginButtons(animate) {
+            startGateActive = false;
+            document.getElementById('start-prompt').style.display = 'none';
+            const g = document.getElementById('login-btn-group');
+            g.style.display = 'flex';
+            if (animate) { g.classList.remove('cta-fade-in'); void g.offsetWidth; g.classList.add('cta-fade-in'); }
+        }
+
         onAuthStateChanged(auth, (user) => {
+            const firstTime = !initialAuthResolved;
+            initialAuthResolved = true;
             if (user) {
-                document.getElementById("login-screen").style.display = "none";
-                document.getElementById("email-login-screen").style.display = "none";
-                document.getElementById("app-screen").style.display = "flex";
-                document.documentElement.classList.remove('auth-mint'); // 앱 화면은 흰 배경
-                userDocRef = doc(db, "users", user.uid);
-                const isAdmin = !user.isAnonymous && ADMIN_EMAILS.includes(user.email);
-                document.getElementById('open-dev-panel-btn').style.display = isAdmin ? 'flex' : 'none';
-                initApp();
+                if (firstTime) {
+                    afterSplash(() => showStartGate(user));  // 지속 세션 → 스플래시 후 '터치하여 시작'
+                } else {
+                    enterApp(user);                          // 이번 세션 새 로그인 → 바로 진입
+                }
             } else {
+                // 미로그인: 스플래시 화면 유지, CTA는 로그인 버튼
+                startGateActive = false;
+                document.getElementById('start-prompt').style.display = 'none';
                 document.getElementById("login-screen").style.display = "flex";
                 document.getElementById("email-login-screen").style.display = "none";
                 document.getElementById("app-screen").style.display = "none";
-                document.documentElement.classList.add('auth-mint'); // 웰컴 화면은 민트 배경
+                document.documentElement.classList.add('auth-mint');
+                if (firstTime) afterSplash(() => showLoginButtons(true));  // 첫 로드 → 스플래시 후 버튼
+                else showLoginButtons(false);                              // 로그아웃 직후 → 즉시
             }
         });
 
@@ -3342,6 +3498,12 @@
             return cleaned.replace(/[\.\#\$\/\[\]]/g, "") || "알수없음";
         }
 
+        // 무거운 저장 작업을 통계 페이드가 끝난 뒤(유휴 시점)로 미뤄 프레임 드랍 방지
+        function deferHeavy(fn) {
+            if ('requestIdleCallback' in window) requestIdleCallback(fn, { timeout: 1500 });
+            else setTimeout(fn, 900); // iOS Safari 폴백 — 페이드 완료 후
+        }
+
         async function recordWordStat(wordTarget, userAnswer) {
             const statRef = doc(db, "word_stats", wordTarget);
             try {
@@ -3368,8 +3530,8 @@
             document.getElementById('exp-text').textContent = expInLevel;
             document.getElementById('exp-bar').style.width = `${(expInLevel / 200) * 100}%`;
 
-            // 파이어베이스 동기화는 백그라운드에서 비동기로 처리하여 메인 UI 스레드와 화면 로딩을 가로막지 않도록 합니다.
-            syncUserData().catch((error) => console.error("사용자 데이터 비동기 동기화 실패:", error));
+            // 파이어베이스 동기화(learnedWords 직렬화 + IndexedDB)는 무거워 페이드 후 유휴 시점으로 지연 → 전환 프레임 확보
+            deferHeavy(() => syncUserData().catch((error) => console.error("사용자 데이터 비동기 동기화 실패:", error)));
         }
 
         function getLevelTitle(level) {
@@ -3626,7 +3788,8 @@
 
         // 배치고사 응답 처리 — 문항당 1회 시도 (오답 연출은 그대로 유지)
         async function handlePlacementAnswer(currentWord, userAnswer, giveUp = false) {
-            await recordWordStat(currentWord.target, userAnswer);
+            // 통계 기록은 유휴 시점으로 지연 — 제출 순간 IndexedDB 쓰기가 반응·전환 프레임을 밀지 않도록
+            deferHeavy(() => recordWordStat(currentWord.target, userAnswer));
             const { stem: vStem, suffix: vSuffix } = splitVerbEnding(currentWord);
             const stems = acceptedStems(currentWord);
             const isCorrect = !giveUp && (userAnswer === currentWord.target || userAnswer === vStem
@@ -3746,7 +3909,7 @@
 
             const statsBox = document.getElementById('inline-stats-container');
             statsBox.style.display = 'none';
-            statsBox.classList.remove('kb-slot');
+            statsBox.classList.remove('kb-slot', 'slid-in', 'anim-done');
             document.getElementById('quiz-box').style.display = 'block';
             showHarangCompanion();
 
@@ -3754,8 +3917,13 @@
             const submitBtn = document.getElementById('submit-btn');
             const showAnswerBtn = document.getElementById('show-answer-btn');
 
-            // UI 초기화: 다음 버튼 숨기고 기존 버튼 살리기
+            // UI 초기화: 다음 버튼을 입력행 원위치로 복귀시키고 숨김
+            if (nextBtn.classList.contains('stats-next')) {
+                nextBtn.classList.remove('stats-next');
+                document.getElementById('input-group').appendChild(nextBtn); // 원래 부모로 복귀
+            }
             nextBtn.style.display = 'none';
+            nextBtn.style.flex = '';
             submitBtn.style.display = 'inline-block';
             showAnswerBtn.style.display = 'inline-block';
 
@@ -3823,9 +3991,17 @@
 
                 // 3. UI 업데이트
                 hideHarangCompanion();
+                // 통계창(하단 고정 kb-slot)·키보드 잔재 정리 — result-box를 덮어 축하 화면이 가려지는 버그 방지
+                const _statsBox = document.getElementById('inline-stats-container');
+                _statsBox.style.display = 'none';
+                _statsBox.classList.remove('kb-slot', 'slid-in', 'anim-done');
+                document.getElementById('custom-keyboard').style.display = 'none';
+                document.getElementById('quiz-box').classList.remove('keyboard-active');
+                isShowingStats = false;
                 dashboard.style.display = 'none';
                 document.getElementById('quiz-box').style.display = 'none';
                 document.getElementById('result-box').style.display = 'block';
+                window.scrollTo(0, 0);
                 document.getElementById('final-exp').textContent = currentExp;
                 document.getElementById('retry-count').textContent = retryCount;
                 document.getElementById('result-words').textContent = completedQuestions;
@@ -3922,7 +4098,8 @@
             if (currentWord._synRetry) statusChip = '<span class="retry-badge syn">유의어 재도전</span>';
             else if (currentWord._reinserted) statusChip = '<span class="retry-badge">재도전</span>';
             else if (currentWord.isReview) statusChip = '<span class="review-badge">복습</span>';
-            const tagChips = tags.map(t => `<span class="word-tag-chip">${t.replace(/_/g, '/')}</span>`).join('');
+            // '기초' 태그는 내부 난이도 산정에만 사용 — 화면에는 노출하지 않음
+            const tagChips = tags.filter(t => t !== '기초').map(t => `<span class="word-tag-chip">${t.replace(/_/g, '/')}</span>`).join('');
             if (statusChip || tagChips) {
                 tagDisplay.style.display = 'block';
                 // 상황 배지를 단어 유형 칩 앞(왼쪽)에 배치
@@ -3945,7 +4122,14 @@
             // 플랫폼(모바일 vs 데스크톱)에 따른 맞춤형 입력 환경 설정
             if (isMobileDevice) {
                 // 모바일 환경: 자체 가상 키보드 사용 및 input readonly화로 네이티브 키보드 팝업 차단
-                document.getElementById('custom-keyboard').style.display = 'flex';
+                const _kb = document.getElementById('custom-keyboard');
+                // 이전 문제의 키보드 숨김 타이머가 남아 있으면 취소 — 방금 띄운 키보드가 뒤늦게 숨겨지는 것 방지
+                if (kbHideTimer) { clearTimeout(kbHideTimer); kbHideTimer = null; }
+                _kb.style.display = 'flex';
+                _kb.classList.remove('kb-sliding-out');
+                // 애니메이션 재생을 위해 클래스 리셋 후 재적용
+                _kb.classList.remove('kb-sliding-in'); void _kb.offsetWidth; _kb.classList.add('kb-sliding-in');
+                setTimeout(() => _kb.classList.remove('kb-sliding-in'), 320);
                 document.getElementById('quiz-box').classList.add('keyboard-active');
                 requestAnimationFrame(positionHarangCompanion);
                 inputEl.readOnly = true;
@@ -3973,72 +4157,68 @@
             const submitBtn = document.getElementById('submit-btn');
             const showAnswerBtn = document.getElementById('show-answer-btn');
             const word = currentWordObj.target; const accepts = currentWordObj.accepts || [];
-            // 재출제(아까 놓친) 단어를 이번엔 한 번에 맞힌 경우 축하 배너 (풀기 전이 아닌 정답 후)
-            const recoveryBanner = isRecovery
-                ? `<div style="display:flex; align-items:center; gap:8px; background:var(--brand-mint); border:1.5px solid var(--mint-border); border-radius:12px; padding:10px 14px; margin-bottom:14px;">${uiIcon('party', '18px')}<span style="font-size:14px; font-weight:800; color:#059669;">아까 놓쳤던 단어를 다시 맞혔어요!</span></div>`
-                : '';
+            // 재출제(아까 놓친) 단어를 이번엔 한 번에 맞힌 경우 → 하랑이 말풍선으로 축하 멘트
+            if (isRecovery) {
+                harangSay('<span style="font-size:12.5px; font-weight:800; color:#059669;">아까 놓쳤던 단어를 다시 맞혔어요!</span>', 3000);
+            }
 
             // 🌟 버튼 전환: 제출/정답 숨기고 다음 버튼 띄우기
             submitBtn.style.display = 'none';
             showAnswerBtn.style.display = 'none';
 
-            // 🌟 가로 배치: 입력창(2) : 다음버튼(1) 비율
-            inputEl.style.width = 'auto';
-            inputEl.style.flex = '2';
-            nextBtn.style.display = 'block';
-            nextBtn.style.flex = '1';
             inputEl.disabled = true;
 
-            // 통계 패널이 키보드 자리를 그대로 대체 — keyboard-active(패딩)는 유지해 위 레이아웃 고정
-            document.getElementById('custom-keyboard').style.display = 'none';
-            if (isMobileDevice) statsContainer.classList.add('kb-slot');
-            statsContainer.style.display = 'block';
+            // 통계 패널이 키보드 자리를 그대로 대체 — 키보드는 아래로 부드럽게 미끄러져 퇴장
+            const kbEl = document.getElementById('custom-keyboard');
+            if (isMobileDevice) {
+                // 전환(키보드 하강 + 통계 등장) 시작 즉시 하랑이 SVG 애니메이션 정지 → 전환 전 구간 메인스레드 확보
+                document.getElementById('harang-companion').classList.add('anim-freeze');
+                kbEl.classList.remove('kb-sliding-in');
+                kbEl.classList.add('kb-sliding-out');
+                // 키보드 하강(0.34s) 완료 후 숨김 — 타이머 핸들을 보관해 다음 문제 진입 시 취소 (0.34s 내 빠른 '다음' 탭 시 새 문제의 키보드가 숨겨지는 레이스 방지)
+                if (kbHideTimer) clearTimeout(kbHideTimer);
+                kbHideTimer = setTimeout(() => { kbEl.style.display = 'none'; kbEl.classList.remove('kb-sliding-out'); kbHideTimer = null; }, 340);
+                statsContainer.classList.add('kb-slot');
+                nextBtn.style.flex = '';   // 통계 하단 고정 버튼으로 전환 (stats-next에서 폭 지정)
+            } else {
+                kbEl.style.display = 'none';
+                // 데스크톱: 기존처럼 입력행에 다음 버튼
+                inputEl.style.width = 'auto';
+                inputEl.style.flex = '2';
+                nextBtn.style.display = 'block';
+                nextBtn.style.flex = '1';
+            }
+            // 모바일 kb-slot은 flex 컬럼(스크롤+하단버튼), 데스크톱은 block
+            statsContainer.style.display = isMobileDevice ? 'flex' : 'block';
 
-            try {
-                // 서버 통계 조회 (실패해도 아래에서 내 답안으로 최소 1개 보장)
-                let answers = {};
-                try {
-                    const docSnap = await getDoc(doc(db, "word_stats", word));
-                    if (docSnap.exists()) answers = docSnap.data().answers || {};
-                } catch (fetchErr) {
-                    console.warn("통계 조회 실패 — 내 답안만 표시:", fetchErr);
-                }
-
-                // 🌟 방금 제출한 내 답안을 실시간 반영: 서버에 아직 없거나 조회 실패여도 최소 1개는 보이도록
-                if (recordedAnswer) {
-                    const myKey = sanitizeStatKey(recordedAnswer);
-                    if (!answers[myKey]) answers[myKey] = 1;
-                }
-
-                if (Object.keys(answers).length > 0) {
-                    // 실제 데이터 기반 total 계산
-                    const total = Object.values(answers).reduce((sum, count) => sum + count, 0);
-                    const sortedAnswers = Object.entries(answers).sort((a, b) => b[1] - a[1]).slice(0, 5);
-
-                    let html = `
+            // 통계 막대 HTML 조립 (로컬/서버 공용) — 순수 문자열 생성, 네트워크 없음
+            const buildStatsHtml = (answers) => {
+                if (Object.keys(answers).length === 0)
+                    return '<div style="text-align:center; color:var(--text-secondary); font-size:14px; padding: 20px 0;">아직 통계 데이터가 없어요.</div>';
+                const total = Object.values(answers).reduce((sum, count) => sum + count, 0);
+                const sortedAnswers = Object.entries(answers).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                let html = `
                         <div style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 15px;">
                             사람들은 이 문장을 어떻게 완성했을까요?
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); font-weight: bold; border-bottom: 2px solid var(--border-strong); padding-bottom: 8px; margin-bottom: 15px;">
                             <span style="margin-left: 5px;">표현</span>
                             <span style="margin-right: 5px;">비율</span>
-                        </div>
-                    `;
-
-                    sortedAnswers.forEach(([submittedWord, count]) => {
-                        const rate = total > 0 ? Math.round((count / total) * 100) : 0;
-                        let badgeHtml = ''; let barColor = ''; let textColor = '';
-                        if (submittedWord === word) {
-                            badgeHtml = '<span style="font-size: 11px; background: #d1fae5; color: #047857; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">정답</span>';
-                            barColor = '#10b981'; textColor = '#047857';
-                        } else if (accepts.includes(submittedWord)) {
-                            badgeHtml = '<span style="font-size: 11px; background: #dbeafe; color: #1d4ed8; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">유의어</span>';
-                            barColor = '#3b82f6'; textColor = '#1d4ed8';
-                        } else {
-                            badgeHtml = '<span style="font-size: 11px; background: var(--border); color: var(--text-sub); padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">오답</span>';
-                            barColor = '#94a3b8'; textColor = '#475569';
-                        }
-                        html += `
+                        </div>`;
+                sortedAnswers.forEach(([submittedWord, count]) => {
+                    const rate = total > 0 ? Math.round((count / total) * 100) : 0;
+                    let badgeHtml = ''; let barColor = ''; let textColor = '';
+                    if (submittedWord === word) {
+                        badgeHtml = '<span style="font-size: 11px; background: #d1fae5; color: #047857; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">정답</span>';
+                        barColor = '#10b981'; textColor = '#047857';
+                    } else if (accepts.includes(submittedWord)) {
+                        badgeHtml = '<span style="font-size: 11px; background: #dbeafe; color: #1d4ed8; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">유의어</span>';
+                        barColor = '#3b82f6'; textColor = '#1d4ed8';
+                    } else {
+                        badgeHtml = '<span style="font-size: 11px; background: var(--border); color: var(--text-sub); padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">오답</span>';
+                        barColor = '#94a3b8'; textColor = '#475569';
+                    }
+                    html += `
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                                 <div style="width: 140px; display: flex; align-items: center;">
                                     <span style="font-size: 15px; font-weight: bold; color: ${textColor}; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(submittedWord)}</span>
@@ -4046,21 +4226,52 @@
                                 </div>
                                 <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end;">
                                     <div style="width: 100%; max-width: 150px; background: var(--surface); border: 1px solid var(--border); height: 10px; border-radius: 5px; overflow: hidden; margin-right: 12px;">
-                                        <div style="width: ${rate}%; height: 100%; background: ${barColor}; border-radius: 5px; transition: width 0.8s ease-out;"></div>
+                                        <div style="width: ${rate}%; height: 100%; background: ${barColor}; border-radius: 5px;"></div>
                                     </div>
                                     <div style="font-size: 13px; font-weight: bold; color: var(--text-secondary); width: 35px; text-align: right;">${rate}%</div>
                                 </div>
-                            </div>
-                        `;
-                    });
-                    statsContainer.innerHTML = recoveryBanner + html;
-                } else {
-                    statsContainer.innerHTML = recoveryBanner + '<div style="text-align:center; color:var(--text-secondary); font-size:14px; padding: 20px 0;">아직 통계 데이터가 없어요.</div>';
-                }
-            } catch (error) {
-                console.error("🔥 통계 로드 실패:", error);
-                statsContainer.innerHTML = recoveryBanner + '<div style="text-align:center; color:var(--text-secondary); font-size:14px; padding: 20px 0;">통계를 표시할 수 없어요.</div>';
+                            </div>`;
+                });
+                return html;
+            };
+
+            // 🌟 1) 로컬(내 답안)으로 즉시 렌더 — 네트워크 대기 없이 통계 골격을 바로 그림
+            const myKey = recordedAnswer ? sanitizeStatKey(recordedAnswer) : null;
+            const localAnswers = myKey ? { [myKey]: 1 } : {};
+            statsContainer.innerHTML = buildStatsHtml(localAnswers);
+
+            // 📊 모바일: 스크롤 래핑 + 하단 다음 버튼 + 페이드 (여기까지 동기 — 무거운 작업 없음)
+            if (isMobileDevice) {
+                const inner = statsContainer.innerHTML;
+                statsContainer.innerHTML = `<div class="stats-scroll">${inner}</div>`;
+                nextBtn.classList.add('stats-next');
+                nextBtn.style.display = 'block';
+                statsContainer.appendChild(nextBtn);
+                const _companion = document.getElementById('harang-companion');
+                // 🌟 딜레이 없이 즉시 등장 — 키보드 하강과 동시에 통계가 위로 떠오름 (통계가 z-index로 위를 덮음)
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => statsContainer.classList.add('slid-in'));
+                });
+                // 등장 연출(0.34s)이 완전히 끝난 뒤 하랑이 애니메이션 재개 + 레이어 승격 해제
+                setTimeout(() => {
+                    _companion.classList.remove('anim-freeze');
+                    statsContainer.classList.add('anim-done');
+                }, 400);
             }
+
+            // 🌟 2) 서버 통계는 백그라운드로 받아, 페이드 완료 후 조용히 갱신 (막대만 교체)
+            getDoc(doc(db, "word_stats", word)).then((docSnap) => {
+                let answers = docSnap.exists() ? (docSnap.data().answers || {}) : {};
+                if (myKey && !answers[myKey]) answers[myKey] = 1;
+                if (Object.keys(answers).length === 0) return;
+                const serverHtml = buildStatsHtml(answers);
+                setTimeout(() => {
+                    if (!isShowingStats) return; // 이미 다음 문제로 넘어갔으면 무시
+                    const scroll = statsContainer.querySelector('.stats-scroll');
+                    if (isMobileDevice && scroll) scroll.innerHTML = serverHtml;
+                    else if (!isMobileDevice) statsContainer.innerHTML = serverHtml;
+                }, 720); // 페이드(≈0.3s 지연 + 0.32s)가 끝난 뒤 갱신
+            }).catch((e) => console.warn("통계 서버 갱신 실패:", e));
         }
 
         // 🔁 세션 내 재출제: 오답 단어를 같은 세션 3~6문제 뒤에 다시 넣어 즉시 복습
@@ -4086,8 +4297,8 @@
             // 🦭 배치고사 모드: 별도 처리 (문항당 1회 시도, 통계 패널 없음)
             if (isPlacement) { await handlePlacementAnswer(currentWord, userAnswer); return; }
 
-            // 데이터 저장 대기
-            await recordWordStat(currentWord.target, userAnswer);
+            // 답안 통계 기록은 페이드 후 유휴 시점으로 지연 (제출 순간 IndexedDB 쓰기가 전환 프레임을 밀지 않도록)
+            deferHeavy(() => recordWordStat(currentWord.target, userAnswer));
 
             const { stem: vStem, suffix: vSuffix } = splitVerbEnding(currentWord);
 
@@ -4140,7 +4351,7 @@
                     inputGroup.classList.add('synonym');
                     inputEl.value = '';
                     jamoBuffer = [];
-                    inputEl.placeholder = '좋은 단어예요! 아까 본 단어로 다시?';
+                    inputEl.placeholder = '정답 입력';   // 안내는 하랑이 말풍선으로만 — 답안 작성란에는 표시하지 않음
                     harangSay('<span style="font-size:12.5px; font-weight:700; color:var(--text-body);">좋은 단어예요! 아까 본 단어를 떠올려 볼까요?</span>', 2800);
                     isWaiting = false;
                     return;
@@ -4224,8 +4435,8 @@
 
             comboCount = 0; // 연속 정답 끊김
 
-            // 정답 보기를 누른 포기 행동을 오답 통계에 '정답 보기(모름)'로 실시간 가산 기록
-            await recordWordStat(currentWord.target, "모르겠어요");
+            // 정답 보기(포기) 통계 기록도 페이드 후로 지연
+            deferHeavy(() => recordWordStat(currentWord.target, "모르겠어요"));
 
             inputGroup.classList.remove('wrong', 'correct', 'synonym'); inputGroup.classList.add('show-answer');
             const { stem: rStem, suffix: rSuffix } = splitVerbEnding(currentWord);
@@ -4262,8 +4473,14 @@
             if (!currentWord) return;
             reportTargetWord = currentWord;
             reportReason = null;
-            document.getElementById('report-word-target').textContent = currentWord.target;
-            document.getElementById('report-word-sentence').textContent = currentWord.sentence.replace('____', `[${currentWord.target}]`);
+            // 정답이 아직 공개되지 않았을 수 있으므로 신고 모달에도 정답 단어를 노출하지 않음
+            //  (뜻풀이 + 빈칸 예문으로 문제를 식별 — 관리자는 저장된 target으로 확인)
+            const answerRevealed = isShowingStats; // 통계 화면 = 이미 정답을 본 상태
+            document.getElementById('report-word-target').textContent = answerRevealed ? currentWord.target : currentWord.meaning;
+            const { suffix: rSuffix } = splitVerbEnding(currentWord);
+            document.getElementById('report-word-sentence').textContent = answerRevealed
+                ? currentWord.sentence.replace('____', `[${currentWord.target}]`)
+                : currentWord.sentence.replace('____', `____${rSuffix}`);
             document.getElementById('report-detail').value = '';
             // 사유 칩 렌더
             const chipBox = document.getElementById('report-reason-chips');
@@ -4633,6 +4850,40 @@
         document.getElementById('open-dev-panel-btn').addEventListener('click', openDevPanel);
         document.getElementById('close-dev-panel-btn').addEventListener('click', closeDevPanel);
         document.getElementById('copy-dev-json-btn').addEventListener('click', copyDevJSON);
+
+        // 📤 신고함 전체를 JSON 파일로 내보내기 — 프로젝트 폴더에 넣으면 Claude가 검토·수정안 제안 가능
+        async function exportReportsJSON() {
+            try {
+                // 패널을 아직 안 열었어도 동작하도록 필요 시 직접 로드
+                if (Object.keys(globalReports).length === 0) {
+                    const snap = await getDocs(collection(db, 'word_reports'));
+                    snap.forEach(d => { globalReports[d.id] = d.data(); });
+                }
+                const entries = Object.values(globalReports);
+                if (entries.length === 0) return alert('내보낼 신고가 없습니다.');
+                const payload = {
+                    exportedAt: new Date().toISOString(),
+                    count: entries.length,
+                    reports: entries.map(r => ({
+                        target: r.target, level: r.level,
+                        meaning: r.meaning, sentence: r.sentence,
+                        accepts: r.accepts || [],
+                        reports: (r.reports || []).map(x => ({ reason: x.reason || '', detail: x.detail || '', d: x.d || '' }))
+                        // 닉네임 등 개인 식별 정보는 제외 (검토에 불필요)
+                    }))
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'word_reports_export.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            } catch (e) {
+                console.error('[DevPanel] 신고 내보내기 실패:', e);
+                alert('신고 내보내기에 실패했습니다. 관리자 로그인 상태를 확인해주세요.');
+            }
+        }
+        document.getElementById('export-reports-btn').addEventListener('click', exportReportsJSON);
 
         // ES 모듈 내부 함수들을 전역 window 객체에 등록하여, HTML 동적 요소의 inline onclick 이벤트가 호출할 수 있도록 보장합니다.
         window.removeDevWord = removeDevWord;
