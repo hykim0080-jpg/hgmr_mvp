@@ -6,6 +6,9 @@
     "FirebaseAuthentication": {
       "skipNativeAuth": true,
       "providers": ["google.com"]
+    },
+    "Keyboard": {
+      "resize": "none"
     }
   }
 }

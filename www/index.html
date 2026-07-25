@@ -470,6 +470,8 @@
             max-width: 480px;
             /* 메인 앱뷰 최대 가로폭과 매칭 */
             z-index: 1000;
+            touch-action: none;
+            /* 🌟 키보드 영역에서 브라우저 스크롤/줌 제스처 판정을 원천 차단 — 터치 지연 제거 */
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -662,6 +664,8 @@
             min-width: 0 !important;
             /* 🌟 중요: 버튼 최소 가로 크기를 없애 유연하게 수축 허용 */
             box-sizing: border-box !important;
+            touch-action: manipulation;
+            /* 🌟 더블탭 줌 등 제스처 판정 제거 — 터치 즉시 입력 보장 */
         }
 
         /* 🧊 얼음 윗면 광택 하이라이트 */
@@ -1200,6 +1204,8 @@
         #email-login-screen {
             display: none;
             height: 100%;
+            width: 100%;   /* body(flex) 직속 자식 — 지정 없으면 내용 폭으로 줄어 양옆이 빔 (#login-screen과 동일 처리) */
+            max-width: none;
             flex-direction: column;
             background: var(--surface);
             padding: calc(68px + env(safe-area-inset-top)) 28px calc(28px + env(safe-area-inset-bottom));
@@ -1676,7 +1682,8 @@
         <div class="hm-wordmark">한글마루</div>
         <div style="flex: 1;"></div>
         <div id="login-btn-group" style="width: 100%; max-width: 360px; display: none; flex-direction: column; gap: 12px;">
-            <button id="email-start-btn" class="hm-btn hm-btn-primary">이메일로 시작하기</button>
+            <!-- 이메일 로그인: 인증 메일 검증 필수 (2026-07-26 재활성화) -->
+                <button id="email-start-btn" class="hm-btn hm-btn-primary">이메일로 시작하기</button>
             <button id="google-login-btn" class="hm-btn hm-btn-white"><span class="hm-g-circle">G</span>Google로 계속하기</button>
             <button id="anon-login-btn" class="hm-ghost">로그인 없이 둘러보기</button>
         </div>
@@ -1796,7 +1803,7 @@
 
         <!-- 🦭 프로필 설정 시트 (홈 화면 프로필 아바타 터치로 진입, 풀스크린) -->
         <div id="profile-edit-modal"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--surface); z-index: 1000; flex-direction: column; animation: slideUp 0.25s ease;">
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--surface); z-index: 1100; flex-direction: column; animation: slideUp 0.25s ease;">
             <!-- 시트 헤더 -->
             <div style="display: flex; align-items: center; gap: 10px; padding: calc(14px + env(safe-area-inset-top)) 20px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0;">
                 <button id="close-profile-edit-btn" title="닫기" aria-label="프로필 설정 닫기"
@@ -1865,6 +1872,18 @@
                     </div>
                     <span style="display: block; font-size: 11px; color: var(--text-muted); margin-top: 8px; text-align: center;">※ 다음 학습 세션부터 적용됩니다.</span>
                 </div>
+
+                <!-- 퀴즈 입력 키보드 — 현재 기본 키보드로 고정되어 숨김 (❄️ 빙하 키보드 재활성화 시 display:none 제거) -->
+                <div style="margin-bottom: 20px; display: none;">
+                    <label
+                        style="display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; font-weight: bold;">퀴즈
+                        입력 키보드</label>
+                    <div id="keyboard-mode-picker" style="display: flex; justify-content: center; gap: 6px;">
+                        <button class="count-chip" data-kbmode="system">기본 키보드</button>
+                        <button class="count-chip" data-kbmode="glacier">❄️ 빙하 키보드</button>
+                    </div>
+                    <span style="display: block; font-size: 11px; color: var(--text-muted); margin-top: 8px; text-align: center;">※ 다음 문제부터 적용됩니다.</span>
+                </div>
             </div>
 
             <!-- 하단 고정 저장 버튼 -->
@@ -1873,6 +1892,9 @@
                     style="width: 100%; padding: 15px 0; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 14px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">저장</button>
                 <button id="logout-btn"
                     style="width: 100%; background: none; border: none; font-size: 14px; font-weight: 700; color: #ef4444; cursor: pointer; padding: 14px 0 2px; text-align: center;">로그아웃</button>
+                <!-- 회원 탈퇴 — App Store 심사 지침 5.1.1(v): 계정 생성 지원 앱은 인앱 계정 삭제 필수 -->
+                <button id="delete-account-btn"
+                    style="width: 100%; background: none; border: none; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 10px 0 0; text-align: center; text-decoration: underline; text-underline-offset: 3px;">회원 탈퇴</button>
             </div>
         </div>
 
@@ -1923,12 +1945,12 @@
                             <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">연속 학습 3일 이상 달성</span>
                         </div>
                     </div>
-                    <!-- 🏆 한글 마스터 -->
+                    <!-- 🏆 어휘 마스터 -->
                     <div class="badge-card locked-badge" id="modal-badge-master"
                         style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 16px; border: 2px solid var(--border);">
                         <span style="font-size: 28px; display:flex; align-items:center;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:28px;height:28px;" aria-hidden="true"><use href="#ic-trophy"></use></svg></span>
                         <div>
-                            <strong style="font-size: 13px; color: var(--text-primary); display: block;">한글 마스터</strong>
+                            <strong style="font-size: 13px; color: var(--text-primary); display: block;">어휘 마스터</strong>
                             <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">학습 레벨 5 이상 달성</span>
                         </div>
                     </div>
@@ -2057,7 +2079,9 @@
                     <use href="#fr-idle-1" style="animation: s1of2 1.6s infinite;"></use>
                     <use href="#fr-idle-2" style="animation: s2of2 1.6s infinite;"></use>
                 </svg>
-                <h3 style="margin: 8px 0 6px; font-size: 19px; font-weight: 900; color: var(--text-primary);">하랑이가 네 어휘 실력을<br>알아볼게요!</h3>
+                <!-- 하랑이 첫 소개 — 이름 유래(하늘+랑) 기반 공식 한 줄 서사 (화면_명칭_가이드.md 7절) -->
+                <p style="margin: 6px 0 0; font-size: 13px; color: var(--text-secondary); line-height: 1.55;">안녕, 나는 <b style="color:#0d9488;">하랑이</b>!<br>하늘처럼 넓은 어휘의 세계를<br><b>너랑</b> 함께 오르는 친구야.</p>
+                <h3 style="margin: 10px 0 6px; font-size: 19px; font-weight: 900; color: var(--text-primary);">먼저 네 어휘 실력을<br>알아볼게!</h3>
                 <p style="margin: 0 0 4px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">최대 20문제로 딱 맞는 난이도를 찾아요.<br>맞힌 단어는 낱말 조각으로 남고,<br>끝나면 <b style="color:#0284c7;">지혜 조각 +15</b>를 드려요!</p>
                 <button id="placement-start-btn" style="width: 100%; margin-top: 14px; padding: 14px; background: #10b981; color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-seal"></use></svg> 실력 알아보기 시작</button>
                 <button id="placement-later-btn" style="width: 100%; margin-top: 8px; padding: 10px; background: none; color: var(--text-muted); border: none; font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">나중에 하기</button>
@@ -2140,6 +2164,39 @@
                         style="flex: 1; padding: 13px 0; background: var(--bg-muted); color: var(--text-secondary); border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer;">돌아가기</button>
                     <button id="logout-confirm-btn"
                         style="flex: 1; padding: 13px 0; background: #ef4444; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);">로그아웃</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🗑 회원 탈퇴 확인 모달 — 실수 방지 2단계: ① 잃는 것 구체적 안내 → ② "탈퇴" 직접 입력 -->
+        <div id="delete-account-modal" class="home-modal-overlay"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); justify-content: center; align-items: center; z-index: 2100; backdrop-filter: blur(2px);">
+            <div style="background: var(--surface); padding: 28px 24px; border-radius: 20px; width: 300px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.25s ease; box-sizing: border-box;">
+                <!-- 1단계: 무엇을 잃는지 -->
+                <div id="delete-step-1">
+                    <svg viewBox="10 10 300 300" style="width: 84px; height: 84px; margin: 0 auto 10px; display: block;" aria-hidden="true"><use href="#fr-wrong-1"></use></svg>
+                    <h3 style="margin: 0 0 10px 0; color: var(--text-primary); font-size: 17px;">정말 탈퇴할까요?</h3>
+                    <div id="delete-loss-summary" style="background: var(--bg-muted); border-radius: 12px; padding: 12px 10px; margin-bottom: 12px; font-size: 13px; color: var(--text-body); line-height: 1.8; text-align: left;"></div>
+                    <p style="margin: 0 0 18px 0; font-size: 12.5px; color: var(--text-secondary); line-height: 1.6;">위 기록이 <b style="color:#ef4444;">모두 삭제되며</b><br>어떤 방법으로도 <b style="color:#ef4444;">복구할 수 없어요.</b></p>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="delete-cancel-btn"
+                            style="flex: 1.4; padding: 13px 0; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer;">계속 배울래요</button>
+                        <button id="delete-next-btn"
+                            style="flex: 1; padding: 13px 0; background: none; color: var(--text-muted); border: 1px solid var(--border); border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer;">계속</button>
+                    </div>
+                </div>
+                <!-- 2단계: "탈퇴" 직접 입력해야 최종 버튼 활성화 -->
+                <div id="delete-step-2" style="display: none;">
+                    <h3 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 17px;">마지막 확인이에요</h3>
+                    <p style="margin: 0 0 14px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.6;">탈퇴하려면 아래 입력칸에<br><b style="color:#ef4444;">탈퇴</b>라고 직접 입력해 주세요.</p>
+                    <input id="delete-confirm-input" type="text" placeholder="탈퇴" autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="off"
+                        style="width: 100%; box-sizing: border-box; padding: 13px 14px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--bg-subtle); color: var(--text-primary); font-size: 15px; text-align: center; margin-bottom: 14px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button id="delete-back-btn"
+                            style="flex: 1; padding: 13px 0; background: var(--bg-muted); color: var(--text-secondary); border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer;">돌아가기</button>
+                        <button id="delete-confirm-btn" disabled
+                            style="flex: 1; padding: 13px 0; background: #ef4444; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; opacity: 0.35; transition: opacity 0.2s;">탈퇴하기</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2249,7 +2306,7 @@
                 <div style="margin-bottom: 25px;">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;">
                         <span id="home-level-title"
-                            style="color: #6366f1; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">한글
+                            style="color: #6366f1; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">어휘
                             새싹</span>
                         <span id="home-altitude-title" style="display: none; color: #047857; font-size: 12.5px; font-weight: 800; background: var(--brand-mint); border: 1px solid var(--mint-border); border-radius: 999px; padding: 2px 9px; cursor: pointer;"></span>
                     </div>
@@ -2395,8 +2452,9 @@
                     <button id="show-answer-btn" class="btn-secondary" disabled
                         style="width: 70px; padding: 15px 0 !important; font-size: 12px !important; text-align: center;">정답
                         보기</button>
-                    <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" inputmode="none"
-                        readonly style="flex: 1; min-width: 0; transition: all 0.3s ease;">
+                    <input type="text" id="answer-input" placeholder="정답 입력" autocomplete="off" autocorrect="off"
+                        spellcheck="false" autocapitalize="off" writingsuggestions="false" enterkeyhint="done"
+                        inputmode="none" readonly style="flex: 1; min-width: 0; transition: all 0.3s ease;">
                     <button id="submit-btn" disabled
                         style="width: 70px; padding: 15px 0 !important; font-size: 12px !important; text-align: center;">제출</button>
 
@@ -2543,7 +2601,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, deleteDoc, increment, arrayUnion, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInWithCredential, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInWithCredential, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, reauthenticateWithCredential, reauthenticateWithPopup } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDSSvJSfL0B8lRflALTZvKjcoDRsYE01Sg",
@@ -2575,6 +2633,8 @@
                 console.error("Firebase Auth 초기화 최종 실패:", error);
             }
         }
+        // ✉️ 인증·비밀번호 재설정 메일을 한국어 템플릿으로 발송
+        if (auth) auth.languageCode = 'ko';
 
         let userDocRef;
         let userNickname = ""; let userEmoji = ""; let currentExp = 0; let streakDays = 1; let lastDate = null;
@@ -2838,6 +2898,12 @@
             || window.matchMedia('(pointer: coarse)').matches
             || (window.Capacitor && window.Capacitor.isNative);
 
+        // 빙하(인앱 자모) 키보드 사용 여부 — 현재는 기본 시스템 키보드만 사용 (빙하 키보드 비활성).
+        // ❄️ 빙하 키보드 코드는 전부 보존됨 — 재활성화 시 아래 줄을 원래 조건으로 복원하고
+        //    설정 모달의 keyboard-mode-picker 섹션(display:none)을 다시 노출할 것.
+        // const usesGlacierKeyboard = () => isMobileDevice && keyboardMode === 'glacier';
+        const usesGlacierKeyboard = () => false;
+
         const sentenceEl = document.getElementById('sentence-text'); const meaningEl = document.getElementById('meaning-text');
         const inputEl = document.getElementById('answer-input'); const submitBtn = document.getElementById('submit-btn');
         const showAnswerBtn = document.getElementById('show-answer-btn'); const inputGroup = document.getElementById('input-group');
@@ -2948,16 +3014,35 @@
             if (animate) { g.classList.remove('cta-fade-in'); void g.offsetWidth; g.classList.add('cta-fade-in'); }
         }
 
+        // ✉️ 이메일 계정은 인증 완료 후에만 앱 진입 (구글·익명은 해당 없음)
+        function needsEmailVerification(user) {
+            return user && !user.isAnonymous
+                && (user.providerData || []).some(p => p.providerId === 'password')
+                && !user.emailVerified;
+        }
+        // 가입/로그인 핸들러가 인증 안내를 직접 처리하는 동안 화면 리셋을 막는 시한부 플래그
+        let emailVerifyKeepScreenUntil = 0;
+
         onAuthStateChanged(auth, (user) => {
             const firstTime = !initialAuthResolved;
             initialAuthResolved = true;
             if (user) {
+                if (needsEmailVerification(user)) {
+                    // 미인증 이메일 계정: 앱 진입 차단. 핸들러 흐름 밖(지속 세션 등)이면 여기서 정리
+                    if (Date.now() >= emailVerifyKeepScreenUntil) {
+                        signOut(auth);
+                        showToast('이메일 인증 후 로그인할 수 있어요. 메일함을 확인해 주세요!', 'error', 5000);
+                    }
+                    return;
+                }
                 if (firstTime) {
                     afterSplash(() => showStartGate(user));  // 지속 세션 → 스플래시 후 '터치하여 시작'
                 } else {
                     enterApp(user);                          // 이번 세션 새 로그인 → 바로 진입
                 }
             } else {
+                // 인증 안내 중의 강제 signOut → 이메일 화면 유지 (웰컴으로 튕기지 않게)
+                if (Date.now() < emailVerifyKeepScreenUntil) return;
                 // 미로그인: 스플래시 화면 유지, CTA는 로그인 버튼
                 startGateActive = false;
                 document.getElementById('start-prompt').style.display = 'none';
@@ -3033,9 +3118,16 @@
                 if (pw !== pwConfirm) return showToast('비밀번호가 서로 달라요. 다시 확인해 주세요.', 'error');
                 btn.disabled = true; btn.textContent = '가입 중...';
                 try {
-                    await createUserWithEmailAndPassword(auth, email, pw);
-                    showToast(`가입 완료! 환영해요 ${uiIcon('seal')}`);
+                    // ✉️ 인증 흐름: 생성 → 인증 메일 발송 → 즉시 로그아웃 (인증 전 앱 진입 차단)
+                    emailVerifyKeepScreenUntil = Date.now() + 4000;
+                    const cred = await createUserWithEmailAndPassword(auth, email, pw);
+                    try { await sendEmailVerification(cred.user); }
+                    catch (mailErr) { console.error('인증 메일 발송 실패:', mailErr); }
+                    await signOut(auth);
+                    setAuthMode('login');
+                    showToast(`가입 완료! ${email}로 인증 메일을 보냈어요.\n메일의 링크를 눌러 인증한 뒤 로그인해 주세요.`, 'info', 7000);
                 } catch (e) {
+                    emailVerifyKeepScreenUntil = 0;
                     if (e.code === 'auth/email-already-in-use') {
                         showToast('이미 가입된 이메일이에요. 로그인해 주세요.', 'error');
                         setAuthMode('login');
@@ -3049,8 +3141,18 @@
                 // 로그인
                 btn.disabled = true; btn.textContent = '로그인 중...';
                 try {
-                    await signInWithEmailAndPassword(auth, email, pw);
+                    emailVerifyKeepScreenUntil = Date.now() + 4000;
+                    const cred = await signInWithEmailAndPassword(auth, email, pw);
+                    if (needsEmailVerification(cred.user)) {
+                        // ✉️ 미인증: 인증 메일 재발송 후 로그아웃 (재발송 실패는 조용히 — 잦은 시도 rate limit 등)
+                        try { await sendEmailVerification(cred.user); } catch (_) { }
+                        await signOut(auth);
+                        showToast('아직 이메일 인증이 안 됐어요.\n인증 메일을 다시 보냈으니 메일함(스팸함 포함)을 확인해 주세요.', 'error', 7000);
+                    } else {
+                        emailVerifyKeepScreenUntil = 0;   // 인증 완료 → onAuthStateChanged가 앱 진입
+                    }
                 } catch (e) {
+                    emailVerifyKeepScreenUntil = 0;
                     // 최신 Firebase는 미가입·비번오류를 모두 invalid-credential로 반환 → 가입 유도
                     if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
                         showToast('이메일 또는 비밀번호가 올바르지 않아요. 처음이라면 회원가입해 주세요.', 'error', 4500);
@@ -3195,6 +3297,8 @@
 
         let dailyTarget = 0;
         let targetWordCount = 30;
+        let keyboardMode = 'system';   // 'system'(기본 키보드) | 'glacier'(빙하 자모 키보드)
+        let tempKeyboardMode = 'system';
 
         // 네트워크가 응답하지 않을 때 무한 대기를 막는 타임아웃 헬퍼
         function withTimeout(promise, ms, label = 'timeout') {
@@ -3219,6 +3323,7 @@
                 avatarPose = data.avatarPose || 'idle';
                 scarfColor = data.scarfColor || '#10B981';
                 targetWordCount = parseInt(data.targetWordCount) || 30;
+                keyboardMode = data.keyboardMode === 'glacier' ? 'glacier' : 'system';
                 totalCorrectFirstTry = parseInt(data.totalCorrectFirstTry) || 0;
                 blueShards = (data.blueShards !== undefined) ? (parseInt(data.blueShards) || 0) : totalCorrectFirstTry;
                 equippedTitle = data.equippedTitle || "🐣 아기 병아리";
@@ -3313,10 +3418,126 @@
         // 📐 문장 폰트 자동 축소: 입력줄이 키보드에 가려지지 않도록 보장
         // 1차로 문장 길이에 따라 기본 크기를 정하고, 2차로 실측하여 입력줄과
         // 키보드 사이에 최소 8px 여유가 생길 때까지 폰트를 줄인다 (최소 15px).
+        // 시스템 키보드 모드: 현재 키보드 높이 (keyboardWillShow/visualViewport로 갱신)
+        let systemKbHeight = 0;
+        function setSystemKbHeight(h) {
+            systemKbHeight = Math.max(0, Math.round(h));
+            document.documentElement.style.setProperty('--kb-height', systemKbHeight + 'px');
+            if (document.getElementById('quiz-box').classList.contains('keyboard-active')) {
+                requestAnimationFrame(fitQuizToKeyboard);
+            }
+            requestAnimationFrame(keepInputAboveKeyboard);   // 퀴즈 외 화면(신고·로그인 등) 가림 방지
+        }
+
+        // 시스템 키보드 높이 연동 — @capacitor/keyboard 이벤트 우선, 웹은 visualViewport 폴백
+        (function setupSystemKeyboardSync() {
+            const KB = window.Capacitor?.Plugins?.Keyboard;
+            if (KB?.addListener) {
+                KB.addListener('keyboardWillShow', (info) => {
+                    if (usesGlacierKeyboard()) return;
+                    // iOS(resize: none)는 플러그인 높이가 정확. 즉시 반영해 입력줄을 키보드 위로.
+                    setSystemKbHeight(info?.keyboardHeight || 300);
+                });
+                KB.addListener('keyboardDidShow', (info) => {
+                    if (usesGlacierKeyboard()) return;
+                    // iOS(resize: none): 웹뷰가 리사이즈되지 않아 visualViewport 실측이 0 →
+                    // 실측으로 덮어쓰면 입력줄이 키보드에 가려짐. 플러그인 높이만 신뢰.
+                    if (window.Capacitor?.getPlatform?.() === 'ios') {
+                        if (info?.keyboardHeight > 0) setSystemKbHeight(info.keyboardHeight);
+                        return;
+                    }
+                    // Android(adjustResize): 웹뷰가 리사이즈되어 실측이 0에 수렴 → 이중 오프셋 방지
+                    const vv = window.visualViewport;
+                    if (!vv) return;
+                    const measured = Math.max(0, window.innerHeight - vv.height);
+                    if (Math.abs(measured - systemKbHeight) > 24) setSystemKbHeight(measured);
+                });
+                // keyboardWillHide: --kb-height는 유지(통계 패널(kb-slot)이 키보드 자리를 같은 높이로 대체)
+                // — 퀴즈 외 화면의 패널 이동만 원복
+                KB.addListener('keyboardWillHide', () => clearKbShift());
+            } else if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', () => {
+                    if (!isMobileDevice || usesGlacierKeyboard()) return;
+                    const h = Math.max(0, window.innerHeight - window.visualViewport.height);
+                    if (h > 80) setSystemKbHeight(h);
+                });
+            }
+        })();
+
+        // 📱 퀴즈 외 입력 화면(신고 모달·이메일 로그인·프로필 설정·관리자 패널) 키보드 가림 방지
+        // resize:none이라 키보드가 떠도 웹뷰가 줄지 않음 → 포커스된 입력이 키보드에 가리면
+        // 입력을 담은 패널(모달 박스·시트·화면)을 가려진 만큼 위로 밀고, 키보드가 내려가면 원복.
+        // 퀴즈(#quiz-box)는 --kb-height 패딩이 담당하므로 제외.
+        let kbShiftedPanel = null, kbShiftSaved = null;
+        function clearKbShift() {
+            if (!kbShiftedPanel) return;
+            const p = kbShiftedPanel, s = kbShiftSaved || {};
+            if (s.mode === 'fit') {
+                p.style.maxHeight = s.maxHeight || '';
+                p.style.marginTop = s.marginTop || '';
+                p.style.overflowY = s.overflowY || '';
+                if (s.overlay) s.overlay.style.alignItems = s.overlayAlign || '';
+            } else {
+                p.style.transform = s.transform || '';
+            }
+            kbShiftedPanel = null; kbShiftSaved = null;
+        }
+        function keepInputAboveKeyboard() {
+            const el = document.activeElement;
+            const editable = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+            if (!systemKbHeight || !editable || el.closest('#quiz-box')) { clearKbShift(); return; }
+            const kbTop = window.innerHeight - systemKbHeight;
+            const overlay = el.closest('.home-modal-overlay');
+            if (overlay) {
+                // 가운데 정렬 모달(신고 등): 패널을 키보드 위 공간에 맞춰 축소 — 내부 스크롤로
+                // 제목·입력창·제출 버튼까지 전부 접근 가능 (밀어올리기만으론 하단 버튼이 가려짐)
+                let panel = el; while (panel.parentElement && panel.parentElement !== overlay) panel = panel.parentElement;
+                if (kbShiftedPanel && kbShiftedPanel !== panel) clearKbShift();
+                if (!kbShiftedPanel) {
+                    kbShiftSaved = { mode: 'fit', overlay, maxHeight: panel.style.maxHeight, marginTop: panel.style.marginTop, overflowY: panel.style.overflowY, overlayAlign: overlay.style.alignItems };
+                    kbShiftedPanel = panel;
+                }
+                overlay.style.alignItems = 'flex-start';
+                panel.style.marginTop = 'calc(10px + env(safe-area-inset-top))';
+                panel.style.maxHeight = Math.max(160, kbTop - 84) + 'px';   // 상단 안전영역+여백 감안
+                panel.style.overflowY = 'auto';
+                requestAnimationFrame(() => { try { el.scrollIntoView({ block: 'nearest' }); } catch (_) { } });
+                return;
+            }
+            // 전면 시트/화면(프로필 설정·이메일 로그인): 가려진 만큼만 위로 이동
+            const panel = el.closest('#profile-edit-modal, #email-login-screen');
+            if (!panel) return;
+            if (kbShiftedPanel && kbShiftedPanel !== panel) clearKbShift();
+            // 측정은 항상 원위치 기준 — didShow 높이 보정 등 반복 호출 시 누적 이동 방지
+            if (kbShiftedPanel === panel) panel.style.transform = kbShiftSaved.transform || '';
+            const r = el.getBoundingClientRect();
+            const need = Math.round(r.bottom + 14 - kbTop);          // 입력 아래 14px 여유
+            if (need <= 0) { if (kbShiftedPanel === panel) clearKbShift(); return; }
+            const shift = Math.min(need, Math.max(0, Math.round(r.top) - 20));   // 입력 상단은 화면 위 20px 안쪽 유지
+            if (shift <= 0) return;
+            if (kbShiftedPanel !== panel) {
+                kbShiftSaved = { mode: 'translate', transform: panel.style.transform || '' };
+                kbShiftedPanel = panel;
+            }
+            if (!panel.style.transition.includes('transform')) {
+                panel.style.transition = (panel.style.transition ? panel.style.transition + ', ' : '') + 'transform 0.25s cubic-bezier(.16,.84,.28,1)';
+            }
+            panel.style.transform = (kbShiftSaved.transform ? kbShiftSaved.transform + ' ' : '') + `translateY(${-shift}px)`;
+        }
+        // 키보드가 떠 있는 상태에서 다른 입력으로 초점 이동 시 재조정
+        window.addEventListener('focusin', () => { if (systemKbHeight) requestAnimationFrame(keepInputAboveKeyboard); });
+        window.addEventListener('focusout', () => {
+            setTimeout(() => {
+                const a = document.activeElement;
+                if (!a || (a.tagName !== 'INPUT' && a.tagName !== 'TEXTAREA')) clearKbShift();
+            }, 60);
+        });
+
         function fitQuizToKeyboard() {
             const kb = document.getElementById('custom-keyboard');
             const quizBox = document.getElementById('quiz-box');
-            if (!kb || kb.style.display === 'none' || !quizBox.classList.contains('keyboard-active')) {
+            const glacier = usesGlacierKeyboard();
+            if (!quizBox.classList.contains('keyboard-active') || (glacier && (!kb || kb.style.display === 'none'))) {
                 sentenceEl.style.fontSize = '';
                 sentenceEl.style.lineHeight = '';
                 return;
@@ -3331,7 +3552,9 @@
             sentenceEl.style.lineHeight = px <= 18 ? '1.5' : '1.6';
 
             // 2차: 실측 보정 — 입력줄 하단이 키보드 상단을 침범하면 1px씩 축소
-            const gap = () => kb.getBoundingClientRect().top - inputGroup.getBoundingClientRect().bottom;
+            // (빙하: 키보드 DOM 실측 / 시스템: 이벤트로 받은 키보드 높이 기준)
+            const kbTop = () => glacier ? kb.getBoundingClientRect().top : (window.innerHeight - systemKbHeight);
+            const gap = () => kbTop() - inputGroup.getBoundingClientRect().bottom;
             let guard = 0;
             while (gap() < 8 && px > 15 && guard < 10) {
                 px -= 1;
@@ -3346,8 +3569,9 @@
             }
         }
 
-        // 화면 회전·리사이즈 시에도 재계산
+        // 화면 회전·리사이즈 시에도 재계산 + 키 팝 위치 캐시 무효화
         window.addEventListener('resize', () => {
+            document.querySelectorAll('#custom-keyboard .key-btn').forEach(b => { b._popRect = null; });
             if (document.getElementById('quiz-box').classList.contains('keyboard-active')) {
                 requestAnimationFrame(fitQuizToKeyboard);
             }
@@ -3489,7 +3713,7 @@
         }
 
         async function syncUserData() {
-            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, avatarPose: avatarPose, scarfColor: scarfColor, targetWordCount: targetWordCount, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, blueShards: blueShards, equippedTitle: equippedTitle, learnedWords: learnedWords, selectedTopic: selectedTopic, vocabRating: Math.round(vocabRating), vocabRatingN: vocabRatingN, vocabPeak: Math.round(vocabPeak), placementDone: placementDone, ratingHistory: ratingHistory }, { merge: true }); }
+            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, avatarPose: avatarPose, scarfColor: scarfColor, targetWordCount: targetWordCount, keyboardMode: keyboardMode, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, blueShards: blueShards, equippedTitle: equippedTitle, learnedWords: learnedWords, selectedTopic: selectedTopic, vocabRating: Math.round(vocabRating), vocabRatingN: vocabRatingN, vocabPeak: Math.round(vocabPeak), placementDone: placementDone, ratingHistory: ratingHistory }, { merge: true }); }
             catch (error) { }
         }
 
@@ -3522,9 +3746,16 @@
         }
 
 
+        // 📜 레벨 4(조선어학회 회원) 첫 도달 감지용 — 세션 내 레벨 상승 교차 시에만 안내 (기존 고레벨 유저 재로그인 시 미발동)
+        let lastSeenLevel = null;
         async function updateDashboard() {
             updateShardCount();
             const currentLevel = Math.floor(currentExp / 200) + 1; const expInLevel = currentExp % 200;
+            if (lastSeenLevel !== null && lastSeenLevel < 4 && currentLevel >= 4) {
+                // 칭호의 무게를 지키는 한 줄 — 게임적 소비가 아니라 역사에 대한 존중임을 전달
+                harangSay('<span style="font-size:12.5px; font-weight:700; color:var(--text-body);">📜 <b>조선어학회 회원</b>이 되었어요! 일제강점기, 우리말 사전을 지키려 낱말을 모았던 분들의 이름이에요.</span>', 5200);
+            }
+            lastSeenLevel = currentLevel;
             document.getElementById('streak-text').textContent = `${streakDays}일차`;
             document.getElementById('level-text').textContent = currentLevel;
             document.getElementById('exp-text').textContent = expInLevel;
@@ -3536,10 +3767,10 @@
 
         function getLevelTitle(level) {
             if (level >= 5) return "👑 세종의 후예";
-            if (level >= 4) return "🏆 한글 지배자";
+            if (level >= 4) return "📜 조선어학회 회원";
             if (level >= 3) return "📚 어휘 수집가";
-            if (level >= 2) return "🌱 한글 새싹";
-            return "🐣 한글 알망이";
+            if (level >= 2) return "🌱 어휘 새싹";
+            return "🐣 낱말 알망이";
         }
 
         function showHomeScreen() {
@@ -3699,7 +3930,7 @@
                 badgeStreak.style.border = '2px solid #e2e8f0';
             }
 
-            // 5. 한글 마스터 (레벨 5)
+            // 5. 어휘 마스터 (레벨 5)
             if (currentLevel >= 5) {
                 badgeMaster.classList.remove('locked-badge');
                 badgeMaster.style.border = '2px solid #f59e0b';
@@ -3728,6 +3959,10 @@
         const PLACEMENT_MAX = 20, PLACEMENT_MIN = 15;
         const PLACEMENT_RETRIES = 3;   // 오답 시 재입력 기회 (초과하면 정답 공개 후 다음)
         let placementWrong = 0;        // 현재 문항의 누적 오답 수
+        // 🧭 고정 앵커 + 밴드 보장 (MST식 절충): 초반 운·문항 보정 오차로 적응 경로가 흔들리는 것 방지
+        let placementAnchors = [];         // 시작 고정 문항 (전원 동일, 쉬움→어려움)
+        let placementBandT = [1200, 1450]; // 난이도 3분위 경계 (시작 시 풀에서 실계산)
+        let placementBandsSeen = new Set();
 
         function maybeShowPlacementIntro() {
             if (placementDone || placementPromptShown || !userDocRef) return;
@@ -3738,6 +3973,7 @@
 
         // 현재 추정치 기준 P(맞힘)≈0.65 부근 단어 출제 (정보량 94% 유지 + 체감 부드러움)
         function pickPlacementWord() {
+            if (placementAnchors.length) return placementAnchors.shift();   // 고정 앵커 구간 우선
             const scored = placementPool.map((w, i) => ({ i, gap: Math.abs(expectedP(vocabRating, wordDifficulty(w)) - 0.65) }));
             scored.sort((a, b) => a.gap - b.gap);
             const pickFrom = scored.slice(0, 8);
@@ -3746,8 +3982,10 @@
         }
 
         function ratePlacement(word, outcome) {
+            const b = wordDifficulty(word);
+            placementBandsSeen.add(b < placementBandT[0] ? 0 : b < placementBandT[1] ? 1 : 2);
             const K = Math.max(40, 120 - 6 * placementCount); // 계단식: 초반 큰 폭 → 점차 정밀
-            const P = expectedP(vocabRating, wordDifficulty(word));
+            const P = expectedP(vocabRating, b);
             vocabRating = Math.max(RATING_MIN, Math.min(RATING_MAX, vocabRating + K * (outcome - P)));
             placementCount++;
             placementEstHistory.push(vocabRating);
@@ -3755,7 +3993,7 @@
 
         function placementFinished() {
             if (placementCount >= PLACEMENT_MAX || placementPool.length === 0) return true;
-            if (placementCount >= PLACEMENT_MIN) {
+            if (placementCount >= PLACEMENT_MIN && placementBandsSeen.size >= 2) {   // 밴드 보장: 한 난이도 대역만 돌다 수렴하는 퇴화 경로 차단
                 const last6 = placementEstHistory.slice(-6);
                 if (Math.max(...last6) - Math.min(...last6) <= 100) return true; // 추정 수렴 → 조기 종료
             }
@@ -3775,6 +4013,14 @@
             placementCount = 0;
             placementWrong = 0;
             placementEstHistory = [];
+            // 🧭 고정 앵커 4문항: 난이도 백분위 12·38·62·88%에서 결정적으로 선정 (정렬 동률은 표제어순 → 전 사용자 동일)
+            // 쉬움→어려움 순서라 첫 문제가 자신감을 만들고, 앵커만으로 전 난이도 밴드를 한 번씩 경유함
+            const sortedByDiff = [...placementPool].sort((a, b) => (wordDifficulty(a) - wordDifficulty(b)) || a.target.localeCompare(b.target));
+            placementBandT = [wordDifficulty(sortedByDiff[Math.floor(sortedByDiff.length * 0.33)]),
+                              wordDifficulty(sortedByDiff[Math.floor(sortedByDiff.length * 0.67)])];
+            placementAnchors = [0.12, 0.38, 0.62, 0.88].map(p => sortedByDiff[Math.floor(sortedByDiff.length * p)]);
+            placementAnchors.forEach(w => { const i = placementPool.indexOf(w); if (i >= 0) placementPool.splice(i, 1); });
+            placementBandsSeen = new Set();
             vocabRating = 1200; vocabRatingN = 0; sessionRatingDelta = 0;
             completedQuestions = 0; totalQuestions = PLACEMENT_MAX;
             retryCount = 0; comboCount = 0; sessionBlueShards = 0; sessionNewWords = 0;
@@ -4020,6 +4266,7 @@
                         nickname: userNickname,
                         emoji: userEmoji,
                         targetWordCount: targetWordCount,
+                        keyboardMode: keyboardMode,
                         totalLearnedWords: totalLearnedWords,
                         totalCorrectFirstTry: totalCorrectFirstTry,
                         equippedTitle: equippedTitle,
@@ -4119,14 +4366,17 @@
             progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
             document.getElementById('progress-text').textContent = `${completedQuestions}/${totalQuestions}`;
 
-            // 플랫폼(모바일 vs 데스크톱)에 따른 맞춤형 입력 환경 설정
-            if (isMobileDevice) {
-                // 모바일 환경: 자체 가상 키보드 사용 및 input readonly화로 네이티브 키보드 팝업 차단
+            // 입력 환경 설정: 모바일+빙하 / 모바일+시스템 / 데스크톱
+            if (usesGlacierKeyboard()) {
+                // 빙하 키보드: 자체 가상 키보드 사용 및 input readonly화로 네이티브 키보드 팝업 차단
                 const _kb = document.getElementById('custom-keyboard');
                 // 이전 문제의 키보드 숨김 타이머가 남아 있으면 취소 — 방금 띄운 키보드가 뒤늦게 숨겨지는 것 방지
                 if (kbHideTimer) { clearTimeout(kbHideTimer); kbHideTimer = null; }
+                // 시스템 키보드 모드가 설정한 --kb-height 오버라이드 제거 (빙하는 CSS 폴백 330px 사용)
+                document.documentElement.style.removeProperty('--kb-height');
                 _kb.style.display = 'flex';
                 _kb.classList.remove('kb-sliding-out');
+                warmupAudioFeedback(); // 🌟 첫 타건음 초기화 지연 제거
                 // 애니메이션 재생을 위해 클래스 리셋 후 재적용
                 _kb.classList.remove('kb-sliding-in'); void _kb.offsetWidth; _kb.classList.add('kb-sliding-in');
                 setTimeout(() => _kb.classList.remove('kb-sliding-in'), 320);
@@ -4135,6 +4385,18 @@
                 inputEl.readOnly = true;
                 inputEl.setAttribute('inputmode', 'none');
                 // 긴 문장이 입력줄을 키보드 밑으로 밀어내지 않도록 폰트 자동 축소
+                requestAnimationFrame(fitQuizToKeyboard);
+            } else if (isMobileDevice) {
+                // 시스템 키보드 모드: 네이티브 키보드 사용, 높이는 keyboardWillShow 이벤트가 --kb-height로 연동
+                const _kb = document.getElementById('custom-keyboard');
+                if (kbHideTimer) { clearTimeout(kbHideTimer); kbHideTimer = null; }
+                _kb.style.display = 'none';
+                _kb.classList.remove('kb-sliding-in', 'kb-sliding-out');
+                document.getElementById('quiz-box').classList.add('keyboard-active');
+                requestAnimationFrame(positionHarangCompanion);
+                inputEl.readOnly = false;
+                inputEl.removeAttribute('inputmode');
+                inputEl.focus();   // 탭 제스처 체인 내 호출 — 시스템 키보드 표시
                 requestAnimationFrame(fitQuizToKeyboard);
             } else {
                 // 데스크톱(웹) 환경: 가상 키보드 숨김 및 컴퓨터 물리 키보드 타건 허용
@@ -4173,11 +4435,17 @@
             if (isMobileDevice) {
                 // 전환(키보드 하강 + 통계 등장) 시작 즉시 하랑이 SVG 애니메이션 정지 → 전환 전 구간 메인스레드 확보
                 document.getElementById('harang-companion').classList.add('anim-freeze');
-                kbEl.classList.remove('kb-sliding-in');
-                kbEl.classList.add('kb-sliding-out');
-                // 키보드 하강(0.34s) 완료 후 숨김 — 타이머 핸들을 보관해 다음 문제 진입 시 취소 (0.34s 내 빠른 '다음' 탭 시 새 문제의 키보드가 숨겨지는 레이스 방지)
-                if (kbHideTimer) clearTimeout(kbHideTimer);
-                kbHideTimer = setTimeout(() => { kbEl.style.display = 'none'; kbEl.classList.remove('kb-sliding-out'); kbHideTimer = null; }, 340);
+                if (usesGlacierKeyboard()) {
+                    kbEl.classList.remove('kb-sliding-in');
+                    kbEl.classList.add('kb-sliding-out');
+                    // 키보드 하강(0.34s) 완료 후 숨김 — 타이머 핸들을 보관해 다음 문제 진입 시 취소 (0.34s 내 빠른 '다음' 탭 시 새 문제의 키보드가 숨겨지는 레이스 방지)
+                    if (kbHideTimer) clearTimeout(kbHideTimer);
+                    kbHideTimer = setTimeout(() => { kbEl.style.display = 'none'; kbEl.classList.remove('kb-sliding-out'); kbHideTimer = null; }, 340);
+                } else {
+                    // 시스템 키보드 모드: blur로 네이티브 키보드 하강 — 통계 패널이 같은 높이(--kb-height)로 자리를 대체
+                    inputEl.blur();
+                    kbEl.style.display = 'none';
+                }
                 statsContainer.classList.add('kb-slot');
                 nextBtn.style.flex = '';   // 통계 하단 고정 버튼으로 전환 (stats-next에서 폭 지정)
             } else {
@@ -5238,6 +5506,19 @@
 
         // 🌟 초프리미엄 네이티브급 사운드 피드백 (Web Audio API 실시간 합성음)
         let audioCtx = null;
+
+        // 🌟 키보드 표시 시점에 미리 오디오 컨텍스트를 생성·재개 — 첫 타건의 초기화 지연 제거
+        function warmupAudioFeedback() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            } catch (e) { /* 미지원 환경 무시 */ }
+        }
+
         function playClickSound() {
             try {
                 if (!audioCtx) {
@@ -5282,7 +5563,11 @@
                 keyPopEl.id = 'key-pop';
                 document.body.appendChild(keyPopEl);
             }
-            const r = btn.getBoundingClientRect();
+            // 🌟 키 위치 캐싱 — 매 타건마다 getBoundingClientRect(강제 레이아웃)를 피함.
+            //    키보드 슬라이드 인 중에는 좌표가 움직이므로 캐시하지 않음. 리사이즈 시 무효화.
+            const kbAnimating = document.getElementById('custom-keyboard').classList.contains('kb-sliding-in');
+            const r = (!kbAnimating && btn._popRect) || btn.getBoundingClientRect();
+            if (!kbAnimating) btn._popRect = r;
             keyPopEl.textContent = btn.textContent; // 쌍자음 시프트 상태도 그대로 반영
             keyPopEl.style.left = `${r.left + r.width / 2}px`;
             keyPopEl.style.top = `${r.top - 62}px`;
@@ -5300,15 +5585,17 @@
             }
             btn.classList.add('pressed');
             showKeyPop(btn); // 🫧 누른 글자 미리보기
-            triggerHaptic(); // 즉시 햅틱 반응 실행
-            playClickSound(); // 🌟 실시간 합성 타건음 즉각 재생 (키감 극대화)
 
+            // 🌟 글자 반영을 햅틱·사운드보다 먼저 — 체감 입력 지연 최소화
             const key = btn.getAttribute('data-key');
             if (key === 'shift') {
                 toggleShift();
             } else {
                 handleKeyPress(key);
             }
+
+            triggerHaptic(); // 즉시 햅틱 반응 실행
+            playClickSound(); // 🌟 실시간 합성 타건음 즉각 재생 (키감 극대화)
         }
 
         // 키보드 자판 클릭 이벤트 등록
@@ -5429,7 +5716,7 @@
                 { name: "📚 어휘 수집가", unlocked: totalLearnedWords >= 50 },
                 { name: "👑 세종의 후예", unlocked: totalLearnedWords >= 150 },
                 { name: "🔥 작심삼일 극복", unlocked: streakDays >= 3 },
-                { name: "🏆 한글 마스터", unlocked: currentLevel >= 5 }
+                { name: "🏆 어휘 마스터", unlocked: currentLevel >= 5 }
             ];
 
             titles.forEach(t => {
@@ -5451,6 +5738,14 @@
 
         // 1회 학습 단어 수 칩 선택
         let tempTargetCount = 30;
+        // 퀴즈 입력 키보드 선택 칩
+        document.querySelectorAll('#keyboard-mode-picker .count-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                tempKeyboardMode = btn.dataset.kbmode === 'glacier' ? 'glacier' : 'system';
+                document.querySelectorAll('#keyboard-mode-picker .count-chip').forEach(b => b.classList.toggle('selected', b === btn));
+            });
+        });
+
         document.querySelectorAll('#target-count-picker .count-chip').forEach(btn => {
             btn.addEventListener('click', () => {
                 tempTargetCount = parseInt(btn.dataset.count);
@@ -5473,14 +5768,19 @@
             document.querySelectorAll('#target-count-picker .count-chip').forEach(b => {
                 b.classList.toggle('selected', parseInt(b.dataset.count) === targetWordCount);
             });
+            tempKeyboardMode = keyboardMode;
+            document.querySelectorAll('#keyboard-mode-picker .count-chip').forEach(b => {
+                b.classList.toggle('selected', b.dataset.kbmode === keyboardMode);
+            });
             // 익명 사용자는 로그아웃 대신 '로그인' 노출
             const isAnon = auth.currentUser && auth.currentUser.isAnonymous;
             const logoutBtn = document.getElementById('logout-btn');
             logoutBtn.textContent = isAnon ? '로그인' : '로그아웃';
             logoutBtn.style.color = isAnon ? '#10b981' : '#ef4444';
-            // 퀴즈 진행 중이면 가상 키보드 숨김
+            // 퀴즈 진행 중이면 키보드 숨김 (빙하=가상 키보드, 시스템=blur)
             if (isQuizActive()) {
                 document.getElementById('custom-keyboard').style.display = 'none';
+                inputEl.blur();
                 document.getElementById('quiz-box').classList.remove('keyboard-active');
             }
             document.getElementById('profile-edit-modal').style.display = 'flex';
@@ -5499,9 +5799,11 @@
 
         document.getElementById('close-profile-edit-btn').addEventListener('click', () => {
             document.getElementById('profile-edit-modal').style.display = 'none';
-            // 퀴즈 중 닫으면 가상 키보드 복구
+            // 퀴즈 중 닫으면 키보드 복구 (빙하만 가상 키보드 재표시 — 시스템은 입력창 탭 시 재등장)
             if (isQuizActive() && !isShowingStats) {
-                document.getElementById('custom-keyboard').style.display = 'flex';
+                if (usesGlacierKeyboard()) {
+                    document.getElementById('custom-keyboard').style.display = 'flex';
+                }
                 document.getElementById('quiz-box').classList.add('keyboard-active');
             }
         });
@@ -5515,6 +5817,7 @@
             scarfColor = tempScarfColor;
             equippedTitle = tempTitle || "🐣 아기 병아리";
             targetWordCount = tempTargetCount || 30;
+            keyboardMode = tempKeyboardMode === 'glacier' ? 'glacier' : 'system';
 
             document.getElementById('display-nickname').textContent = userNickname;
             applyAvatar();
@@ -5523,7 +5826,10 @@
             // 퀴즈 진행 중이면 학습으로 복귀, 아니면 홈 표시 갱신
             if (isQuizActive()) {
                 if (!isShowingStats) {
-                    document.getElementById('custom-keyboard').style.display = 'flex';
+                    if (usesGlacierKeyboard()) {
+                        document.documentElement.style.removeProperty('--kb-height');
+                        document.getElementById('custom-keyboard').style.display = 'flex';
+                    }
                     document.getElementById('quiz-box').classList.add('keyboard-active');
                 }
             } else {
@@ -5641,9 +5947,8 @@
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
                     ${vocabEntries.map(({ t, e }, i) => `
                     <div class="vocab-card" data-idx="${i}"
-                        style="border: 1px solid var(--border); border-radius: 10px; padding: 10px 4px 8px; background: var(--surface); text-align: center; cursor: pointer;">
+                        style="border: 1px solid var(--border); border-radius: 10px; padding: 12px 4px; background: var(--bg-muted); text-align: center; cursor: pointer;">
                         <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHTML(t)}</div>
-                        <div style="font-size: 10px; color: #059669; font-weight: 700; margin-top: 4px;">${e.c}회</div>
                     </div>`).join('')}
                 </div>`;
         }
@@ -5934,6 +6239,94 @@
             document.getElementById('logout-confirm-modal').style.display = 'none';
             document.getElementById('profile-edit-modal').style.display = 'none';
             signOut(auth).then(() => location.reload());
+        });
+
+        // 🗑 회원 탈퇴 (App Store 5.1.1(v) 요건): Firestore 학습 데이터 삭제 → Auth 계정 삭제
+        // 실수 방지 UX: ① 잃는 기록을 숫자로 확인 → ② "탈퇴" 직접 입력해야 최종 버튼 활성화
+        function resetDeleteModal() {
+            document.getElementById('delete-step-1').style.display = 'block';
+            document.getElementById('delete-step-2').style.display = 'none';
+            const input = document.getElementById('delete-confirm-input');
+            input.value = '';
+            const btn = document.getElementById('delete-confirm-btn');
+            btn.disabled = true; btn.style.opacity = '0.35'; btn.textContent = '탈퇴하기';
+        }
+        document.getElementById('delete-account-btn').addEventListener('click', () => {
+            resetDeleteModal();
+            // 잃게 될 기록을 구체적 숫자로 — 추상적 경고보다 강한 제동
+            document.getElementById('delete-loss-summary').innerHTML =
+                `<b>${userNickname || '회원'}</b>님이 잃게 되는 것<br>` +
+                `· 학습한 어휘 <b>${totalLearnedWords}개</b><br>` +
+                `· 지혜 조각 <b>${blueShards}개</b><br>` +
+                `· 연속 학습 <b>${streakDays}일</b>의 기록`;
+            document.getElementById('delete-account-modal').style.display = 'flex';
+        });
+        document.getElementById('delete-cancel-btn').addEventListener('click', () => {
+            document.getElementById('delete-account-modal').style.display = 'none';
+        });
+        document.getElementById('delete-next-btn').addEventListener('click', () => {
+            document.getElementById('delete-step-1').style.display = 'none';
+            document.getElementById('delete-step-2').style.display = 'block';
+        });
+        document.getElementById('delete-back-btn').addEventListener('click', () => {
+            document.getElementById('delete-confirm-input').blur();
+            resetDeleteModal();
+        });
+        // "탈퇴" 정확히 입력해야만 최종 버튼 활성화
+        document.getElementById('delete-confirm-input').addEventListener('input', (e) => {
+            const ok = e.target.value.trim() === '탈퇴';
+            const btn = document.getElementById('delete-confirm-btn');
+            btn.disabled = !ok;
+            btn.style.opacity = ok ? '1' : '0.35';
+        });
+        document.getElementById('delete-confirm-btn').addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+            const btn = document.getElementById('delete-confirm-btn');
+            btn.disabled = true; btn.textContent = '삭제 중…';
+            const restoreBtn = () => { btn.disabled = false; btn.textContent = '탈퇴하기'; };
+            try {
+                // 1) 서버 학습 데이터 삭제 — 인증이 살아 있는 동안 먼저 수행
+                try { if (userDocRef) await deleteDoc(userDocRef); } catch (e) { console.error('사용자 데이터 삭제 실패:', e); }
+                // 2) 계정 삭제 — 세션이 오래됐으면 재인증 후 재시도
+                try {
+                    await user.delete();
+                } catch (e) {
+                    if (e.code !== 'auth/requires-recent-login') throw e;
+                    const providerId = (user.providerData[0] || {}).providerId || '';
+                    if (providerId === 'google.com') {
+                        const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+                        if (isNative) {
+                            const FirebaseAuthentication = window.Capacitor.Plugins.FirebaseAuthentication;
+                            const result = await FirebaseAuthentication.signInWithGoogle();
+                            const idToken = result?.credential?.idToken;
+                            if (!idToken) throw e;
+                            await reauthenticateWithCredential(user, GoogleAuthProvider.credential(idToken));
+                        } else {
+                            await reauthenticateWithPopup(user, new GoogleAuthProvider());
+                        }
+                        await user.delete();
+                    } else if (user.isAnonymous) {
+                        // 익명 세션 재인증 불가 — 데이터는 이미 삭제됐으므로 세션만 종료
+                        await signOut(auth);
+                    } else {
+                        // 이메일 계정 등: 재로그인 안내 (현재 출시 정책은 구글 전용이라 드문 경로)
+                        showToast('보안을 위해 로그아웃 후 다시 로그인한 뒤 탈퇴해 주세요.', 'error', 5000);
+                        restoreBtn();
+                        return;
+                    }
+                }
+                showToast('계정이 삭제되었어요. 그동안 함께해 줘서 고마웠어요.', 'info', 3500);
+                setTimeout(() => location.reload(), 1400);
+            } catch (e) {
+                console.error('회원 탈퇴 실패:', e);
+                // 재인증 시트를 사용자가 닫은 경우는 조용히 복귀
+                const code = e?.code || '';
+                if (!(code.includes('cancel') || code.includes('popup-closed'))) {
+                    showToast('탈퇴 처리에 실패했어요. 잠시 후 다시 시도해 주세요.', 'error');
+                }
+                restoreBtn();
+            }
         });
         // 서비스 워커는 현재 비활성. 과거에 등록된 좀비 SW가 옛 캐시를 서빙하며
         // 최신 빌드를 가리는 문제를 막기 위해 능동적으로 해제·캐시 삭제한다.

@@ -17,8 +17,8 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 initializeApp({ credential: cert(require(KEY_PATH)) });
 const db = getFirestore();
 
-// 2026-07-20 검토 완료분 (수정 반영 5건 + 반려 2건 + 펜테스트 잔재 1건)
-const HANDLED = ['견디다', '기르다', '두렵다', '매입', '미루다', '압도', '채록', '펜테스트단어'];
+// 2026-07-26 검토 완료분 (수정 반영 5건 — 고루하다 Lv3, 괴리 간극 추가, 급등 예문 교체, 분간 accepts 확장, 어긋남→어긋나다)
+const HANDLED = ['고루하다', '괴리', '급등', '분간', '어긋남'];
 
 (async () => {
     for (const t of HANDLED) {
