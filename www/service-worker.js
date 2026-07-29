@@ -1,9 +1,11 @@
 // 캐시 버전을 올려줍니다. (코드를 크게 수정할 때마다 v2, v3로 올려주면 좋습니다)
-const CACHE_NAME = 'hgmr-cache-v3';
+const CACHE_NAME = 'hgmr-cache-v4';
 const urlsToCache = [
   './',
   './index.html',
-  './words.json'
+  './words.json',
+  './privacy.html',
+  './terms.html'
 ];
 
 // 1. 설치 및 캐시 저장 (새 서비스 워커가 즉시 대기열을 통과하도록 설정)

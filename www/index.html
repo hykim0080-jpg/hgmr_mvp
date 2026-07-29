@@ -1686,6 +1686,11 @@
                 <button id="email-start-btn" class="hm-btn hm-btn-primary">이메일로 시작하기</button>
             <button id="google-login-btn" class="hm-btn hm-btn-white"><span class="hm-g-circle">G</span>Google로 계속하기</button>
             <button id="anon-login-btn" class="hm-ghost">로그인 없이 둘러보기</button>
+            <!-- 법적 고지 — 가입 전 동의 근거 노출 (스토어 심사 요건) -->
+            <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.6; color: var(--muted-text, #94a3b8); text-align: center;">
+                계속하면 <a href="https://hgmr.co.kr/terms.html" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">이용약관</a> 및
+                <a href="https://hgmr.co.kr/privacy.html" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">개인정보처리방침</a>에 동의하는 것으로 봅니다.
+            </p>
         </div>
         <!-- 이미 로그인된 세션: 시작 화면 프롬프트 (터치하여 시작) -->
         <div id="start-prompt" style="display: none; width: 100%; max-width: 360px; text-align: center;">
@@ -2225,6 +2230,7 @@
                 <p style="margin: 0 0 16px 0; font-size: 12px; color: var(--text-muted);">집중하고 싶은 주제를 선택하세요</p>
                 <div id="topic-selector" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
                     <button class="topic-btn active" data-topic="all">전체</button>
+                    <button class="topic-btn" data-topic="기초"><svg class="ui-ic" viewBox="0 0 24 24" style="width:15px;height:15px;" aria-hidden="true"><use href="#ic-sprout"></use></svg> 기초/생활</button>
                     <button class="topic-btn" data-topic="학술"><svg class="ui-ic" viewBox="0 0 24 24" style="width:15px;height:15px;" aria-hidden="true"><use href="#ic-book"></use></svg> 학술/논리</button>
                     <button class="topic-btn" data-topic="수능"><svg class="ui-ic" viewBox="0 0 24 24" style="width:15px;height:15px;" aria-hidden="true"><use href="#ic-pencil"></use></svg> 수능</button>
                     <button class="topic-btn" data-topic="비즈니스"><svg class="ui-ic" viewBox="0 0 24 24" style="width:15px;height:15px;" aria-hidden="true"><use href="#ic-briefcase"></use></svg> 경제/비즈니스</button>
@@ -2602,6 +2608,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, deleteDoc, increment, arrayUnion, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInWithCredential, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, reauthenticateWithCredential, reauthenticateWithPopup } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getAnalytics, logEvent, isSupported } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDSSvJSfL0B8lRflALTZvKjcoDRsYE01Sg",
@@ -2614,6 +2621,28 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // 📊 사용자 행동 계측 (Firebase Analytics)
+        //   · measurementId는 config에 없어도 SDK가 서버에서 동적으로 가져옵니다.
+        //     단, Firebase 콘솔 → 프로젝트 설정 → 통합 → Google Analytics 가 "사용 설정"되어 있어야 합니다.
+        //   · GA 미연동·구형 웹뷰·광고차단 등 어떤 이유로 실패해도 학습 흐름은 절대 막히지 않도록 완전히 격리합니다.
+        let analytics = null;
+        const _evQueue = [];   // 초기화 완료 전 발생한 이벤트 보관 (최대 50건)
+        isSupported().then((ok) => {
+            if (!ok) return;
+            try {
+                analytics = getAnalytics(app);
+                while (_evQueue.length) { const [n, prm] = _evQueue.shift(); logEvent(analytics, n, prm); }
+            } catch (e) { console.warn('[analytics] 초기화 건너뜀:', e?.code || e); }
+        }).catch(() => { /* 지원 여부 판별 실패 — 계측만 비활성 */ });
+
+        function track(name, params = {}) {
+            try {
+                if (analytics) logEvent(analytics, name, params);
+                else if (_evQueue.length < 50) _evQueue.push([name, params]);
+            } catch (e) { /* 계측 실패가 학습을 막지 않도록 무시 */ }
+        }
+        window.track = track;
 
         enableIndexedDbPersistence(db).catch((err) => console.log("오프라인 모드 실패:", err.code));
         let auth;
@@ -2668,15 +2697,17 @@
 
         const TOPIC_TAGS = {
             'all': null,
-            '학술': ['학술_논리', '교육_학술', '학술_윤리', '철학_인문'],
+            '기초': ['기초'],
+            '학술': ['학술_논리', '교육_학술', '학술_윤리', '철학_인문', '학교_배움'],
             '수능': ['수능'],
             '비즈니스': ['격식_비즈니스', '비즈니스', '경제_경영', '경제', '경제_금융', '사회_경제', '금융'],
-            '사회': ['사회', '사회_문화', '사회_일반', '사회_제도', '사회_직업', '사회_행사', '사회_관계', '사회_정치', '문화_예술', '문화', '문화_스포츠', '법률', '법률_제도', '스포츠', '스포츠_게임', '미디어'],
-            '감정': ['감정_심리', '심리'],
+            '사회': ['사회', '사회_문화', '사회_일반', '사회_제도', '사회_직업', '사회_행사', '사회_관계', '사회_정치', '문화_예술', '문화', '문화_스포츠', '법률', '법률_제도', '스포츠', '스포츠_게임', '미디어', '사회_기본', '관계_소통'],
+            '감정': ['감정_심리', '심리', '감정_기분'],
         };
 
         const TOPIC_DESC = {
             'all': '모든 주제를 균등하게 출제합니다.',
+            '기초': '일상에서 가장 자주 쓰이는 쉬운 단어부터 출제합니다.',
             '학술': '학술/논리 단어를 약 65% 비중으로 출제합니다.',
             '수능': '수능 빈출 단어를 약 65% 비중으로 출제합니다.',
             '비즈니스': '경제/비즈니스 단어를 약 65% 비중으로 출제합니다.',
@@ -2686,6 +2717,7 @@
 
         const TOPIC_LABEL = {
             'all': '전체',
+            '기초': '기초/생활',
             '학술': '학술/논리',
             '수능': '수능',
             '비즈니스': '경제/비즈니스',
@@ -2931,6 +2963,7 @@
                     // 웹 브라우저: 기존 팝업 방식
                     await signInWithPopup(auth, new GoogleAuthProvider());
                 }
+                track('login', { method: 'google' });
             } catch (error) {
                 console.error("구글 로그인 에러:", error);
                 // 사용자가 시트를 닫은 경우는 조용히 무시
@@ -2951,6 +2984,7 @@
                 signInAnonymously(auth)
                     .then((cred) => {
                         console.log("익명 로그인 성공:", cred.user.uid);
+                        track('login', { method: 'anonymous' });
                     })
                     .catch((error) => {
                         console.error("익명 로그인 에러:", error);
@@ -3123,6 +3157,7 @@
                     const cred = await createUserWithEmailAndPassword(auth, email, pw);
                     try { await sendEmailVerification(cred.user); }
                     catch (mailErr) { console.error('인증 메일 발송 실패:', mailErr); }
+                    track('sign_up', { method: 'email' });
                     await signOut(auth);
                     setAuthMode('login');
                     showToast(`가입 완료! ${email}로 인증 메일을 보냈어요.\n메일의 링크를 눌러 인증한 뒤 로그인해 주세요.`, 'info', 7000);
@@ -3150,6 +3185,7 @@
                         showToast('아직 이메일 인증이 안 됐어요.\n인증 메일을 다시 보냈으니 메일함(스팸함 포함)을 확인해 주세요.', 'error', 7000);
                     } else {
                         emailVerifyKeepScreenUntil = 0;   // 인증 완료 → onAuthStateChanged가 앱 진입
+                        track('login', { method: 'email' });
                     }
                 } catch (e) {
                     emailVerifyKeepScreenUntil = 0;
@@ -3603,6 +3639,7 @@
             totalQuestions = target; // 진행률 바 계산을 위한 총 목표치
             sessionCorrectFirstTry = 0; // 세션 내 첫 시도 정답 수 초기화
             sessionBlueShards = 0; sessionNewWords = 0; comboCount = 0; // 조각·콤보 초기화
+            track('study_start', { topic: selectedTopic, target_count: target });
 
             try {
                 const response = await fetch('words.json');
@@ -3675,6 +3712,8 @@
                     queue = queue.concat(notDue.map(x => ({ ...x.word, isReview: true })).slice(0, target - queue.length));
                 }
                 quizQueue = shuffleArray(queue);
+                // 분모는 실제로 편성된 서로 다른 단어 수 (단어 풀 부족으로 target에 못 미칠 수 있음)
+                totalQuestions = quizQueue.length;
 
                 // 화면 전환
                 document.getElementById('setup-screen').style.display = 'none';
@@ -4008,6 +4047,7 @@
                 showToast('단어 데이터를 불러오지 못했어요. 네트워크 확인 후 다시 시도해 주세요.', 'error');
                 return;
             }
+            track('placement_start', {});
             isPlacement = true;
             placementPool = [...allWordsCache];
             placementCount = 0;
@@ -4090,9 +4130,8 @@
         function placementAdvance() {
             placementWrong = 0; // 다음 문항을 위해 오답 카운터 초기화
             quizQueue.shift();
-            completedQuestions++;
-            document.getElementById('progress-text').textContent = `${completedQuestions}/${totalQuestions}`;
-            progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
+            completedQuestions++;   // 배치고사는 재출제가 없어 1문항 = 1카운트
+            renderProgress();
             if (!placementFinished()) quizQueue.push(pickPlacementWord());
             // 통계 패널 없이 '다음' 버튼만 (측정 템포 유지)
             inputEl.disabled = true;
@@ -4127,6 +4166,7 @@
             document.getElementById('quiz-box').style.display = 'none';
             document.getElementById('custom-keyboard').style.display = 'none';
             document.getElementById('placement-result-modal').style.display = 'flex';
+            track('placement_complete', { tier: tier.name, altitude: peakAltitude(), rating: Math.round(vocabPeak) });
 
             try {
                 await setDoc(userDocRef, {
@@ -4254,6 +4294,16 @@
                 document.getElementById('result-shards').textContent = sessionBlueShards;
                 document.getElementById('result-newwords').textContent = sessionNewWords;
                 document.getElementById('result-streak').textContent = streakDays;
+                track('study_complete', {
+                    topic: selectedTopic,
+                    words: completedQuestions,
+                    correct_first_try: sessionCorrectFirstTry,
+                    accuracy: completedQuestions ? Math.round(sessionCorrectFirstTry / completedQuestions * 100) : 0,
+                    shards: sessionBlueShards,
+                    new_words: sessionNewWords,
+                    streak: streakDays,
+                    level: Math.floor(currentExp / 200) + 1
+                });
 
                 // 4. Firestore 비동기 단일 쓰기로 통합 (경합 조건 및 유실 완벽 해소)
                 try {
@@ -4359,12 +4409,10 @@
             jamoBuffer = [];
             inputEl.value = ''; inputEl.placeholder = '정답 입력'; inputGroup.className = 'input-group';
 
-            const progress = (completedQuestions / dailyTarget) * 100;
             inputEl.disabled = false;
             submitBtn.disabled = false;
             showAnswerBtn.disabled = false;
-            progressEl.style.width = `${(completedQuestions / totalQuestions) * 100}%`;
-            document.getElementById('progress-text').textContent = `${completedQuestions}/${totalQuestions}`;
+            renderProgress();
 
             // 입력 환경 설정: 모바일+빙하 / 모바일+시스템 / 데스크톱
             if (usesGlacierKeyboard()) {
@@ -4543,6 +4591,25 @@
         }
 
         // 🔁 세션 내 재출제: 오답 단어를 같은 세션 3~6문제 뒤에 다시 넣어 즉시 복습
+        // ── 진행 표시 ────────────────────────────────────────────────
+        // 분모 totalQuestions = 이번 세션의 '서로 다른 단어 수'.
+        // 오답·정답보기·유의어 정답 시 같은 단어의 사본(_reinserted)이 큐에 추가되는데,
+        // 이 사본까지 세면 분자가 분모를 넘어 '31/30'처럼 표시된다. 사본은 세지 않는다.
+        function advanceProgress(word) {
+            if (word && word._reinserted) return;   // 재출제·재도전 사본은 이미 원본에서 셈
+            completedQuestions++;
+            if (totalQuestions > 0 && completedQuestions > totalQuestions) {
+                completedQuestions = totalQuestions; // 방어선: 어떤 경로로도 분모를 넘지 않게
+            }
+        }
+
+        function renderProgress() {
+            const shown = Math.min(completedQuestions, totalQuestions);
+            const pct = totalQuestions > 0 ? (shown / totalQuestions) * 100 : 0;
+            progressEl.style.width = pct + '%';
+            document.getElementById('progress-text').textContent = shown + '/' + totalQuestions;
+        }
+
         function handleReinsertion(wordObj) {
             const minGap = 3;
             const maxGap = 6;
@@ -4604,7 +4671,7 @@
                 const todayStr = `${yyyy}-${mm}-${dd}`;
                 recordLearned(currentWord.target, todayStr, !hasFailedCurrent);
 
-                quizQueue.shift(); completedQuestions++;
+                advanceProgress(currentWord); quizQueue.shift();
                 updateDashboard();
                 showHarangMotion('clap', 1800, lastShardGain); // 🦭 물범 박수 + 조각 획득
                 showInlineStats(currentWord, userAnswer, !!currentWord._reinserted && !currentWord._synRetry && !hasFailedCurrent);
@@ -4666,7 +4733,7 @@
                     recordLearned(currentWord.target, todayStr, !hasFailedCurrent);
                 }
 
-                quizQueue.shift(); completedQuestions++;
+                advanceProgress(currentWord); quizQueue.shift();
                 updateDashboard();
                 showHarangMotion('clap', 1800, lastShardGain); // 🦭 물범 박수 + 조각 획득
                 showInlineStats(currentWord, userAnswer, false);
@@ -4722,7 +4789,7 @@
             const gaveUpToday = (() => { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; })();
             recordLearned(currentWord.target, gaveUpToday, false);
 
-            quizQueue.shift();
+            advanceProgress(currentWord); quizQueue.shift();
             showInlineStats(currentWord, "모르겠어요");
         }
 
@@ -4809,6 +4876,7 @@
                 setDoc(userDocRef, { flaggedWords: flaggedWords }, { merge: true }).catch(() => {});
                 syncFlagButtons(w.target);
                 document.getElementById('report-modal').style.display = 'none';
+                track('word_report', { reason: entry.reason, word: w.target });
                 showToast(`신고가 접수됐어요. 검토 후 반영할게요 ${uiIcon('seal')}`);
             } catch (e) {
                 console.error('[Report] 제출 실패:', e);

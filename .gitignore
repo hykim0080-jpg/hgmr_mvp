@@ -10,3 +10,23 @@ words.backup.*.json
 .DS_Store
 word_reports_export*.json
 serviceAccountKey.json
+
+# 의존성 (npm install로 복원 — 리포에 커밋하지 않음)
+node_modules/
+
+# 빌드 산출물
+www/
+android/app/build/
+android/build/
+android/.gradle/
+ios/App/build/
+android/keystore.properties
+*.keystore
+*.jks
+
+# Firebase 배포 캐시 (firebase.json / .firebaserc 는 커밋 대상)
+.firebase/
+
+# 로컬 도구 설정
+.claude/settings.local.json
+.venv/

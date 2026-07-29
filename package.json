@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "mkdir -p www && cp index.html privacy.html words.json service-worker.js www/",
+    "build": "mkdir -p www && cp index.html privacy.html terms.html words.json service-worker.js www/",
     "merge-words": "node merge_words.js",
     "update-accepts": "node update_accepts.js",
     "sync-words": "node sync_words.js",
