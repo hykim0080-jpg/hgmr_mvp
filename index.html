@@ -1167,6 +1167,15 @@
         .hm-btn-primary { background: #10B981; color: #fff; }
         .hm-btn-white { background: var(--surface); color: var(--ink-text); }
 
+        /* Apple 로그인 — 애플 디자인 규격: 검정 배경·흰 글씨·공식 로고 */
+        .hm-btn-apple { background: #000; color: #fff; }
+        .hm-apple-mark {
+            width: 18px; height: 22px; flex-shrink: 0;
+            background-color: #fff;
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath d='M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z'/%3E%3C/svg%3E") center/contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath d='M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+
         .hm-g-circle {
             width: 24px;
             height: 24px;
@@ -1685,6 +1694,8 @@
             <!-- 이메일 로그인: 인증 메일 검증 필수 (2026-07-26 재활성화) -->
                 <button id="email-start-btn" class="hm-btn hm-btn-primary">이메일로 시작하기</button>
             <button id="google-login-btn" class="hm-btn hm-btn-white"><span class="hm-g-circle">G</span>Google로 계속하기</button>
+            <!-- Apple 로그인 — 가이드라인 4.8: 구글과 동등한 노출 위치·크기 필수 -->
+            <button id="apple-login-btn" class="hm-btn hm-btn-apple"><span class="hm-apple-mark" aria-hidden="true"></span>Apple로 계속하기</button>
             <button id="anon-login-btn" class="hm-ghost">로그인 없이 둘러보기</button>
             <!-- 법적 고지 — 가입 전 동의 근거 노출 (스토어 심사 요건) -->
             <p style="margin: 14px 0 0; font-size: 11px; line-height: 1.6; color: var(--muted-text, #94a3b8); text-align: center;">
@@ -1736,6 +1747,7 @@
             <div style="flex: 1; height: 1px; background: #E5E7EB;"></div>
         </div>
         <button id="email-google-btn" class="hm-flat-google"><span class="hm-g-circle" style="width: 22px; height: 22px;">G</span>Google로 계속하기</button>
+        <button id="email-apple-btn" class="hm-flat-google" style="background: #000; border-color: #000; color: #fff; margin-top: 10px;"><span class="hm-apple-mark" style="width: 16px; height: 20px;"></span>Apple로 계속하기</button>
         <div style="flex: 1;"></div>
         <button id="email-guest-btn" class="hm-ghost" style="color: var(--text-secondary); text-decoration: none; align-self: center;">로그인 없이 둘러보기 →</button>
     </div>
@@ -1889,17 +1901,19 @@
                     </div>
                     <span style="display: block; font-size: 11px; color: var(--text-muted); margin-top: 8px; text-align: center;">※ 다음 문제부터 적용됩니다.</span>
                 </div>
+
+                <!-- 👤 계정 관리 진입 — 로그아웃·회원 탈퇴는 서브 모달로 격리 (오인 탭 방지, 2026-07-31) -->
+                <button id="open-account-btn"
+                    style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 15px 16px; margin-top: 26px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 14px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--text-primary); box-sizing: border-box;">
+                    계정 관리
+                    <span style="color: var(--text-muted); font-weight: 400; font-size: 18px; line-height: 1;">›</span>
+                </button>
             </div>
 
             <!-- 하단 고정 저장 버튼 -->
             <div style="padding: 12px 24px calc(16px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); flex-shrink: 0; max-width: 480px; width: 100%; margin: 0 auto; box-sizing: border-box;">
                 <button id="save-profile-edit-btn"
                     style="width: 100%; padding: 15px 0; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 14px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">저장</button>
-                <button id="logout-btn"
-                    style="width: 100%; background: none; border: none; font-size: 14px; font-weight: 700; color: #ef4444; cursor: pointer; padding: 14px 0 2px; text-align: center;">로그아웃</button>
-                <!-- 회원 탈퇴 — App Store 심사 지침 5.1.1(v): 계정 생성 지원 앱은 인앱 계정 삭제 필수 -->
-                <button id="delete-account-btn"
-                    style="width: 100%; background: none; border: none; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 10px 0 0; text-align: center; text-decoration: underline; text-underline-offset: 3px;">회원 탈퇴</button>
             </div>
         </div>
 
@@ -2158,6 +2172,24 @@
         </div>
 
         <!-- 🚪 로그아웃 확인 모달 -->
+        <!-- 👤 계정 관리 모달 — 프로필 설정의 '계정 관리 ›'로 진입. 로그아웃·탈퇴 격리 -->
+        <div id="account-modal" class="home-modal-overlay"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); justify-content: center; align-items: center; z-index: 2050; backdrop-filter: blur(2px);">
+            <div style="background: var(--surface); padding: 24px 22px; border-radius: 20px; width: 90%; max-width: 320px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.25s ease; box-sizing: border-box;">
+                <h3 style="margin: 0 0 14px 0; color: var(--text-primary); font-size: 17px; text-align: center;">계정 관리</h3>
+                <div id="account-info" style="background: var(--bg-muted); border-radius: 12px; padding: 12px 14px; font-size: 13px; color: var(--text-body); line-height: 1.7; margin-bottom: 16px; text-align: center;"></div>
+                <button id="logout-btn"
+                    style="width: 100%; padding: 13px 0; background: var(--danger-bg); border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer; color: #ef4444;">로그아웃</button>
+                <button id="account-close-btn"
+                    style="width: 100%; padding: 12px 0; margin-top: 8px; background: var(--bg-muted); color: var(--text-secondary); border: none; border-radius: 12px; font-weight: bold; font-size: 14px; cursor: pointer;">닫기</button>
+                <!-- 회원 탈퇴 — App Store 5.1.1(v). 계정 관리 → 탈퇴 → 2단계 확인의 4중 방어 -->
+                <div style="text-align: center; margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border);">
+                    <button id="delete-account-btn"
+                        style="background: none; border: none; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 6px 12px; text-decoration: underline; text-underline-offset: 3px;">회원 탈퇴</button>
+                </div>
+            </div>
+        </div>
+
         <div id="logout-confirm-modal" class="home-modal-overlay"
             style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); justify-content: center; align-items: center; z-index: 2100; backdrop-filter: blur(2px);">
             <div style="background: var(--surface); padding: 28px 24px; border-radius: 20px; width: 290px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.25s ease;">
@@ -2607,7 +2639,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, deleteDoc, increment, arrayUnion, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signInWithCredential, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, reauthenticateWithCredential, reauthenticateWithPopup } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, OAuthProvider, signInWithPopup, signInWithCredential, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, reauthenticateWithCredential, reauthenticateWithPopup } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
         import { getAnalytics, logEvent, isSupported } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
 
         const firebaseConfig = {
@@ -2975,6 +3007,51 @@
 
         document.getElementById("google-login-btn").addEventListener("click", doGoogleLogin);
 
+        // 🍎 Apple 로그인 — App Store 가이드라인 4.8 요건
+        // 주의 1) 이메일 비공개 선택 시 @privaterelay.appleid.com 주소가 온다. 정상 계정으로 취급할 것
+        // 주의 2) 이름(displayName)은 최초 1회만 전달된다. 이때 저장하지 않으면 영영 받을 수 없음
+        async function doAppleLogin() {
+            if (!auth) { showToast("로그인 준비 중이에요. 잠시 후 다시 시도해 주세요.", "error"); return; }
+            const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+            try {
+                let cred;
+                if (isNative) {
+                    // 네이티브: OS 시트로 인증 → idToken + rawNonce 를 JS SDK 로 전달 (skipNativeAuth 구성)
+                    const FirebaseAuthentication = window.Capacitor.Plugins.FirebaseAuthentication;
+                    const result = await FirebaseAuthentication.signInWithApple({ skipNativeAuth: true });
+                    const idToken = result?.credential?.idToken;
+                    if (!idToken) throw new Error("Apple 자격 증명을 받지 못했습니다.");
+                    const provider = new OAuthProvider('apple.com');
+                    cred = await signInWithCredential(auth, provider.credential({
+                        idToken,
+                        rawNonce: result.credential.nonce,   // 네이티브가 만든 원본 nonce — 없으면 검증 실패
+                    }));
+                    // 이름은 최초 로그인에만 옴 (plugin 이 별도 필드로 전달)
+                    const given = result?.result?.givenName || result?.givenName || '';
+                    const family = result?.result?.familyName || result?.familyName || '';
+                    const full = (family + given).trim() || given.trim();
+                    if (full && !cred.user.displayName) appleFirstName = full;
+                } else {
+                    const provider = new OAuthProvider('apple.com');
+                    provider.addScope('email');
+                    provider.addScope('name');
+                    cred = await signInWithPopup(auth, provider);
+                    if (cred.user.displayName) appleFirstName = cred.user.displayName;
+                }
+                track('login', { method: 'apple' });
+            } catch (error) {
+                console.error("Apple 로그인 에러:", error);
+                const code = error?.code || '';
+                // 사용자가 시트를 닫은 경우는 조용히 무시
+                if (code.includes('cancel') || code.includes('popup-closed') || error?.message?.includes('cancel')) return;
+                showToast("Apple 로그인에 실패했어요. 잠시 후 다시 시도해 주세요.", "error");
+            }
+        }
+        // 최초 1회만 오는 Apple 이름을 initApp 의 닉네임 초기화까지 전달하는 임시 보관소
+        let appleFirstName = '';
+        document.getElementById("apple-login-btn").addEventListener("click", doAppleLogin);
+
+
         document.getElementById("anon-login-btn").addEventListener("click", () => {
             console.log("익명 로그인 버튼 클릭됨!");
             try {
@@ -3104,6 +3181,7 @@
         document.getElementById('email-start-btn').addEventListener('click', () => { setAuthMode('login'); switchAuthScreen('login-screen', 'email-login-screen'); });
         document.getElementById('email-back-btn').addEventListener('click', () => switchAuthScreen('email-login-screen', 'login-screen'));
         document.getElementById('email-google-btn').addEventListener('click', () => document.getElementById('google-login-btn').click());
+        document.getElementById('email-apple-btn').addEventListener('click', () => document.getElementById('apple-login-btn').click());
         document.getElementById('email-guest-btn').addEventListener('click', () => document.getElementById('anon-login-btn').click());
 
         function mapAuthError(e) {
@@ -3354,7 +3432,8 @@
                 currentExp = parseInt(data.exp) || 0;
                 streakDays = parseInt(data.streak) || 1;
                 lastDate = data.last_date || null;
-                userNickname = data.nickname || (auth.currentUser.isAnonymous ? "익명 사용자" : auth.currentUser.displayName);
+                // Apple 은 이름을 최초 로그인에만 주므로, 저장된 닉네임이 없을 때 appleFirstName 으로 보완
+                userNickname = data.nickname || (auth.currentUser.isAnonymous ? "익명 사용자" : (auth.currentUser.displayName || appleFirstName || "학습자"));
                 userEmoji = data.emoji || "⭐";
                 avatarPose = data.avatarPose || 'idle';
                 scarfColor = data.scarfColor || '#10B981';
@@ -4607,7 +4686,11 @@
             const shown = Math.min(completedQuestions, totalQuestions);
             const pct = totalQuestions > 0 ? (shown / totalQuestions) * 100 : 0;
             progressEl.style.width = pct + '%';
-            document.getElementById('progress-text').textContent = shown + '/' + totalQuestions;
+            // 원본 단어를 다 끝냈는데 재도전 사본이 남은 구간: '30/30'인 채 문항이 더 나와
+            // 오해를 부르므로 숫자 대신 마무리 표시. (사본은 진행 카운트에 넣지 않는 설계의 부작용)
+            // 3글자라 min-width 42px 안에 들어가 진행바 폭이 밀리지 않음
+            const wrapUp = totalQuestions > 0 && shown >= totalQuestions && quizQueue.length > 0;
+            document.getElementById('progress-text').textContent = wrapUp ? '마무리' : (shown + '/' + totalQuestions);
         }
 
         function handleReinsertion(wordObj) {
@@ -6307,6 +6390,25 @@
             document.getElementById('logout-confirm-modal').style.display = 'none';
             document.getElementById('profile-edit-modal').style.display = 'none';
             signOut(auth).then(() => location.reload());
+        });
+
+        // 👤 계정 관리 모달 — 로그인 방식·이메일 표시, 로그아웃/탈퇴 진입점
+        document.getElementById('open-account-btn').addEventListener('click', () => {
+            const u = auth.currentUser;
+            let method = '게스트 (로그인 없이 둘러보기)', email = '';
+            if (u && !u.isAnonymous) {
+                const pid = (u.providerData[0] || {}).providerId || '';
+                method = pid === 'google.com' ? 'Google 계정으로 로그인됨'
+                       : pid === 'apple.com' ? 'Apple 계정으로 로그인됨'
+                       : pid === 'password' ? '이메일 계정으로 로그인됨' : '로그인됨';
+                email = u.email || '';
+            }
+            document.getElementById('account-info').innerHTML =
+                `<b>${method}</b>` + (email ? `<br>${escapeHTML(email)}` : '');
+            document.getElementById('account-modal').style.display = 'flex';
+        });
+        document.getElementById('account-close-btn').addEventListener('click', () => {
+            document.getElementById('account-modal').style.display = 'none';
         });
 
         // 🗑 회원 탈퇴 (App Store 5.1.1(v) 요건): Firestore 학습 데이터 삭제 → Auth 계정 삭제

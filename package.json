@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "mkdir -p www && cp index.html privacy.html terms.html words.json service-worker.js www/",
+    "add-words": "node add_words.js",
     "merge-words": "node merge_words.js",
     "update-accepts": "node update_accepts.js",
     "sync-words": "node sync_words.js",
