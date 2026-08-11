@@ -2920,6 +2920,34 @@
             itemRatingDelta[word.target] = (itemRatingDelta[word.target] || 0) + itemD;
             pendingItemDelta[word.target] = (pendingItemDelta[word.target] || 0) + itemD;
         }
+        // 📏 P29 (2026-08-05 확정): 복습 단어도 어휘 고도에 반영.
+        // 기억 단계(s)만큼 난이도를 낮춰 기대 확률을 높인다 — 이미 본 단어의 정답은 당연하므로
+        // delta가 작고, "아는 줄 알았는데 잊은" 오답은 delta가 커진다. 복습 반영의 실익은 후자.
+        // K 감쇠 오염 방지를 위해 vocabRatingN 은 올리지 않는다 (복습까지 세면 K가 순식간에 감쇠).
+        const REVIEW_EASE = 40;        // 단계당 하향폭. s=0~4 → 최대 -160 (b 범위 900~1800의 약 18%)
+        let ratingDebt = {};           // 복습 오답 감점의 절반 — 같은 세션 재도전 성공 시 복원
+        function rateReview(word, outcome, entry) {
+            const s = Math.max(0, Math.min(4, (entry && entry.s) || 0));
+            const b = Math.max(RATING_MIN, wordDifficulty(word) - REVIEW_EASE * s);
+            const P = expectedP(vocabRating, b);
+            // 정답 K는 절반 — rating < b_eff 구간에선 EASE만으론 P가 낮아 정답 delta가 오답보다
+            // 커지는 역전이 생김(시뮬레이션 확인). 복습 반복으로 고도를 밀어올리는 파밍을 막되,
+            // 오답("잊음")의 신호는 온전히 반영한다. SRS 간격 증가(1→30일)로 노출 자체도 제한됨.
+            const delta = userK() * (outcome === 1 ? 0.5 : 1) * (outcome - P);
+            vocabRating = Math.max(RATING_MIN, Math.min(RATING_MAX, vocabRating + delta));
+            sessionRatingDelta += delta;
+            if (outcome === 0 && delta < 0) ratingDebt[word.target] = -delta / 2;
+            // 문항 난이도 역보정(itemRatingDelta)은 첫 노출 답만 신뢰 — 복습은 개인 기억 효과가 섞여 제외
+        }
+        // 재도전(재출제 사본) 정답: 복습 오답으로 깎인 delta의 절반 복원 — 이중 계수 없이 회복만 (벌하지 않는 원칙)
+        function refundRatingDebt(target) {
+            const refund = ratingDebt[target];
+            if (!refund) return;
+            vocabRating = Math.min(RATING_MAX, vocabRating + refund);
+            sessionRatingDelta += refund;
+            delete ratingDebt[target];
+        }
+
         function pushRatingHistory(dateStr) {
             const r = Math.round(vocabRating);
             const last = ratingHistory[ratingHistory.length - 1];
@@ -3739,6 +3767,7 @@
                     if (irSnap.exists()) itemRatingDelta = irSnap.data() || {};
                 } catch (e) { /* 오프라인 등 — b 초기값만 사용 */ }
                 sessionRatingDelta = 0;
+                ratingDebt = {};
 
                 // 🌟 핵심 변경: 복잡한 레벨 정렬을 없애고,
                 // 최근 3일 이내에 이미 정답을 맞춘 단어는 퀴즈 후보군에서 필터링하여 한동안 나오지 않게 합니다.
@@ -4415,6 +4444,7 @@
                     ratingRow.style.display = 'none';
                 }
                 sessionRatingDelta = 0;
+                ratingDebt = {};
                 flushItemRatings(); // 전역 난이도 보정 비동기 플러시 (실패 무해)
 
                 // 3. UI 업데이트
@@ -4813,8 +4843,13 @@
 
                 // 🔷 조각 획득: 첫 학습 여부는 기록 전에 판정
                 const prevEntry = learnedEntry(currentWord.target);
-                // 📏 어휘 지수: 완전히 새 단어의 첫 시도 정답만 반영 (복습·재출제 제외)
-                if (!hasFailedCurrent && !prevEntry && !currentWord._reinserted) rateAnswer(currentWord, 1);
+                // 📏 어휘 지수: 새 단어 첫 시도는 정규 반영, 복습(P29)은 기억 단계 보정 반영, 재출제는 부채 복원만
+                if (!hasFailedCurrent && !currentWord._reinserted) {
+                    if (!prevEntry) rateAnswer(currentWord, 1);
+                    else rateReview(currentWord, 1, prevEntry);
+                } else if (currentWord._reinserted && !hasFailedCurrent) {
+                    refundRatingDebt(currentWord.target);
+                }
                 const newlyMastered = !hasFailedCurrent && !(prevEntry && prevEntry.m);
                 if (newlyMastered) sessionNewWords++;
                 comboCount++;
@@ -4869,8 +4904,11 @@
                 sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#3b82f6; font-weight:800;">${vStem}</span>` + vSuffix);
 
                 const prevEntry = learnedEntry(currentWord.target);
-                // 📏 어휘 지수: 완전히 새 단어의 첫 시도 정답만 반영 (복습·재출제 제외)
-                if (!hasFailedCurrent && !prevEntry && !currentWord._reinserted) rateAnswer(currentWord, 1);
+                // 📏 어휘 지수: 새 단어 첫 시도는 정규 반영, 복습(P29)은 기억 단계 보정 반영
+                if (!hasFailedCurrent && !currentWord._reinserted) {
+                    if (!prevEntry) rateAnswer(currentWord, 1);
+                    else rateReview(currentWord, 1, prevEntry);
+                }
                 // 🔷 유의어 정답: 보상(파란 조각·콤보·EXP)은 즉시, 어휘 수집(초록)은 재도전에서
                 comboCount++;
                 const comboBonus = (comboCount % 3 === 0) ? 1 : 0;
@@ -4917,8 +4955,12 @@
                 inputEl.placeholder = '다시 시도!';
 
                 if (!hasFailedCurrent) {
-                    // 📏 어휘 지수: 새 단어의 첫 시도 오답만 반영
-                    if (!learnedEntry(currentWord.target) && !currentWord._reinserted) rateAnswer(currentWord, 0);
+                    // 📏 어휘 지수: 새 단어 오답은 정규 반영, 복습 오답(P29)은 "잊음" 신호로 크게 반영
+                    if (!currentWord._reinserted) {
+                        const _e = learnedEntry(currentWord.target);
+                        if (!_e) rateAnswer(currentWord, 0);
+                        else rateReview(currentWord, 0, _e);
+                    }
                     hasFailedCurrent = true;
                     retryCount++;
                     handleReinsertion(currentWord); // 같은 세션 내 재출제 (즉시 복습)
@@ -4945,8 +4987,12 @@
             sentenceEl.innerHTML = currentWord.sentence.replace('____', `<span style="color:#ef4444; font-weight:800; text-decoration: underline;">${rStem}</span>` + rSuffix);
 
             if (!hasFailedCurrent) {
-                // 📏 어휘 지수: 새 단어를 첫 행동으로 포기한 경우 오답 반영
-                if (!learnedEntry(currentWord.target) && !currentWord._reinserted) rateAnswer(currentWord, 0);
+                // 📏 어휘 지수: 새 단어 포기는 정규 반영, 복습 포기(P29)는 "잊음" 신호로 반영
+                if (!currentWord._reinserted) {
+                    const _e = learnedEntry(currentWord.target);
+                    if (!_e) rateAnswer(currentWord, 0);
+                    else rateReview(currentWord, 0, _e);
+                }
                 hasFailedCurrent = true;
                 retryCount++;
                 handleReinsertion(currentWord); // 같은 세션 내 재출제 (즉시 복습)
