@@ -66,6 +66,7 @@ function trailingParticle(sentence) {
 // 검사 실행
 // ─────────────────────────────────────────
 const words = JSON.parse(fs.readFileSync(WORDS_PATH, 'utf8'));
+const allTargets = new Set(words.map(w => w.target));
 
 const integrity   = []; // 필수 필드/빈칸 누락
 const targetBugs  = []; // 문장 조사가 target 과 안 맞음 (사람 수정 필요)
@@ -90,6 +91,18 @@ words.forEach((w, i) => {
     else if (!/^[가-힣]+$/.test(a))             hygiene.push(`${loc}: accepts에 비한글/공백 ("${a}")`);
     seen.add(a);
   });
+
+  // 5) 유의어 뉘앙스 대조 예문 — ref 는 words.json 에 실존하는 표제어여야 함
+  //    (유의어_뉘앙스_설계.md: nuance = { 유의어: {ref} | {s} }. 참조 깨짐은 렌더 시 빈 화면이 되므로 차단)
+  if (w.nuance && typeof w.nuance === 'object') {
+    for (const [syn, v] of Object.entries(w.nuance)) {
+      if (v && typeof v === 'object' && v.ref !== undefined) {
+        if (!allTargets.has(v.ref)) integrity.push(`${loc}: nuance["${syn}"].ref = "${v.ref}" — words.json에 없는 표제어`);
+      } else if (v && typeof v === 'object' && v.s !== undefined) {
+        if (!String(v.s).includes('____')) integrity.push(`${loc}: nuance["${syn}"].s 에 빈칸(____) 없음`);
+      }
+    }
+  }
 
   // 2·3) 조사 결합
   if (isVerb(w)) return;
