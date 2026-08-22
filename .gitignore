@@ -20,7 +20,6 @@ android/app/build/
 android/build/
 android/.gradle/
 ios/App/build/
-android/keystore.properties
 *.keystore
 *.jks
 
@@ -30,3 +29,17 @@ android/keystore.properties
 # 로컬 도구 설정
 .claude/settings.local.json
 .venv/
+android/key.properties
+ios/signing/
+ios/export/out/
+**/.DS_Store
+_mac_cmd.txt
+_mac_out.txt
+_mac_out.tmp
+_mac_alive.txt
+_mac_bridge.command
+b.sh
+b2.sh
+pw.sh
+.claude/hooks/__pycache__/
+.claude/hooks/.write_test

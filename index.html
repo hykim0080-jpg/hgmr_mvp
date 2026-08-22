@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
     <title>한글마루</title>
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f1420">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
@@ -53,40 +53,40 @@
 
         @media (prefers-color-scheme: dark) {
             :root:not(.force-light) {
-            --bg: #0f1420;
-            --bg-subtle: #151c2a;
-            --bg-muted: #202939;
-            --surface: #1a2231;
-            --border: #2b3547;
-            --border-strong: #3d4a60;
-            --text-primary: #e6ebf4;
-            --text-body: #cfd8e5;
-            --text-sub: #b4c0d1;
-            --text-secondary: #93a0b4;
-            --text-muted: #6e7a8d;
-            --ink-text: #e8edf5;
+            --bg: #121212;
+            --bg-subtle: #1a1a1a;
+            --bg-muted: #262626;
+            --surface: #1e1e1e;
+            --border: #303030;
+            --border-strong: #464646;
+            --text-primary: #f0f0f0;
+            --text-body: #dadada;
+            --text-sub: #bdbdbd;
+            --text-secondary: #9e9e9e;
+            --text-muted: #8c8c8c;
+            --ink-text: #f0f0f0;
             --ink-border: var(--border-strong);
-            --brand-mint: #0e2e23;
-            --mint-border: #14532d;
-            --info-soft: #14283c;
-            --info-bg: #172a45;
-            --info-border: #1e4a6e;
-            --amber-soft: #33270e;
-            --lime-soft: #1d2a10;
-            --teal-soft: #0e2a26;
-            --danger-bg: #351b20;
-            --danger-border: #542a31;
-            --indigo-bg: #252a4d;
-            --overlay: rgba(0, 0, 0, 0.62);
-            --toast-bg: rgba(51, 65, 85, 0.97);
-            --kbd-bg: linear-gradient(180deg, rgba(21, 32, 48, 0.95) 0%, rgba(13, 21, 34, 0.97) 100%);
+            --brand-mint: #13291f;
+            --mint-border: #1e5335;
+            --info-soft: #1b2733;
+            --info-bg: #1d2836;
+            --info-border: #2c4759;
+            --amber-soft: #2f2712;
+            --lime-soft: #212a14;
+            --teal-soft: #132a25;
+            --danger-bg: #331e1e;
+            --danger-border: #553231;
+            --indigo-bg: #292a3a;
+            --overlay: rgba(0, 0, 0, 0.66);
+            --toast-bg: rgba(52, 52, 52, 0.97);
+            --kbd-bg: linear-gradient(180deg, rgba(38, 38, 38, 0.95) 0%, rgba(24, 24, 24, 0.97) 100%);
             --kbd-edge: rgba(255, 255, 255, 0.08);
-            --kbd-key: linear-gradient(180deg, #3c4d68 0%, #2d3c55 55%, #253247 100%);
+            --kbd-key: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 55%, #303030 100%);
             --kbd-key-border: rgba(255, 255, 255, 0.10);
             --kbd-gloss: rgba(255, 255, 255, 0.13);
-            --kbd-key-text: #dce8f6;
-            --kbd-key-fn: linear-gradient(180deg, #283a52 0%, #1f2c40 100%);
-            --kbd-key-fn-active: #3e5678;
+            --kbd-key-text: #ececec;
+            --kbd-key-fn: linear-gradient(180deg, #343434 0%, #282828 100%);
+            --kbd-key-fn-active: #505050;
             --kbd-snow: rgba(255, 255, 255, 0.35);
             }
         }
@@ -100,42 +100,50 @@
         }
 
         :root.force-dark {
-            --bg: #0f1420;
-            --bg-subtle: #151c2a;
-            --bg-muted: #202939;
-            --surface: #1a2231;
-            --border: #2b3547;
-            --border-strong: #3d4a60;
-            --text-primary: #e6ebf4;
-            --text-body: #cfd8e5;
-            --text-sub: #b4c0d1;
-            --text-secondary: #93a0b4;
-            --text-muted: #6e7a8d;
-            --ink-text: #e8edf5;
+            --bg: #121212;
+            --bg-subtle: #1a1a1a;
+            --bg-muted: #262626;
+            --surface: #1e1e1e;
+            --border: #303030;
+            --border-strong: #464646;
+            --text-primary: #f0f0f0;
+            --text-body: #dadada;
+            --text-sub: #bdbdbd;
+            --text-secondary: #9e9e9e;
+            --text-muted: #8c8c8c;
+            --ink-text: #f0f0f0;
             --ink-border: var(--border-strong);
-            --brand-mint: #0e2e23;
-            --mint-border: #14532d;
-            --info-soft: #14283c;
-            --info-bg: #172a45;
-            --info-border: #1e4a6e;
-            --amber-soft: #33270e;
-            --lime-soft: #1d2a10;
-            --teal-soft: #0e2a26;
-            --danger-bg: #351b20;
-            --danger-border: #542a31;
-            --indigo-bg: #252a4d;
-            --overlay: rgba(0, 0, 0, 0.62);
-            --toast-bg: rgba(51, 65, 85, 0.97);
-            --kbd-bg: linear-gradient(180deg, rgba(21, 32, 48, 0.95) 0%, rgba(13, 21, 34, 0.97) 100%);
+            --brand-mint: #13291f;
+            --mint-border: #1e5335;
+            --info-soft: #1b2733;
+            --info-bg: #1d2836;
+            --info-border: #2c4759;
+            --amber-soft: #2f2712;
+            --lime-soft: #212a14;
+            --teal-soft: #132a25;
+            --danger-bg: #331e1e;
+            --danger-border: #553231;
+            --indigo-bg: #292a3a;
+            --overlay: rgba(0, 0, 0, 0.66);
+            --toast-bg: rgba(52, 52, 52, 0.97);
+            --kbd-bg: linear-gradient(180deg, rgba(38, 38, 38, 0.95) 0%, rgba(24, 24, 24, 0.97) 100%);
             --kbd-edge: rgba(255, 255, 255, 0.08);
-            --kbd-key: linear-gradient(180deg, #3c4d68 0%, #2d3c55 55%, #253247 100%);
+            --kbd-key: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 55%, #303030 100%);
             --kbd-key-border: rgba(255, 255, 255, 0.10);
             --kbd-gloss: rgba(255, 255, 255, 0.13);
-            --kbd-key-text: #dce8f6;
-            --kbd-key-fn: linear-gradient(180deg, #283a52 0%, #1f2c40 100%);
-            --kbd-key-fn-active: #3e5678;
+            --kbd-key-text: #ececec;
+            --kbd-key-fn: linear-gradient(180deg, #343434 0%, #282828 100%);
+            --kbd-key-fn-active: #505050;
             --kbd-snow: rgba(255, 255, 255, 0.35);
         }
+
+        /* 🌑 다크모드 마무리 — 남아 있던 남색(slate) 계열을 중립 회색으로 */
+        @media (prefers-color-scheme: dark) {
+            :root:not(.force-light) button.btn-secondary:hover { background-color: #7a7a7a; }
+            :root:not(.force-light) .dashboard { background-color: #262626; }
+        }
+        :root.force-dark button.btn-secondary:hover { background-color: #7a7a7a; }
+        :root.force-dark .dashboard { background-color: #262626; }
 
         * {
             -webkit-tap-highlight-color: transparent;
@@ -366,26 +374,32 @@
             box-sizing: border-box;
         }
 
+        /* 뜻풀이 안에 인라인으로 들어가므로 본문 줄 높이(15px × 1.6 = 24px)를 넘지 않게 —
+           넘으면 뜻풀이가 두 줄 이상일 때 첫 줄만 벌어져 보인다 */
         .level-badge {
             background-color: #3b82f6;
             color: white;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 12px;
+            padding: 1px 6px;
+            border-radius: 5px;
+            font-size: 10.5px;
+            line-height: 1.45;
             font-weight: bold;
-            margin-right: 8px;
-            vertical-align: middle;
+            margin-right: 6px;
+            vertical-align: 1px;
+            display: inline-block;
         }
 
         .review-badge {
             background-color: #f59e0b;
             color: white;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 12px;
+            padding: 1px 6px;
+            border-radius: 5px;
+            line-height: 1.45;
+            vertical-align: 1px;
+            display: inline-block;
+            font-size: 10.5px;
             font-weight: bold;
-            margin-right: 8px;
-            vertical-align: middle;
+            margin-right: 6px;
         }
 
         .retry-badge {
@@ -596,6 +610,72 @@
         /* 키보드에 제출 키가 있으므로 상단 제출 버튼은 숨겨 중복 제거 */
         #quiz-box.keyboard-active #submit-btn {
             display: none !important;
+        }
+
+        /* 🌐 모바일 웹 전용 — 시스템 키보드가 올라온 상태
+           앱(resize:none)은 웹뷰가 안 줄어드니 padding-bottom으로 밀어야 하지만,
+           웹은 visualViewport만 줄고 body(position:fixed)는 그대로라 같은 패딩을 더하면
+           카드가 화면보다 길어져 문제-입력칸 사이에 빈 공간이 생긴다.
+           → 웹에서는 패딩 대신 화면 자체를 보이는 영역(--vvh)으로 줄인다. */
+        body.web-kb #app-screen {
+            height: var(--vvh, 100%) !important;
+            /* 사파리가 포커스를 보이려고 레이아웃을 밀어 올린 양(--vvtop)을 되돌려
+               화면이 항상 「보이는 영역」에 정확히 붙게 한다 (스크롤 의존 제거) */
+            transform: translateY(var(--vvtop, 0px));
+            will-change: transform;
+        }
+
+        body.web-kb #quiz-box.keyboard-active {
+            /* 키보드 높이만큼의 패딩만 걷어내고, 카드 자체의 아래 여백은 유지 —
+               0으로 만들면 입력줄이 카드 모서리에 잘린다 */
+            padding-bottom: 14px !important;
+            padding-top: 14px !important;
+            /* 키보드가 홈 인디케이터를 덮고 있으므로 safe-area 여백은 필요 없다.
+               그 자리를 문제 영역에 돌려준다 */
+            margin-top: 8px !important;
+            margin-bottom: 8px !important;
+        }
+
+        /* 키보드가 떠 있는 동안 퀴즈 헤더(진행바) 아래 여백 축소 */
+        body.web-kb #quiz-box.keyboard-active #quiz-head {
+            margin-bottom: 14px !important;
+        }
+
+        body.web-kb #quiz-box.keyboard-active .meaning {
+            padding: 9px 12px;
+        }
+
+        /* 문제 영역만 줄어들고 입력줄은 항상 카드 바닥에 고정 —
+           문장이 길어도 입력줄이 화면 밖으로 밀려나지 않는다 */
+        #quiz-box.keyboard-active #quiz-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #quiz-box.keyboard-active .input-group {
+            flex: 0 0 auto;
+        }
+
+        /* 통계창이 떠 있는 동안 — 문제 영역이 남는 공간을 먹지 않고 내용 크기대로,
+           입력줄은 뜻풀이 바로 아래에 붙는다 (남는 공간은 통계창 뒤로 밀림) */
+        #quiz-box.keyboard-active.stats-open #quiz-body {
+            flex: 0 1 auto;
+        }
+
+        #quiz-box.keyboard-active.stats-open .input-group {
+            margin-top: 0;
+        }
+
+        /* 키보드가 떠 있는 동안은 고정 여백을 줄여 한 화면에 담는다 */
+        #quiz-box.keyboard-active .sentence {
+            min-height: 0;
+            margin-bottom: 10px;
+        }
+
+        #quiz-box.keyboard-active .meaning {
+            margin-bottom: 0;
         }
 
         /* 🫧 키 팝: 누른 자모가 키 위로 떠오르는 미리보기 (iOS 순정 타건감) */
@@ -2356,17 +2436,18 @@
 
                 <!-- 모바일 앱 스타일 대시보드 성과 피드 -->
                 <div
-                    style="background: linear-gradient(135deg, var(--bg-subtle) 0%, var(--border) 100%); color: var(--text-primary); padding: 22px 18px; border-radius: 24px; text-align: left; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04); border: 1px solid var(--border-strong); position: relative; overflow: hidden;">
+                    style="background: linear-gradient(135deg, var(--bg-subtle) 0%, var(--border) 100%); color: var(--text-primary); padding: 16px 16px; border-radius: 24px; text-align: left; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04); border: 1px solid var(--border-strong); position: relative; overflow: hidden;">
                     <div
-                        style="font-size: 13px; color: var(--text-sub); font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 6px;">
+                        style="font-size: 13px; color: var(--text-sub); font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
                         <span>학습 분석 요약 피드</span>
+                        <span style="margin-left: auto; font-size: 11px; font-weight: 800; color: var(--text-secondary);"><span id="home-exp-text">0</span> / 200 EXP</span>
                     </div>
 
                     <!-- 2x2 모바일 통계 그리드 -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
                         <div id="home-streak-card"
                             class="feed-stat-card"
-                            style="border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
+                            style="border: 1px solid var(--border-strong); padding: 10px 12px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
                                 style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">연속
                                 학습</span>
@@ -2375,7 +2456,7 @@
                         </div>
                         <div id="home-words-card"
                             class="feed-stat-card"
-                            style="border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
+                            style="border: 1px solid var(--border-strong); padding: 10px 12px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
                                 style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">학습
                                 어휘</span>
@@ -2384,7 +2465,7 @@
                         </div>
                         <div id="home-accuracy-card"
                             class="feed-stat-card"
-                            style="border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
+                            style="border: 1px solid var(--border-strong); padding: 10px 12px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
                                 style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">평균
                                 정답률</span>
@@ -2393,7 +2474,7 @@
                         </div>
                         <div id="home-badges-card"
                             class="feed-stat-card"
-                            style="border: 1px solid var(--border-strong); padding: 12px 14px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
+                            style="border: 1px solid var(--border-strong); padding: 10px 12px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
                             <span
                                 style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">업적
                                 달성</span>
@@ -2402,18 +2483,12 @@
                         </div>
                     </div>
 
-                    <!-- 성과 카드의 레벨 바 -->
-                    <div style="border-top: 1px solid var(--border-strong); padding-top: 14px;">
-                        <div
-                            style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-sub); font-weight: 800; margin-bottom: 6px;">
-                            <span>다음 레벨 진척도</span>
-                            <span><span id="home-exp-text">0</span> / 200 EXP</span>
-                        </div>
-                        <div
-                            style="width: 100%; height: 6px; background-color: var(--border-strong); border-radius: 3px; overflow: hidden;">
-                            <div class="exp-fill" id="home-exp-bar"
-                                style="width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.5s ease;">
-                            </div>
+                    <!-- 성과 카드의 레벨 바 — 수치는 제목 줄로 올리고 막대만 남김 -->
+                    <div
+                        style="width: 100%; height: 5px; background-color: var(--border-strong); border-radius: 3px; overflow: hidden;"
+                        title="다음 레벨 진척도">
+                        <div class="exp-fill" id="home-exp-bar"
+                            style="width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.5s ease;">
                         </div>
                     </div>
                 </div>
@@ -2448,7 +2523,7 @@
                 <!-- 🛠️ 개발자용 단어 검토 제보 버튼 -->
                 <button id="flag-word-btn" class="flag-btn" title="이 단어 신고하기 (오류 검토 요청)" aria-label="단어 신고"><svg class="ui-ic" viewBox="0 0 24 24" style="width:17px;height:17px;" aria-hidden="true"><use href="#ic-flag"></use></svg></button>
 
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding-right: 52px;">
+                <div id="quiz-head" style="display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding-right: 52px;">
                     <button id="quiz-home-btn" title="학습 종료하고 홈으로" aria-label="학습 종료하고 홈으로"
                         style="flex-shrink: 0; width: 34px; height: 34px; border: none; border-radius: 50%; background: var(--bg-muted); color: var(--text-secondary); font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
                     <div class="progress-bar" style="flex: 1; margin-bottom: 0;">
@@ -2459,7 +2534,7 @@
 
                 <div id="word-tag-display" style="display:none; text-align:left; margin-bottom:8px;"></div>
 
-                <div style="text-align: left;">
+                <div id="quiz-body" style="text-align: left;">
                     <div class="sentence" id="sentence-text">데이터를 동기화하는 중입니다...</div>
                     <div style="position: relative; margin-bottom: 30px;">
                         <div class="meaning" id="meaning-text" style="margin-bottom: 0;"></div>
@@ -2724,6 +2799,7 @@
         }
         let quizQueue = []; let totalQuestions = 0; let completedQuestions = 0; let retryCount = 0;
         let isWaiting = false; let hasFailedCurrent = false; let isShowingStats = false;
+        let attemptCounted = false;   // 한 문항이 두 번 집계되지 않도록
         let kbHideTimer = null; // 키보드 하강 완료 후 숨김 타이머 핸들 (문제 전환 시 취소용)
         let selectedTopic = 'all';
 
@@ -2846,6 +2922,10 @@
         let totalLearnedWords = 0;
         let totalCorrectFirstTry = 0;
         let sessionCorrectFirstTry = 0;
+        // 📊 평균 정답률의 분모 — 답이 확정된 «문항 수» (재출제도 별개 출제로 1회 계산)
+        // 배치고사는 제외한다 (측정 모드는 학습 지표를 오염시키지 않는다)
+        let totalAttempted = 0;
+        let sessionAttempted = 0;
         // 🔷 파란 지혜 조각(재화): 정답마다 +1, 3연속 정답마다 +1 보너스
         let blueShards = 0;
         let sessionBlueShards = 0;
@@ -3476,6 +3556,7 @@
                 targetWordCount = parseInt(data.targetWordCount) || 30;
                 keyboardMode = data.keyboardMode === 'glacier' ? 'glacier' : 'system';
                 totalCorrectFirstTry = parseInt(data.totalCorrectFirstTry) || 0;
+                totalAttempted = parseInt(data.totalAttempted) || 0;
                 blueShards = (data.blueShards !== undefined) ? (parseInt(data.blueShards) || 0) : totalCorrectFirstTry;
                 equippedTitle = TITLE_MIGRATE[data.equippedTitle] || data.equippedTitle || "🐣 첫걸음";
                 learnedWords = data.learnedWords || {};
@@ -3543,6 +3624,7 @@
                         quizQueue = data.current_session.quizQueue;
                         dailyTarget = target;
                         completedQuestions = done;
+                        sessionAttempted = parseInt(data.current_session.sessionAttempted) || 0;
                         sessionCorrectFirstTry = parseInt(data.current_session.sessionCorrectFirstTry) || 0; // 이어서 풀기 시 첫 시도 정답 복원
                         totalQuestions = dailyTarget;
 
@@ -3607,11 +3689,43 @@
                 // — 퀴즈 외 화면의 패널 이동만 원복
                 KB.addListener('keyboardWillHide', () => clearKbShift());
             } else if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', () => {
+                // 웹: 키보드가 떠도 body(position:fixed)는 안 줄어든다.
+                // visualViewport 높이를 --vvh로 노출하고 body.web-kb를 토글해
+                // CSS가 화면을 실제 보이는 영역으로 줄이게 한다.
+                const vv = window.visualViewport;
+                const applyVV = () => {
                     if (!isMobileDevice || usesGlacierKeyboard()) return;
-                    const h = Math.max(0, window.innerHeight - window.visualViewport.height);
-                    if (h > 80) setSystemKbHeight(h);
-                });
+                    const kb = Math.max(0, window.innerHeight - vv.height);
+                    const open = kb > 80;
+                    const root = document.documentElement;
+                    root.style.setProperty('--vvh', Math.round(vv.height) + 'px');
+                    root.style.setProperty('--vvtop', Math.round(vv.offsetTop) + 'px');
+                    document.body.classList.toggle('web-kb', open);
+                    if (open) setSystemKbHeight(kb);
+                    const qb = document.getElementById('quiz-box');
+                    if (qb) qb.scrollTop = 0;
+                    if (qb?.classList.contains('keyboard-active')) {
+                        requestAnimationFrame(fitQuizToKeyboard);
+                    }
+                };
+                vv.addEventListener('resize', applyVV);
+                vv.addEventListener('scroll', applyVV);
+                applyVV();
+
+                // 키보드가 뜨는 동안 사파리는 여러 번 나눠 스크롤한다.
+                // 포커스 직후 잠깐 따라붙어 첫 프레임부터 제자리에 있게 한다.
+                let vvPinUntil = 0;
+                const vvPin = () => {
+                    applyVV();
+                    if (window.scrollY) window.scrollTo(0, 0);
+                    if (performance.now() < vvPinUntil) requestAnimationFrame(vvPin);
+                };
+                document.addEventListener('focusin', (e) => {
+                    if (!isMobileDevice || usesGlacierKeyboard()) return;
+                    if (!e.target.closest || !e.target.closest('#quiz-box')) return;
+                    vvPinUntil = performance.now() + 900;
+                    requestAnimationFrame(vvPin);
+                }, true);
             }
         })();
 
@@ -3695,6 +3809,11 @@
             }
             quizBox.scrollTop = 0;
             const inputGroup = document.getElementById('input-group');
+            const bodyEl = document.getElementById('quiz-body');
+            if (bodyEl) bodyEl.scrollTop = 0;
+            // 매 계산은 원래 크기에서 다시 시작 (이전 문항의 축소값이 남지 않도록)
+            meaningEl.style.fontSize = '';
+            meaningEl.style.lineHeight = '';
 
             // 1차: 문장 길이 기반 기본 크기
             const len = sentenceEl.textContent.length;
@@ -3704,19 +3823,31 @@
 
             // 2차: 실측 보정 — 입력줄 하단이 키보드 상단을 침범하면 1px씩 축소
             // (빙하: 키보드 DOM 실측 / 시스템: 이벤트로 받은 키보드 높이 기준)
-            const kbTop = () => glacier ? kb.getBoundingClientRect().top : (window.innerHeight - systemKbHeight);
+            const vv = window.visualViewport;
+            const webKb = document.body.classList.contains('web-kb');
+            // 웹 모드에서는 #app-screen이 --vvtop만큼 내려가 있으므로
+            // 화면 바닥도 시각 뷰포트 기준(offsetTop + height)으로 재야 한다.
+            const kbTop = () => glacier ? kb.getBoundingClientRect().top
+                : (webKb && vv ? vv.offsetTop + vv.height : window.innerHeight - systemKbHeight);
             const gap = () => kbTop() - inputGroup.getBoundingClientRect().bottom;
+            // 문제 영역이 잘리고 있는가 — 입력줄만 확인하면 뜻풀이가 잘린 채 통과한다
+            const clipped = () => !!bodyEl && (bodyEl.scrollHeight - bodyEl.clientHeight > 2);
+            const bad = () => gap() < 8 || clipped();
             let guard = 0;
-            while (gap() < 8 && px > 15 && guard < 10) {
+            while (bad() && px > 14 && guard < 12) {
                 px -= 1;
                 sentenceEl.style.fontSize = px + 'px';
                 sentenceEl.style.lineHeight = '1.5';
                 guard++;
             }
-            // 최소 크기로도 안 들어가는 극단적 경우: 뜻풀이도 한 단계 축소
-            if (gap() < 8) {
-                meaningEl.style.fontSize = '11px';
-                meaningEl.style.lineHeight = '1.4';
+            // 문장을 최소로 줄여도 안 들어가면 뜻풀이도 단계적으로 축소
+            if (bad()) {
+                meaningEl.style.fontSize = '13px';
+                meaningEl.style.lineHeight = '1.45';
+            }
+            if (bad()) {
+                meaningEl.style.fontSize = '11.5px';
+                meaningEl.style.lineHeight = '1.35';
             }
         }
 
@@ -3753,6 +3884,7 @@
             completedQuestions = 0;
             totalQuestions = target; // 진행률 바 계산을 위한 총 목표치
             sessionCorrectFirstTry = 0; // 세션 내 첫 시도 정답 수 초기화
+            sessionAttempted = 0;       // 세션 내 출제 문항 수 초기화
             sessionBlueShards = 0; sessionNewWords = 0; comboCount = 0; // 조각·콤보 초기화
             track('study_start', { topic: selectedTopic, target_count: target });
 
@@ -3863,7 +3995,8 @@
                     quizQueue: quizQueue,
                     dailyTarget: dailyTarget,
                     completedQuestions: completedQuestions,
-                    sessionCorrectFirstTry: sessionCorrectFirstTry
+                    sessionCorrectFirstTry: sessionCorrectFirstTry,
+                    sessionAttempted: sessionAttempted
                 }
             }, { merge: true });
         }
@@ -4029,12 +4162,13 @@
                 startBtnSpan.innerHTML = `${btnText} (<span id="home-target-count-text">${targetWordCount}</span>개)`;
             }
 
-            // 평균 정답률 계산 (안전 정밀 캐스팅)
-            const learnedVal = parseInt(totalLearnedWords) || 0;
-            const correctVal = parseInt(totalCorrectFirstTry) || 0;
-            // 학습 데이터가 없으면 100% 대신 '-' 표시 (오해 방지)
-            document.getElementById('home-accuracy-text').textContent = learnedVal > 0
-                ? `${Math.round((Math.min(correctVal, learnedVal) / learnedVal) * 100)}%`
+            // 평균 정답률 = 첫 시도 정답 수 ÷ 답이 확정된 문항 수
+            // 진행 중인 세션분을 함께 더해야 학습 도중에도 값이 어긋나지 않는다
+            const attemptedVal = (parseInt(totalAttempted) || 0) + (parseInt(sessionAttempted) || 0);
+            const correctVal = (parseInt(totalCorrectFirstTry) || 0) + (parseInt(sessionCorrectFirstTry) || 0);
+            // 아직 푼 문항이 없으면 0%·100% 대신 '-' 표시 (오해 방지)
+            document.getElementById('home-accuracy-text').textContent = attemptedVal > 0
+                ? `${Math.round((Math.min(correctVal, attemptedVal) / attemptedVal) * 100)}%`
                 : '-';
 
             // 해제된 뱃지 개수 카운트
@@ -4425,6 +4559,8 @@
                 // 학습 어휘 수 = 첫 시도 정답한 단어 수 (masteredCount) — 초록 조각과 항상 동일
                 totalLearnedWords = masteredCount();
                 totalCorrectFirstTry = (parseInt(totalCorrectFirstTry) || 0) + addedCorrectCount;
+                totalAttempted = (parseInt(totalAttempted) || 0) + (parseInt(sessionAttempted) || 0);
+                sessionAttempted = 0;
                 sessionCorrectFirstTry = 0; // 누적 합산 완료 — 헤더 조각 카운터 이중 계산 방지
 
                 // 📏 어휘 고도: 최고점만 표시 갱신 (내려간 것은 반영하지 않음 — 다시 넘어서면 그때 상승)
@@ -4491,6 +4627,7 @@
                         keyboardMode: keyboardMode,
                         totalLearnedWords: totalLearnedWords,
                         totalCorrectFirstTry: totalCorrectFirstTry,
+                        totalAttempted: totalAttempted,
                         equippedTitle: equippedTitle,
                         learnedWords: learnedWords,
                         vocabRating: Math.round(vocabRating),
@@ -4536,6 +4673,8 @@
             // 매 등장은 새 문제로 취급 — 재출제 문항도 한 번에 맞추면 첫 시도 정답(학습 어휘 집계),
             // 다시 틀리면 또 재출제되어 한 번에 맞출 때까지 세션 내 반복
             hasFailedCurrent = false;
+            attemptCounted = false;
+            document.getElementById('quiz-box').classList.remove('stats-open');
             const { suffix: vSuffix } = splitVerbEnding(currentWord);
             sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:var(--text-muted); border-bottom: 2px dashed var(--border-strong);">____</span>' + vSuffix);
 
@@ -4632,8 +4771,43 @@
 
 
         // 🌟 수정된 통계 보여주기 함수 (가로 배치 적용)
+        // ⌨️ 키보드가 «완전히» 내려간 뒤에 콜백 — 통계 패널이 하강 중인 키보드 위에
+        // 어중간한 위치로 떠오르는 것을 막고, 처음부터 화면 아래에 자리잡게 한다.
+        function whenKeyboardGone(cb) {
+            if (!isMobileDevice) { cb(); return; }
+            if (usesGlacierKeyboard()) { setTimeout(cb, 360); return; }   // 빙하 키보드 하강 0.34s
+            let done = false, tid = null, onResize = null, sub = null;
+            const cleanup = () => {
+                if (tid) clearTimeout(tid);
+                if (onResize && window.visualViewport) window.visualViewport.removeEventListener('resize', onResize);
+                if (sub) { try { sub.remove && sub.remove(); } catch (e) { } }
+            };
+            const fire = () => { if (done) return; done = true; cleanup(); cb(); };
+            const KB = window.Capacitor?.Plugins?.Keyboard;
+            if (KB?.addListener) {
+                // 네이티브: 하강 완료 이벤트를 신뢰
+                try {
+                    Promise.resolve(KB.addListener('keyboardDidHide', () => requestAnimationFrame(fire)))
+                        .then(h => { if (done) { try { h.remove && h.remove(); } catch (e) { } } else sub = h; })
+                        .catch(() => { });
+                } catch (e) { }
+                tid = setTimeout(fire, 700);
+            } else if (window.visualViewport) {
+                // 웹: 시각 뷰포트가 원래 높이로 돌아오면 키보드가 다 내려간 것
+                const vv = window.visualViewport;
+                onResize = () => { if (window.innerHeight - vv.height < 80) requestAnimationFrame(fire); };
+                vv.addEventListener('resize', onResize);
+                onResize();
+                tid = setTimeout(fire, 900);
+            } else {
+                tid = setTimeout(fire, 350);
+            }
+        }
+
         async function showInlineStats(currentWordObj, recordedAnswer, isRecovery = false) {
             isShowingStats = true;
+            // 📊 이 문항의 답이 확정됨 → 평균 정답률의 분모 +1 (문항당 한 번만)
+            if (!attemptCounted) { attemptCounted = true; sessionAttempted++; }
             const statsContainer = document.getElementById('inline-stats-container');
             const nextBtn = document.getElementById('next-btn');
             const submitBtn = document.getElementById('submit-btn');
@@ -4677,7 +4851,8 @@
                 nextBtn.style.flex = '1';
             }
             // 모바일 kb-slot은 flex 컬럼(스크롤+하단버튼), 데스크톱은 block
-            statsContainer.style.display = isMobileDevice ? 'flex' : 'block';
+            // 모바일은 키보드 하강 완료 후 표시 (아래 whenKeyboardGone) — 미리 띄우면 하강 중 화면 중앙에 뜬다
+            if (!isMobileDevice) statsContainer.style.display = 'block';
 
             // 통계 막대 HTML 조립 (로컬/서버 공용) — 순수 문자열 생성, 네트워크 없음
             const buildStatsHtml = (answers) => {
@@ -4756,15 +4931,21 @@
                 nextBtn.style.display = 'block';
                 statsContainer.appendChild(nextBtn);
                 const _companion = document.getElementById('harang-companion');
-                // 🌟 딜레이 없이 즉시 등장 — 키보드 하강과 동시에 통계가 위로 떠오름 (통계가 z-index로 위를 덮음)
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => statsContainer.classList.add('slid-in'));
+                // 🌟 키보드가 완전히 내려간 뒤 등장 — 처음부터 화면 아래에 자리잡는다
+                whenKeyboardGone(() => {
+                    document.getElementById('quiz-box').classList.add('stats-open');
+                    statsContainer.style.display = 'flex';
+                    // 키보드 → 통계창으로 바뀐 레이아웃 기준으로 문장 크기 재계산
+                    requestAnimationFrame(fitQuizToKeyboard);
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => statsContainer.classList.add('slid-in'));
+                    });
+                    // 등장 연출(0.34s)이 완전히 끝난 뒤 하랑이 애니메이션 재개 + 레이어 승격 해제
+                    setTimeout(() => {
+                        _companion.classList.remove('anim-freeze');
+                        statsContainer.classList.add('anim-done');
+                    }, 400);
                 });
-                // 등장 연출(0.34s)이 완전히 끝난 뒤 하랑이 애니메이션 재개 + 레이어 승격 해제
-                setTimeout(() => {
-                    _companion.classList.remove('anim-freeze');
-                    statsContainer.classList.add('anim-done');
-                }, 400);
             }
 
             // 🌟 2) 서버 통계는 백그라운드로 받아, 페이드 완료 후 조용히 갱신 (막대만 교체)
@@ -6372,8 +6553,9 @@
         function openStatsModal() {
             // 카운터와 실제 학습 기록 간 불일치 시 실데이터(learnedWords) 기준으로 보정
             const learnedVal = Math.max(parseInt(totalLearnedWords) || 0, Object.keys(learnedWords).length);
-            const correctVal = parseInt(totalCorrectFirstTry) || 0;
-            const accuracy = learnedVal > 0 ? `${Math.round((Math.min(correctVal, learnedVal) / learnedVal) * 100)}%` : '-';
+            const attemptedVal = (parseInt(totalAttempted) || 0) + (parseInt(sessionAttempted) || 0);
+            const correctVal = (parseInt(totalCorrectFirstTry) || 0) + (parseInt(sessionCorrectFirstTry) || 0);
+            const accuracy = attemptedVal > 0 ? `${Math.round((Math.min(correctVal, attemptedVal) / attemptedVal) * 100)}%` : '-';
             const currentLevel = Math.floor(currentExp / 200) + 1;
             const now = new Date();
             const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -6391,7 +6573,7 @@
             // ① 요약 칩 그리드
             const chips = [
                 ['어휘 고도', measured ? `해발 ${peakAltitude().toLocaleString()}m` : '측정 전', measured ? `${uiIcon(tier.ic, '11px')} ${tier.name}` : '', '#047857'],
-                ['평균 정답률', accuracy, '첫 시도 기준', '#2563eb'],
+                ['평균 정답률', accuracy, attemptedVal > 0 ? `${attemptedVal}문항 · 첫 시도 기준` : '첫 시도 기준', '#2563eb'],
                 ['누적 학습 어휘', `${learnedVal}개`, `오늘 +${todayCount}`, '#059669'],
                 ['연속 학습', `${streakDays}일차`, `총 출석 ${attendedDays}일`, '#d97706'],
                 ['현재 레벨', `Lv.${currentLevel}`, `${currentExp} EXP`, '#7c3aed'],

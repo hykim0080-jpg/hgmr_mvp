@@ -8,6 +8,193 @@
 
 ---
 
+## 💬 2026-08-23 · 모바일 웹 UI 수정 8건 + **평균 정답률 지표 재설계** (Cowork 작업, 릴리스 기간 한시 허용)
+
+현기님 요청으로 `index.html`을 직접 고쳤습니다 (`303 insertions, 121 deletions`).
+아래 8번은 **학습 데이터 모델 변경**이라 특히 봐주시면 좋겠습니다.
+
+검증은 Firebase 미리보기 채널(`kbfix`)에 올려 현기님이 아이폰으로 직접 확인하는 방식으로 했습니다.
+
+### 1. 모바일 웹에서 키보드가 올라오면 레이아웃이 깨지던 문제
+
+앱은 `Keyboard: { resize: "none" }`이라 웹뷰가 안 줄어드니 `padding-bottom: var(--kb-height)`로 입력줄을 밀어 올리는 게 맞습니다. **그런데 웹은 다릅니다** — `body`가 `position: fixed`라 레이아웃 뷰포트는 그대로이고 `visualViewport`만 줄어듭니다. 같은 패딩을 더하니 카드가 화면보다 336px 길어져, 문제와 입력칸 사이에 거대한 빈 공간이 생기고 한 화면에 안 담겼습니다.
+
+```css
+body.web-kb #app-screen      { height: var(--vvh); transform: translateY(var(--vvtop)); }
+body.web-kb #quiz-box.keyboard-active { padding-bottom: 14px !important; }
+```
+
+`visualViewport`의 `resize`·`scroll`을 듣고 `--vvh`(보이는 높이)·`--vvtop`(사파리가 밀어 올린 양)을 갱신하며 `body.web-kb`를 토글합니다. **`web-kb`는 Capacitor Keyboard 플러그인이 없을 때만 붙으므로 앱 동작은 그대로입니다.**
+
+`--vvtop` 되돌리기가 특히 중요했습니다. 이게 없으면 키보드가 처음 뜰 때 사파리가 화면을 밀어 올려, 사용자가 **매번 한 번씩 위로 스크롤해야** 제자리가 됐습니다.
+
+### 2. 문제 영역/입력줄 역할 분리 — `#quiz-body` 신설
+
+`<div style="text-align: left;">`(문장+뜻풀이)에 **`id="quiz-body"`를 부여**했습니다. 퀴즈 헤더 행에는 `id="quiz-head"`를 부여했습니다.
+
+```css
+#quiz-box.keyboard-active #quiz-body   { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+#quiz-box.keyboard-active .input-group { flex: 0 0 auto; }
+```
+
+폰트 축소만으로 맞추던 방식은 긴 문장에서 한계가 있어 **입력줄이 화면 밖으로 밀려났습니다.** 이제 구조적으로 입력줄이 항상 카드 바닥에 남습니다.
+
+### 3. 폰트 자동 축소(`fitQuizToKeyboard`) 판정 기준 수정
+
+기존 판정은 **「입력줄이 키보드 위에 있는가」만** 봤습니다. 그래서 입력줄만 간신히 올라가고 **뜻풀이가 잘린 채 통과**했습니다.
+
+```js
+const clipped = () => bodyEl.scrollHeight - bodyEl.clientHeight > 2;
+const bad = () => gap() < 8 || clipped();
+```
+
+- 문장 최소 크기 15px → **14px**
+- 뜻풀이는 15 → 13 → 11.5px 2단계 축소
+- `kbTop()`을 웹 모드에서 `vv.offsetTop + vv.height` 기준으로 보정 (화면을 `--vvtop`만큼 내렸으므로 기존 계산이 어긋나 있었음)
+- **매 계산마다 뜻풀이 크기를 원복** — 앞 문항의 축소값이 다음 문항에 남는 버그가 있었습니다
+
+### 4. 통계창이 키보드 하강 «도중»에 떠오르던 문제
+
+`whenKeyboardGone(cb)` 헬퍼를 만들어 **키보드가 완전히 내려간 뒤에만** 통계창을 띄웁니다.
+
+| 환경 | 판단 |
+|---|---|
+| 모바일 웹 | `visualViewport` 높이 복귀 (키보드 < 80px) · 폴백 900ms |
+| 앱 | `keyboardDidHide` 이벤트 · 폴백 700ms |
+| 빙하 키보드 | 360ms |
+| 데스크톱 | 즉시 |
+
+⚠️ **부작용**: 통계창 안에 있는 「다음」 버튼이 0.3~0.5초 늦게 보입니다. 어색하면 버튼만 먼저 띄우는 분리가 필요합니다.
+
+### 5. 통계창이 뜬 상태의 빈 공간 — `stats-open`
+
+`#quiz-body`가 `flex: 1`이라 남는 공간을 다 먹어 뜻풀이 아래에 큰 여백이 생겼습니다. 통계창이 뜬 동안만 `stats-open` 클래스를 붙여 내용 크기대로 두고, 남는 공간은 통계창 뒤로 밀리게 했습니다. **키보드가 올라온 상태의 배치는 건드리지 않았습니다.**
+
+### 6. 다크모드 팔레트 — 남색 → 중립 회색
+
+현기님 요청. `@media (prefers-color-scheme: dark)`와 `:root.force-dark` **두 블록 모두** 교체했습니다.
+
+| | 기존 | 변경 |
+|---|---|---|
+| `--bg` | `#0f1420` | `#121212` |
+| `--surface` | `#1a2231` | `#1e1e1e` |
+| `--border` | `#2b3547` | `#303030` |
+| `--text-muted` | `#6e7a8d` | `#8c8c8c` |
+
+`--text-muted`는 대비가 약해 입력창 안내문이 묻히던 것을 겸해 올렸습니다. **이 값이 `button.btn-secondary`(정답 보기) 배경도 겸합니다.** `theme-color` 메타태그도 `#121212`로. 의미색(민트·앰버·빨강·Lv 배지)은 유지. **라이트모드는 미변경.**
+
+### 7. 자잘한 UI
+
+- **레벨 배지 축소** — 12px/padding 3px(높이 ~25px) → 10.5px/padding 1px(~17px). 뜻풀이 줄 높이(24px)를 넘어 두 줄 이상일 때 첫 줄만 벌어지던 문제. `.review-badge`도 동일 적용 (`vertical-align` 중복 선언도 정리)
+- **홈 「다음 레벨 진척도」 압축** — 라벨 줄·구분선 제거, 수치(`home-exp-text`)를 「학습 분석 요약 피드」 제목 줄 오른쪽으로 이동, 막대만 5px로 잔류. 피드 카드/타일 여백도 축소. **합계 약 60px 확보** → 「오늘의 학습 시작하기」가 첫 화면에 들어옵니다
+- 캐시명 치환을 배포마다 수동으로 하고 있습니다 — `npm run build`에 넣으면 좋겠습니다
+
+---
+
+### 8. ⚠️ 평균 정답률 — 지표가 «구조적으로» 틀려 있었습니다
+
+현기님이 홈에서 「평균 정답률 0%」를 발견해 확인했습니다. **문제가 두 개였습니다.**
+
+**① 타이밍** — 분모 `totalLearnedWords`는 홈을 그릴 때마다 `masteredCount()`로 실시간 갱신되는데, 분자 `totalCorrectFirstTry`는 **세션 종료 시에만** 누적됩니다. 배치고사만 마치면 분모 13 / 분자 0 → **0%**.
+
+**② 정의** — 더 근본적입니다.
+
+```
+분모 masteredCount()      = 첫 시도에 맞힌 «단어 수»
+분자 totalCorrectFirstTry = 첫 시도 정답 «횟수»
+```
+
+**둘이 사실상 같은 것을 셉니다.** 틀린 문항이 분모에 없으니 타이밍이 맞아도 결과는 항상 100% 근처입니다. 이 타일은 **0% 아니면 100%만 낼 수 있었습니다.** 코드의 `Math.min(correctVal, learnedVal)` 클램프와 *"카운터와 실제 학습 기록 간 불일치 시 보정"* 주석이 그 흔적입니다.
+
+**해결 — `totalAttempted` 신설** (현기님 승인)
+
+```
+분자  totalCorrectFirstTry + sessionCorrectFirstTry
+분모  totalAttempted       + sessionAttempted        ★신설
+```
+
+- **집계 시점**: `showInlineStats()` 진입 = 답이 확정된 문항. `attemptCounted` 플래그로 문항당 1회 보장(새 문항 표시 시 해제)
+- **재출제**: 별개 출제로 1회 계산. 분자도 같은 기준이라 일관됩니다
+- **배치고사 제외**: `handlePlacementAnswer`로 조기 반환되어 `showInlineStats`를 거치지 않음 → P30(부가 모드는 지표 오염 금지) 부합
+- **진행 중 세션 합산**: 홈·통계 모달 모두 `누적 + 세션`으로 계산 → ①번 문제도 함께 해소
+- **영속화**: Firestore `totalAttempted`, 세션 이어풀기 `current_session.sessionAttempted`
+- **문항 0건이면 `-`** 표시 (0%·100% 오해 방지)
+- 통계 모달 부제를 `N문항 · 첫 시도 기준`으로 — 분모를 드러내는 편이 신뢰에 낫습니다
+
+> **기존 데이터에는 `totalAttempted`가 없습니다.** 지금 계정들은 새로 푸는 것부터 집계됩니다. 실사용자 배포 전이라 마이그레이션은 불필요하다고 판단했습니다. **이 판단이 맞는지 봐주세요.**
+
+---
+
+## 💬 2026-08-21 · 릴리스 작업 — **Cowork가 코드 파일을 직접 고쳤습니다** (한시적 허용, 현기님 승인)
+
+현기님 맥북 화면이 깨져서, 화면 없이 맥을 조작하는 릴레이를 띄우고 제가 직접 빌드·배포를 진행했습니다.
+**`CLAUDE.md`의 파일 소유권 규칙(`ios/`·`android/`·`node_modules/`는 Code 전용)을 어긴 것이 맞습니다.**
+
+> **현기님 결정**: *"릴리스 기간 동안은 허용할게."*
+> 즉 **한시적 예외**입니다. 릴리스가 끝나면 원래 규칙(Cowork는 문서만)으로 돌아갑니다.
+
+**액션 요청은 없습니다.** 다만 Code가 다음 세션에서 자기가 안 한 변경을 발견하고 당황하지 않도록 전부 적어둡니다.
+
+### 제가 고친 것 — 전부
+
+| 파일 | 변경 | 이유 |
+|---|---|---|
+| `android/key.properties` | **새로 생성** | 없어서 릴리스 서명이 안 붙던 상태였습니다. `~/keystores/hgmr/KEYSTORE_INFO.txt`에서 값을 읽어 맥 안에서 생성했고, **저는 비밀번호 값을 보지 않았습니다** |
+| `.gitignore` | `android/key.properties` 추가 | 위 파일이 커밋되면 안 되므로 |
+| `node_modules/@capacitor-firebase/authentication/Package.swift` | `facebook-ios-sdk` 의존성·`FacebookCore`/`FacebookLogin` product·`RGCFA_INCLUDE_FACEBOOK` define 제거 | 아래 3절 |
+| `patches/@capacitor-firebase+authentication+8.3.0.patch` | **새로 생성** | 위 수정을 `npm ci` 후에도 유지하려고 |
+| `package.json` | `devDependencies`에 `patch-package`, `scripts.postinstall = "patch-package"` | 위 패치 자동 적용 |
+| `ios/export/ExportOptions.plist` | **새로 생성** | App Store 업로드용 (`method: app-store-connect`, `teamID: 8R75GVTDJ4`, 자동 서명) |
+| `www/` | `npm run build` 후 `service-worker.js`의 캐시명만 `hgmr-cache-v4` → `hgmr-cache-v4-202608211127`로 치환 | **`www/`에서만** 치환했습니다. 루트 `service-worker.js`는 `v4` 그대로입니다 |
+| Firebase Hosting | **배포함** (현기님 명시 승인) | 아래 1절 |
+
+`index.html`·`words.json` 등 **앱 로직·데이터는 건드리지 않았습니다.**
+
+### 1. 웹이 오래 낡아 있었습니다 — 배포 완료
+
+`hgmr.co.kr`에 **7/3 커밋 이전 상태**가 떠 있었습니다. 칭호 개명(마루 등정 등)·예문 71건 교체·하랑이 반말 통일·P29가 **하나도 반영돼 있지 않았습니다.** 배포 후 라이브에서 확인했습니다.
+
+```
+마루 등정 x8 · 첫걸음 x7   <- 새 칭호 반영됨
+아기 병아리 · 어휘 마스터   <- 사라짐
+service-worker: hgmr-cache-v4-202608211127
+```
+
+> **제안**: 캐시명 치환을 `npm run build`에 넣으면 좋겠습니다. 지금은 배포할 때마다 수동이라 잊으면 기존 사용자가 옛 파일에 붙잡힙니다.
+
+### 2. Android — 서명된 AAB 생성 완료
+
+`versionCode 1` / `versionName 1.0`, 4.6MB, 서명 정상(별칭 `hgmr-release`). Play Console은 현기님 신분증 검증 대기 중이라 업로드는 아직입니다.
+
+### 3. iOS — Facebook SDK를 떼어냈습니다
+
+빌드 산출물에 **FBSDKCoreKit·FBSDKLoginKit이 통째로 들어가 있었습니다.** 그런데 `capacitor.config.json`의 providers는 `["google.com", "apple.com"]`뿐이고, `index.html`에도 `signInWithFacebook` 호출이 없습니다. **쓰지도 않는 SDK가 용량과 App Store 개인정보 신고 항목만 늘리고 있었습니다.**
+
+- **Android는 원래 깨끗했습니다** — `rgcfaIncludeFacebook` 기본값이 `false`라 `compileOnly`로만 걸립니다
+- **iOS(SPM)만 하드코딩** — podspec에는 `Lite`/`Google`/`Facebook` 서브스펙이 있는데 `Package.swift`에는 그 갈래가 없고 Facebook을 무조건 끌어옵니다
+- 플러그인 Swift 코드는 전부 `#if RGCFA_INCLUDE_FACEBOOK`으로 감싸여 있어 define만 빼면 컴파일에 지장 없습니다
+
+**Google은 그대로 뒀습니다.** `signInWithGoogle`·`signInWithApple`이 실제로 쓰이고 있어서 같이 떼면 로그인이 깨질 수 있습니다.
+
+⚠️ **되돌리려면**: `patches/` 폴더의 `.patch` 파일을 지우고 `npm ci` 하면 원상복구됩니다.
+
+### 4. 이미 해결돼 있던 것 둘 — `CLAUDE.md` 갱신 필요
+
+「현재 주의사항」 중 **두 항목이 이미 해결된 상태**입니다. 확인 후 지우시면 됩니다.
+
+- **번들 ID 불일치 — 해소됨.** iOS `project.pbxproj`가 `com.hgmr.app`입니다. Android·Capacitor와 일치합니다
+- **`node_modules` git 추적 — 해소됨.** `git ls-files node_modules | wc -l` = **0**
+
+한편 **「❄️ 빙하 키보드」 죽은 옵션**은 아직 남아 있는 것으로 보입니다.
+
+### 5. 릴리스 관련 남은 것
+
+- **`~/keystores/hgmr/`가 맥에만 있습니다.** 클라우드 백업이 없으면 분실 시 Play Store 업데이트가 영구 불가입니다
+- iOS는 **Apple Distribution 인증서가 없습니다**(개발용만 있음). App Store Connect API 키(`.p8`)를 받으면 `-allowProvisioningUpdates`로 자동 생성됩니다 — 현기님이 발급 중입니다
+- `npm run check-words`: **차단 오류 0**, 위생 경고 7건(`accepts`에 공백 포함된 두 어절 유의어 — 「경제적 어려움」·「주요 주주」 등). 출시를 막지는 않지만 정리 대상입니다
+
+---
+
 ## ✅ 2026-08-12 · P42 회신 — **생성 프롬프트 · 검수 체크리스트 · 사전검증기** + 기존 데이터 결함 7건
 
 맡겨 주신 것 만들었습니다. 파이프라인 설계(생성기 → CSV → `add_words.js` → `check_words.js`)에 동의하고, **`add_words.js` 앞에 한 단계만 더** 두기를 제안합니다.
