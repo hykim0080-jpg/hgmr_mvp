@@ -2937,11 +2937,26 @@
         let vocabRatingN = 0;          // 반영된 시도 수 (K 감쇠용)
         let ratingHistory = [];        // [{d, r}] 일별 지수 기록 (최대 90)
         let placementDone = false;     // 배치고사 완료 여부
-        let vocabPeak = 0;             // 표시용 최고점 기록 — 절대 내려가지 않음 (오답 공포 방지)
+        let vocabPeak = 0;             // 최고 기록 — 절대 내려가지 않음 (칭호 기준·「최고 해발」 표기)
+        // 📏 P17 개정 (2026-08-23): 표시 고도는 내려갈 수 있다.
+        // 측정(vocabRating)은 대칭 Elo 그대로 두고 «표시»만 완만하게 따라간다.
+        // 오답 K를 줄이는 비대칭 Elo는 평형점을 P* = p/(α+p(1-α))로 밀어 올려
+        // α=0.4면 +160m 영구 과대평가가 생긴다 — 측정을 왜곡하므로 쓰지 않는다.
+        let vocabShown = 0;            // 표시 고도 — 상승 즉시, 하강은 하루 상한
+        let vocabShownDate = '';       // 마지막 하강 적용일 (하루 한 번만 내린다)
         let sessionRatingDelta = 0;    // 이번 세션 지수 변동 (완료 화면 표시용)
         let itemRatingDelta = {};      // 단어별 전역 난이도 보정치 (meta/item_ratings)
         let pendingItemDelta = {};     // 세션 중 누적된 보정치 (종료 시 플러시)
         const RATING_MIN = 800, RATING_MAX = 1900;
+        // 하강 상한 20m/일 — 시뮬레이션(40시드): +200m 과대평가가 약 8일에 교정되고
+        // 실력과 일치하는 사용자의 일간 표시 변동은 약 14m. 30m면 교정 6일·변동 16m,
+        // 10m면 교정 16일·변동 11m. 20이 교정 속도와 안정감의 균형점.
+        const SHOWN_DROP_MAX = 20;
+        // 상승 상한 — 평상시엔 걸릴 일이 없고(일간 변동이 그보다 작다),
+        // 배치고사 상한에 묶인 상위 사용자가 «학습으로» 제자리를 찾아가게 하는 데만 쓰인다.
+        const SHOWN_RISE_MAX = 60;
+        // 문항이 아주 적을 때만 걸리는 안전장치 (하루 목표 30문항이라 실제로는 거의 안 걸림)
+        const SHOWN_GUARD_N = 30;
 
         // ===== 커스텀 UI 아이콘 헬퍼 (이모지 대체 SVG) =====
         function uiIcon(name, size) {
@@ -2978,7 +2993,34 @@
         function userK() { return vocabRatingN < 30 ? 32 : vocabRatingN < 100 ? 16 : 8; }
         // 표시 단위: 어휘 고도(m) = θ − 800 (기슭<300m, 오르막 300~, 중턱 500~, 능선 700~, 마루 900~1100m)
         function peakAltitude() { return Math.max(0, Math.round(vocabPeak - 800)); }
-        function raisePeak() { if (vocabRating > vocabPeak) vocabPeak = vocabRating; }
+        function shownAltitude() { return Math.max(0, Math.round(vocabShown - 800)); }
+        // 배치고사 최종 점수 — 응답 «전체»를 한 번에 놓고 θ를 찾는다(최대우도).
+        // 순차 Elo는 시작점(1200)에 끌려가 실력이 높을수록 과소평가된다(시뮬레이션: 950m에서 -167m).
+        // 갱신 순서와 무관한 추정으로 바꾸면 편향이 사라진다(-10~+3m).
+        function placementMLE() {
+            if (!placementItems.length) return vocabRating;
+            let lo = RATING_MIN, hi = RATING_MAX;
+            for (let k = 0; k < 40; k++) {
+                const m = (lo + hi) / 2;
+                let d = 0;
+                for (let i = 0; i < placementItems.length; i++) d += placementOuts[i] - expectedP(m, placementItems[i]);
+                if (d > 0) lo = m; else hi = m;
+            }
+            return (lo + hi) / 2;
+        }
+        // 표시 고도 정산 — 세션·배치고사 종료 시 1회. 상승은 즉시, 하강은 하루 SHOWN_DROP_MAX.
+        function settleShown(todayStr) {
+            if (!vocabShown) { vocabShown = Math.min(Math.max(vocabRating, vocabPeak), PLACEMENT_SHOWN_CAP); }
+            else if (vocabShownDate !== todayStr) {
+                if (vocabRating > vocabShown) {
+                    vocabShown = Math.min(vocabRating, vocabShown + SHOWN_RISE_MAX);
+                } else if (vocabRatingN >= SHOWN_GUARD_N) {
+                    vocabShown = Math.max(vocabRating, vocabShown - SHOWN_DROP_MAX);
+                }
+            }
+            vocabShownDate = todayStr;
+            if (vocabShown > vocabPeak) vocabPeak = vocabShown;   // 칭호 = 표시 고도의 최고 기록
+        }
 
         function ratingTier(r) {
             return r >= 1700 ? { ic: 'summit', name: '마루' }
@@ -3580,6 +3622,9 @@
                     vocabRating = 1200; vocabRatingN = 0; // 신규 — 배치고사 대상
                 }
                 vocabPeak = parseInt(data.vocabPeak) || ((placementDone || vocabRatingN > 0) ? Math.round(vocabRating) : 0);
+                // 기존 사용자: 표시 고도를 최고 기록에서 출발시킨다 (하강은 그 다음부터)
+                vocabShown = parseInt(data.vocabShown) || vocabPeak;
+                vocabShownDate = data.vocabShownDate || '';
 
                 document.getElementById('display-nickname').textContent = userNickname;
                 applyAvatar();
@@ -4133,7 +4178,7 @@
             const altitudeEl = document.getElementById('home-altitude-title');
             if ((placementDone || vocabRatingN > 0) && vocabPeak > 0) {
                 const tier = ratingTier(vocabPeak);
-                altitudeEl.innerHTML = `${uiIcon(tier.ic, '12px')} ${tier.name} · ${peakAltitude().toLocaleString()}m`;
+                altitudeEl.innerHTML = `${uiIcon(tier.ic, '12px')} ${tier.name} · ${shownAltitude().toLocaleString()}m`;
                 altitudeEl.style.display = 'inline-block';
             } else {
                 altitudeEl.style.display = 'none'; // 측정 전에는 표시하지 않음 (배치고사 안내가 담당)
@@ -4298,8 +4343,16 @@
         let placementPool = [];
         let placementCount = 0;
         let placementEstHistory = [];
+        let placementItems = [];        // 출제된 문항 난이도 b (최종 MLE 추정용)
+        let placementOuts = [];         // 대응 정오 (1/0)
+        let placementConfirmLeft = -1;  // 수렴 후 「동급 확인 문항」 남은 수 (-1 = 아직 아님)
+        const PLACEMENT_CONFIRM = 4;    // 수렴했다고 바로 끝내지 않고 동급으로 몇 개 더 확인
+        const PLACEMENT_HIGH = 1450;    // 추정이 이 위면 조기 종료하지 않는다 (상단 도달력 확보)
+        // 배치고사만으로 산꼭대기에 배치하지 않는다 — 오를 자리를 남긴다.
+        // 내부 추정(vocabRating)은 정확히 두고 «표시»만 묶은 뒤, 학습으로 하루 SHOWN_RISE_MAX씩 풀린다.
+        const PLACEMENT_SHOWN_CAP = 1500;   // 700m = 능선 초입
         let placementPromptShown = false; // 이번 앱 실행에서 안내를 이미 띄웠는지
-        const PLACEMENT_MAX = 20, PLACEMENT_MIN = 15;
+        const PLACEMENT_MAX = 22, PLACEMENT_MIN = 15;   // 상단이면 더 묻되 22문항을 넘기지 않는다
         const PLACEMENT_RETRIES = 3;   // 오답 시 재입력 기회 (초과하면 정답 공개 후 다음)
         let placementWrong = 0;        // 현재 문항의 누적 오답 수
         // 🧭 고정 앵커 + 밴드 보장 (MST식 절충): 초반 운·문항 보정 오차로 적응 경로가 흔들리는 것 방지
@@ -4317,9 +4370,10 @@
         // 현재 추정치 기준 P(맞힘)≈0.65 부근 단어 출제 (정보량 94% 유지 + 체감 부드러움)
         function pickPlacementWord() {
             if (placementAnchors.length) return placementAnchors.shift();   // 고정 앵커 구간 우선
-            const scored = placementPool.map((w, i) => ({ i, gap: Math.abs(expectedP(vocabRating, wordDifficulty(w)) - 0.65) }));
+            const tgt = placementConfirmLeft > 0 ? 0.5 : 0.65;   // 확인 구간은 정보량이 가장 큰 50:50으로
+            const scored = placementPool.map((w, i) => ({ i, gap: Math.abs(expectedP(vocabRating, wordDifficulty(w)) - tgt) }));
             scored.sort((a, b) => a.gap - b.gap);
-            const pickFrom = scored.slice(0, 8);
+            const pickFrom = scored.slice(0, 12);   // 후보를 조금 넓혀 매 응시마다 문항이 겹치지 않게
             const chosen = pickFrom[Math.floor(Math.random() * pickFrom.length)];
             return placementPool.splice(chosen.i, 1)[0];
         }
@@ -4330,15 +4384,24 @@
             const K = Math.max(40, 120 - 6 * placementCount); // 계단식: 초반 큰 폭 → 점차 정밀
             const P = expectedP(vocabRating, b);
             vocabRating = Math.max(RATING_MIN, Math.min(RATING_MAX, vocabRating + K * (outcome - P)));
+            placementItems.push(b); placementOuts.push(outcome);
+            if (placementConfirmLeft > 0) placementConfirmLeft--;
             placementCount++;
             placementEstHistory.push(vocabRating);
         }
 
         function placementFinished() {
             if (placementCount >= PLACEMENT_MAX || placementPool.length === 0) return true;
+            if (placementConfirmLeft === 0) return true;          // 동급 확인 문항까지 마침
+            if (placementConfirmLeft > 0) return false;           // 확인 문항 진행 중
             if (placementCount >= PLACEMENT_MIN && placementBandsSeen.size >= 2) {   // 밴드 보장: 한 난이도 대역만 돌다 수렴하는 퇴화 경로 차단
                 const last6 = placementEstHistory.slice(-6);
-                if (Math.max(...last6) - Math.min(...last6) <= 100) return true; // 추정 수렴 → 조기 종료
+                if (Math.max(...last6) - Math.min(...last6) <= 100) {
+                    // 추정이 상단이면 더 묻는다 — 여기서 끊으면 실력자가 과소평가된다
+                    if (vocabRating >= PLACEMENT_HIGH) return false;
+                    placementConfirmLeft = PLACEMENT_CONFIRM;     // 동급 문항으로 확인하고 끝낸다
+                    return false;
+                }
             }
             return false;
         }
@@ -4358,12 +4421,28 @@
             placementCount = 0;
             placementWrong = 0;
             placementEstHistory = [];
-            // 🧭 고정 앵커 4문항: 난이도 백분위 12·38·62·88%에서 결정적으로 선정 (정렬 동률은 표제어순 → 전 사용자 동일)
-            // 쉬움→어려움 순서라 첫 문제가 자신감을 만들고, 앵커만으로 전 난이도 밴드를 한 번씩 경유함
+            placementItems = []; placementOuts = []; placementConfirmLeft = -1;
+            // 🧭 앵커 4문항: 난이도 백분위 12·38·62·88% «부근»에서 매번 새로 뽑는다.
+            // 고정 선정은 전 사용자가 같은 문제로 시작해 재응시·공유 시 답이 새고 지루하다.
+            // ±4% 폭(약 110개 후보) 안에서 무작위 — 난이도 구조와 밴드 경유는 그대로 유지된다.
+            // 쉬움→어려움 순서라 첫 문제가 자신감을 만든다
             const sortedByDiff = [...placementPool].sort((a, b) => (wordDifficulty(a) - wordDifficulty(b)) || a.target.localeCompare(b.target));
             placementBandT = [wordDifficulty(sortedByDiff[Math.floor(sortedByDiff.length * 0.33)]),
                               wordDifficulty(sortedByDiff[Math.floor(sortedByDiff.length * 0.67)])];
-            placementAnchors = [0.12, 0.38, 0.62, 0.88].map(p => sortedByDiff[Math.floor(sortedByDiff.length * p)]);
+            const anchorSpan = Math.max(1, Math.round(sortedByDiff.length * 0.04));
+            const anchorTaken = new Set();
+            placementAnchors = [0.12, 0.38, 0.62, 0.88].map(p => {
+                const c = Math.floor(sortedByDiff.length * p);
+                const lo = Math.max(0, c - anchorSpan), hi = Math.min(sortedByDiff.length - 1, c + anchorSpan);
+                let w = null;
+                for (let t = 0; t < 12 && !w; t++) {          // 중복이면 다시 뽑는다
+                    const cand = sortedByDiff[lo + Math.floor(Math.random() * (hi - lo + 1))];
+                    if (cand && !anchorTaken.has(cand.target)) w = cand;
+                }
+                w = w || sortedByDiff[c];
+                anchorTaken.add(w.target);
+                return w;
+            });
             placementAnchors.forEach(w => { const i = placementPool.indexOf(w); if (i >= 0) placementPool.splice(i, 1); });
             placementBandsSeen = new Set();
             vocabRating = 1200; vocabRatingN = 0; sessionRatingDelta = 0;
@@ -4462,10 +4541,15 @@
             totalLearnedWords = masteredCount();
             updateShardCount();
 
-            raisePeak(); // 측정 결과가 시작 고도
+            // 최종 점수는 응답 전체로 한 번에 추정 (순차 Elo의 시작점 편향 제거)
+            vocabRating = Math.max(RATING_MIN, Math.min(RATING_MAX, placementMLE()));
+            // 표시는 능선 초입(700m)까지만 — 나머지는 학습으로 오른다
+            vocabShown = Math.min(vocabRating, PLACEMENT_SHOWN_CAP);
+            vocabShownDate = todayStr;
+            vocabPeak = vocabShown;
             const tier = ratingTier(vocabPeak);
             document.getElementById('placement-result-tier').innerHTML = `${uiIcon(tier.ic, '30px')} ${tier.name}`;
-            document.getElementById('placement-result-rating').textContent = `해발 ${peakAltitude().toLocaleString()}m`;
+            document.getElementById('placement-result-rating').textContent = `해발 ${shownAltitude().toLocaleString()}m`;
             hideHarangCompanion();
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('quiz-box').style.display = 'none';
@@ -4477,6 +4561,8 @@
                 await setDoc(userDocRef, {
                     vocabRating: Math.round(vocabRating), vocabRatingN: vocabRatingN,
                     vocabPeak: Math.round(vocabPeak),
+                    vocabShown: Math.round(vocabShown),
+                    vocabShownDate: vocabShownDate,
                     placementDone: true, ratingHistory: ratingHistory,
                     blueShards: blueShards, learnedWords: learnedWords,
                     totalLearnedWords: totalLearnedWords, current_session: null
@@ -4563,19 +4649,19 @@
                 sessionAttempted = 0;
                 sessionCorrectFirstTry = 0; // 누적 합산 완료 — 헤더 조각 카운터 이중 계산 방지
 
-                // 📏 어휘 고도: 최고점만 표시 갱신 (내려간 것은 반영하지 않음 — 다시 넘어서면 그때 상승)
+                // 📏 어휘 고도: 최고 기록 갱신 + 표시 고도 정산 (P17 개정)
                 pushRatingHistory(todayStr);
-                const prevPeak = vocabPeak;
-                raisePeak();
+                const prevShown = vocabShown;
+                settleShown(todayStr);   // 최고 기록(vocabPeak) 갱신도 이 안에서 — 표시 고도 기준
                 const ratingRow = document.getElementById('result-rating-row');
                 if (vocabRatingN > 0) {
                     ratingRow.style.display = 'block';
-                    const tier = ratingTier(vocabPeak);
-                    document.getElementById('result-rating').innerHTML = `해발 ${peakAltitude().toLocaleString()}m · ${uiIcon(tier.ic, '17px')} ${tier.name}`;
-                    const climbed = Math.round(vocabPeak - prevPeak);
+                    const tier = ratingTier(vocabPeak);   // 칭호는 최고 기록 기준 — 강등 없음
+                    document.getElementById('result-rating').innerHTML = `해발 ${shownAltitude().toLocaleString()}m · ${uiIcon(tier.ic, '17px')} ${tier.name}`;
+                    const climbed = Math.round(vocabShown - prevShown);
                     const deltaEl = document.getElementById('result-rating-delta');
-                    deltaEl.textContent = climbed > 0 ? `+${climbed}m ⬆` : '고도 유지';
-                    deltaEl.style.color = climbed > 0 ? '#059669' : '#94a3b8';
+                    deltaEl.textContent = climbed > 0 ? `+${climbed}m ⬆` : climbed < 0 ? `${climbed}m` : '고도 유지';
+                    deltaEl.style.color = climbed > 0 ? '#059669' : 'var(--text-muted)';
                 } else {
                     ratingRow.style.display = 'none';
                 }
@@ -4633,6 +4719,8 @@
                         vocabRating: Math.round(vocabRating),
                         vocabRatingN: vocabRatingN,
                         vocabPeak: Math.round(vocabPeak),
+                        vocabShown: Math.round(vocabShown),
+                        vocabShownDate: vocabShownDate,
                         placementDone: placementDone,
                         ratingHistory: ratingHistory
                     }, { merge: true });
@@ -6572,7 +6660,7 @@
 
             // ① 요약 칩 그리드
             const chips = [
-                ['어휘 고도', measured ? `해발 ${peakAltitude().toLocaleString()}m` : '측정 전', measured ? `${uiIcon(tier.ic, '11px')} ${tier.name}` : '', '#047857'],
+                ['어휘 고도', measured ? `해발 ${shownAltitude().toLocaleString()}m` : '측정 전', measured ? `${uiIcon(tier.ic, '11px')} ${tier.name}` + (peakAltitude() > shownAltitude() ? ` · 최고 ${peakAltitude().toLocaleString()}m` : '') : '', '#047857'],
                 ['평균 정답률', accuracy, attemptedVal > 0 ? `${attemptedVal}문항 · 첫 시도 기준` : '첫 시도 기준', '#2563eb'],
                 ['누적 학습 어휘', `${learnedVal}개`, `오늘 +${todayCount}`, '#059669'],
                 ['연속 학습', `${streakDays}일차`, `총 출석 ${attendedDays}일`, '#d97706'],
@@ -6653,7 +6741,7 @@
             // 산 위 현재 고도 마커 (해발 alt → y = 200 − alt × 170/1100)
             const marker = document.getElementById('alt-guide-marker');
             if (measured) {
-                const alt = peakAltitude();
+                const alt = shownAltitude();
                 const y = Math.max(34, Math.min(198, 200 - alt * 170 / 1100));
                 document.getElementById('alt-guide-marker-line').setAttribute('y1', y);
                 document.getElementById('alt-guide-marker-line').setAttribute('y2', y);
