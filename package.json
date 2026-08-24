@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "mkdir -p www && cp index.html privacy.html terms.html words.json service-worker.js apple-touch-icon.png www/",
+    "build": "mkdir -p www && cp index.html privacy.html terms.html words.json service-worker.js apple-touch-icon.png www/ && node make_shot.js",
     "add-words": "node add_words.js",
     "merge-words": "node merge_words.js",
     "update-accepts": "node update_accepts.js",
