@@ -105,6 +105,10 @@ words.forEach((w, i) => {
       if (hp && !isVerb(w) && !particleFits(w.target, hp)) {
         targetBugs.push({ i, target: w.target, particle: hp, sentence: w.hint });
       }
+      // 동형이의어(수렴·지표·역학·수용성 …)는 표제어가 같아도 뜻이 다르다.
+      // 같은 힌트를 공유하면 엉뚱한 뜻의 문맥을 보여주게 되므로 차단한다.
+      const twin = words.find((o, j) => j !== i && o.target === w.target && o.hint === w.hint);
+      if (twin) integrity.push(`${loc}: 같은 표제어의 다른 뜻과 hint가 동일 — 뜻별로 다르게 쓸 것`);
     }
   }
 
