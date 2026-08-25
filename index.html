@@ -2045,13 +2045,22 @@
                             <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">연속 학습 3일 이상 달성</span>
                         </div>
                     </div>
+                    <!-- 📜 조선어학회 회원 -->
+                    <div class="badge-card locked-badge" id="modal-badge-scholar"
+                        style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 16px; border: 2px solid var(--border);">
+                        <span style="font-size: 28px; display:flex; align-items:center;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:28px;height:28px;" aria-hidden="true"><use href="#ic-book"></use></svg></span>
+                        <div>
+                            <strong style="font-size: 13px; color: var(--text-primary); display: block;">조선어학회 회원</strong>
+                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">학습 레벨 30 이상 달성</span>
+                        </div>
+                    </div>
                     <!-- 🏆 마루 등정 -->
                     <div class="badge-card locked-badge" id="modal-badge-master"
                         style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 16px; border: 2px solid var(--border);">
                         <span style="font-size: 28px; display:flex; align-items:center;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:28px;height:28px;" aria-hidden="true"><use href="#ic-trophy"></use></svg></span>
                         <div>
                             <strong style="font-size: 13px; color: var(--text-primary); display: block;">마루 등정</strong>
-                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">학습 레벨 5 이상 달성</span>
+                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">학습 레벨 50 이상 달성</span>
                         </div>
                     </div>
                 </div>
@@ -4213,12 +4222,7 @@
                 : '-';
 
             // 해제된 뱃지 개수 카운트
-            let unlockedCount = 0;
-            if (totalLearnedWords >= 10) unlockedCount++;
-            if (totalLearnedWords >= 50) unlockedCount++;
-            if (totalLearnedWords >= 150) unlockedCount++;
-            if (streakDays >= 3) unlockedCount++;
-            if (currentLevel >= 5) unlockedCount++;
+            const unlockedCount = achievementCount();
 
             document.getElementById('home-badges-text').textContent = `${unlockedCount}개`; // "N개" 단일 카운트 표시
 
@@ -4268,60 +4272,27 @@
             document.getElementById('topic-desc').textContent = TOPIC_DESC[selectedTopic] || '';
         }
 
+        // 🏅 업적 정의 한 곳 — 홈 배지 개수·업적 모달·학습 분석이 모두 이걸 본다.
+        // 예전엔 세 곳에 조건이 복제돼 있어 해제 기준을 바꿀 때마다 값이 어긋났다.
+        const ACHIEVEMENTS = [
+            { el: 'modal-badge-sprout', color: '#10b981', test: () => totalLearnedWords >= 10 },
+            { el: 'modal-badge-collector', color: '#3b82f6', test: () => totalLearnedWords >= 50 },
+            { el: 'modal-badge-conqueror', color: '#8b5cf6', test: () => totalLearnedWords >= 150 },
+            { el: 'modal-badge-streak', color: '#ef4444', test: () => streakDays >= 3 },
+            { el: 'modal-badge-scholar', color: '#b45309', test: () => Math.floor(currentExp / 200) + 1 >= 30 },
+            { el: 'modal-badge-master', color: '#f59e0b', test: () => Math.floor(currentExp / 200) + 1 >= 50 },
+        ];
+        const achievementCount = () => ACHIEVEMENTS.filter(a => a.test()).length;
+
         // 독립형 업적 팝업 데이터 연동 및 스타일링 함수
         function updateAchievementModal() {
-            const currentLevel = Math.floor(currentExp / 200) + 1;
-
-            const badgeSprout = document.getElementById('modal-badge-sprout');
-            const badgeCollector = document.getElementById('modal-badge-collector');
-            const badgeConqueror = document.getElementById('modal-badge-conqueror');
-            const badgeStreak = document.getElementById('modal-badge-streak');
-            const badgeMaster = document.getElementById('modal-badge-master');
-
-            // 1. 어휘 산책 (단어 10개)
-            if (totalLearnedWords >= 10) {
-                badgeSprout.classList.remove('locked-badge');
-                badgeSprout.style.border = '2px solid #10b981';
-            } else {
-                badgeSprout.classList.add('locked-badge');
-                badgeSprout.style.border = '2px solid #e2e8f0';
-            }
-
-            // 2. 어휘 탐험 (단어 50개)
-            if (totalLearnedWords >= 50) {
-                badgeCollector.classList.remove('locked-badge');
-                badgeCollector.style.border = '2px solid #3b82f6';
-            } else {
-                badgeCollector.classList.add('locked-badge');
-                badgeCollector.style.border = '2px solid #e2e8f0';
-            }
-
-            // 3. 어휘 등반 (단어 150개)
-            if (totalLearnedWords >= 150) {
-                badgeConqueror.classList.remove('locked-badge');
-                badgeConqueror.style.border = '2px solid #8b5cf6';
-            } else {
-                badgeConqueror.classList.add('locked-badge');
-                badgeConqueror.style.border = '2px solid #e2e8f0';
-            }
-
-            // 4. 작심삼일 극복 (연속 3일)
-            if (streakDays >= 3) {
-                badgeStreak.classList.remove('locked-badge');
-                badgeStreak.style.border = '2px solid #ef4444';
-            } else {
-                badgeStreak.classList.add('locked-badge');
-                badgeStreak.style.border = '2px solid #e2e8f0';
-            }
-
-            // 5. 마루 등정 (레벨 5)
-            if (currentLevel >= 5) {
-                badgeMaster.classList.remove('locked-badge');
-                badgeMaster.style.border = '2px solid #f59e0b';
-            } else {
-                badgeMaster.classList.add('locked-badge');
-                badgeMaster.style.border = '2px solid #e2e8f0';
-            }
+            ACHIEVEMENTS.forEach(a => {
+                const el = document.getElementById(a.el);
+                if (!el) return;
+                const on = a.test();
+                el.classList.toggle('locked-badge', !on);
+                el.style.border = `2px solid ${on ? a.color : '#e2e8f0'}`;
+            });
         }
 
         function goToHome() {
@@ -6265,10 +6236,10 @@
                 { name: "🔥 작심삼일 극복", unlocked: streakDays >= 3 },
                 // 📜 칭호의 무게를 지키는 한 줄 — 게임적 소비가 아니라 역사에 대한 존중임을 전달 (브랜드 원칙 P16)
                 {
-                    name: "📜 조선어학회 회원", unlocked: currentLevel >= 4,
+                    name: "📜 조선어학회 회원", unlocked: currentLevel >= 30,
                     note: "일제강점기, 우리말 사전을 지키려 낱말을 모았던 분들의 이름이야"
                 },
-                { name: "🏆 마루 등정", unlocked: currentLevel >= 5 }
+                { name: "🏆 마루 등정", unlocked: currentLevel >= 50 }
             ];
 
             titles.forEach(t => {
@@ -6655,13 +6626,7 @@
             const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             const todayCount = Object.keys(learnedWords).filter(t => learnedEntry(t).d === todayStr).length;
             const attendedDays = attendanceDateSet().size;
-            let badgeCount = 0;
-            if (totalLearnedWords >= 10) badgeCount++;
-            if (totalLearnedWords >= 50) badgeCount++;
-            if (totalLearnedWords >= 150) badgeCount++;
-            if (streakDays >= 3) badgeCount++;
-            if (currentLevel >= 4) badgeCount++;
-            if (currentLevel >= 5) badgeCount++;
+            const badgeCount = achievementCount();
             const tier = ratingTier(vocabPeak);
             const measured = (placementDone || vocabRatingN > 0) && vocabPeak > 0;
 
@@ -6672,7 +6637,7 @@
                 ['누적 학습 어휘', `${learnedVal}개`, `오늘 +${todayCount}`, '#059669'],
                 ['연속 학습', `${streakDays}일차`, `총 출석 ${attendedDays}일`, '#d97706'],
                 ['현재 레벨', `Lv.${currentLevel}`, `${currentExp} EXP`, '#7c3aed'],
-                ['달성 업적', `${badgeCount} / 6`, '', '#dc2626'],
+                ['달성 업적', `${badgeCount} / ${ACHIEVEMENTS.length}`, '', '#dc2626'],
             ];
             const chipsHtml = chips.map(([label, value, sub, color]) => `
                 <div style="background:var(--bg-subtle); border:1px solid var(--border); border-radius:14px; padding:10px 12px; text-align:left;">
