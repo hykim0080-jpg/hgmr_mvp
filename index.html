@@ -2237,6 +2237,7 @@
                 <p style="margin: 0 0 4px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">스무 문제 안팎으로 딱 맞는 난이도를 찾아요.<br>맞힌 단어는 낱말 조각으로 남고,<br>끝나면 <b style="color:#0284c7;">지혜 조각 +15</b>를 드려요!</p>
                 <button id="placement-start-btn" style="width: 100%; margin-top: 14px; padding: 14px; background: #10b981; color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-seal"></use></svg> 실력 알아보기 시작</button>
                 <button id="placement-later-btn" style="width: 100%; margin-top: 8px; padding: 10px; background: none; color: var(--text-muted); border: none; font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">나중에 하기</button>
+                <p style="margin: 6px 0 0; font-size: 11px; color: var(--text-muted); line-height: 1.5;">학습은 실력을 알아본 뒤에 시작할 수 있어요.</p>
             </div>
         </div>
 
@@ -4404,8 +4405,13 @@
 
             const startBtnSpan = document.querySelector('#start-study-btn span');
             if (startBtnSpan) {
-                const btnText = lastDate === todayStr ? "계속해서 학습하기" : "오늘의 학습 시작하기";
-                startBtnSpan.innerHTML = `${btnText} (<span id="home-target-count-text">${targetWordCount}</span>개)`;
+                if (!placementDone) {
+                    // 눌렀을 때 열리는 것과 다른 말을 하지 않는다
+                    startBtnSpan.innerHTML = '먼저 실력 알아보기';
+                } else {
+                    const btnText = lastDate === todayStr ? "계속해서 학습하기" : "오늘의 학습 시작하기";
+                    startBtnSpan.innerHTML = `${btnText} (<span id="home-target-count-text">${targetWordCount}</span>개)`;
+                }
             }
 
             // 평균 정답률 = 첫 시도 정답 수 ÷ 답이 확정된 문항 수
@@ -5950,7 +5956,17 @@
         submitBtn.addEventListener('click', checkAnswer);
         showAnswerBtn.addEventListener('click', revealAnswer);
         document.getElementById('next-btn').addEventListener('click', loadQuestion);
-        document.getElementById('start-study-btn').addEventListener('click', () => startSession(targetWordCount));
+        // 첫 학습은 무조건 배치고사부터. 아직 마치지 않았다면 이 버튼이 배치고사로 간다 —
+        // 고도 없이 학습을 시작하면 출제 난이도를 정할 근거가 없다(sampleAdaptive가 expectedP로 고른다).
+        document.getElementById('start-study-btn').addEventListener('click', () => {
+            if (!placementDone) {
+                placementPromptShown = true;
+                document.getElementById('placement-intro-modal').style.display = 'flex';
+                track('placement_gate', { from: 'start_button' });
+                return;
+            }
+            startSession(targetWordCount);
+        });
 
         // 퀴즈 중 홈으로 나가기 — 앱 자체 디자인의 확인 모달 사용
         document.getElementById('quiz-home-btn').addEventListener('click', () => {
