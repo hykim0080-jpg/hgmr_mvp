@@ -1,9 +1,0 @@
-fix: 웹 구글·애플 로그인 복구 — initializeAuth에 popupRedirectResolver 누락
-
-initializeAuth()는 getAuth()와 달리 팝업/리다이렉트 리졸버를 자동 등록하지
-않는다. 그래서 signInWithPopup()이 팝업을 열기도 전에 auth/argument-error로
-실패했고, 웹의 구글·애플 로그인이 2026-05-27 이후 계속 막혀 있었다.
-(네이티브 앱은 signInWithCredential 경로라 영향 없음)
-
-browserPopupRedirectResolver를 명시적으로 넘기도록 수정.
-프로브 재실행 결과 팝업이 정상적으로 __/auth/handler 로 열림.
