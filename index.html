@@ -4144,16 +4144,9 @@
         }
 
 
-        // 📜 레벨 4(조선어학회 회원) 첫 도달 감지용 — 세션 내 레벨 상승 교차 시에만 안내 (기존 고레벨 유저 재로그인 시 미발동)
-        let lastSeenLevel = null;
         async function updateDashboard() {
             updateShardCount();
             const currentLevel = Math.floor(currentExp / 200) + 1; const expInLevel = currentExp % 200;
-            if (lastSeenLevel !== null && lastSeenLevel < 4 && currentLevel >= 4) {
-                // 칭호의 무게를 지키는 한 줄 — 게임적 소비가 아니라 역사에 대한 존중임을 전달
-                harangSay('<span style="font-size:12.5px; font-weight:700; color:var(--text-body);">📜 <b>조선어학회 회원</b>이 됐어! 일제강점기, 우리말 사전을 지키려 낱말을 모았던 분들의 이름이야.</span>', 5200);
-            }
-            lastSeenLevel = currentLevel;
             document.getElementById('streak-text').textContent = `${streakDays}일차`;
             document.getElementById('level-text').textContent = currentLevel;
             document.getElementById('exp-text').textContent = expInLevel;
