@@ -2539,7 +2539,7 @@
                     <div class="progress-bar" style="flex: 1; margin-bottom: 0;">
                         <div class="progress-fill" id="progress"></div>
                     </div>
-                    <span id="progress-text" style="flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--text-secondary); min-width: 52px; text-align: right;">0/0</span>
+                    <span id="progress-text" style="flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--text-secondary); min-width: 52px; text-align: right;"></span>
                 </div>
 
                 <div id="word-tag-display" style="display:none; text-align:left; margin-bottom:8px;"></div>
@@ -4320,7 +4320,7 @@
         const PLACEMENT_SHOWN_CAP = 1500;   // 700m = 능선 초입
         let placementPromptShown = false; // 이번 앱 실행에서 안내를 이미 띄웠는지
         const PLACEMENT_MAX = 22, PLACEMENT_MIN = 15;   // 상단이면 더 묻되 22문항을 넘기지 않는다
-        const PLACEMENT_RETRIES = 3;   // 오답 시 재입력 기회 (초과하면 정답 공개 후 다음)
+        const PLACEMENT_RETRIES = 2;   // 오답 시 재입력 기회 — 첫 입력 포함 총 3번 답할 수 있다 (초과하면 정답 공개 후 다음)
         let placementWrong = 0;        // 현재 문항의 누적 오답 수
         // 🧭 고정 앵커 + 밴드 보장 (MST식 절충): 초반 운·문항 보정 오차로 적응 경로가 흔들리는 것 방지
         let placementAnchors = [];         // 시작 고정 문항 (전원 동일, 쉬움→어려움)

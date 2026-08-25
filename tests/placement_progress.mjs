@@ -27,8 +27,10 @@ const visible = sel => page.evaluate(s => {
 
 await page.goto(URL, { waitUntil: 'networkidle2', timeout: 60000 });
 await click('#anon-login-btn');
-await sleep(3500);
-if (!(await visible('#placement-intro-modal'))) { log('❌ 배치고사 안내가 뜨지 않음'); await browser.close(); process.exit(1); }
+// 익명 로그인 + 첫 데이터 로드가 느릴 때가 있어 최대 25초까지 기다린다
+let ready = false;
+for (let t = 0; t < 25 && !ready; t++) { await sleep(1000); ready = await visible('#placement-intro-modal'); }
+if (!ready) { log('❌ 배치고사 안내가 뜨지 않음'); await browser.close(); process.exit(1); }
 
 const intro = await page.evaluate(() => document.querySelector('#placement-intro-modal p:nth-of-type(2)')?.textContent.trim());
 log('안내 문구:', JSON.stringify(intro));
@@ -60,7 +62,7 @@ for (; i < 140; i++) {   // 오답 시 재입력 기회가 있어 제출 횟수 
     // PROFILE=weak: 재입력 기회(3회)를 모두 소진해 실제 오답으로 채점되게 한다.
     // 전부 맞히면 추정이 상단(PLACEMENT_HIGH)에 머물러 수렴하지 않고 상한 22문항까지 간다.
     const weak = process.env.PROFILE === 'weak';
-    const wrongTurn = weak ? (seen[st.meaning] = (seen[st.meaning] || 0) + 1) <= 4 : i % 3 === 2;
+    const wrongTurn = weak ? (seen[st.meaning] = (seen[st.meaning] || 0) + 1) <= 3 : i % 3 === 2;   // 총 3번까지 답할 수 있다
     const ans = (!hit.length || wrongTurn) ? '엉뚱한답' : hit[0].target;
 
     await page.focus('#answer-input');
@@ -79,14 +81,15 @@ rows.forEach(r => log(`  ${String(r.n).padStart(2)}  ${r.text.padEnd(10)} ${r.wi
 // ── 검증 ──────────────────────────────────────────────
 const pct = rows.map(r => parseFloat(r.width) || 0);
 const monotonic = pct.every((v, k) => k === 0 || v >= pct[k - 1]);
-const noFakeDenom = rows.every(r => !r.text.includes('/'));
+const noFakeDenom = rows.every(r => !/\d+\s*\/\s*\d+/.test(r.text));
 const hasWrapUp = rows.some(r => r.text === '마무리');
 log('\n판정');
 log(`  · 가짜 분모(n/22) 없음: ${noFakeDenom ? '✅' : '❌ ' + rows.filter(r => r.text.includes('/')).map(r => r.text)}`);
 log(`  · 막대가 뒤로 가지 않음: ${monotonic ? '✅' : '❌'}`);
 log(`  · 확인 구간에서 '마무리' 표시: ${hasWrapUp ? '✅' : '⚠️ 이번 실행에선 수렴 없이 상한까지 감'}`);
 log(`  · 마지막 막대 폭: ${rows.length ? rows[rows.length - 1].width : '-'} (마지막 문항 제출 후 100%)`);
-const items = Math.max(...rows.map(r => parseInt(r.text) || 0), 0) + (hasWrapUp ? 0 : 1);
-log(`  · 제출 ${rows.length}회 / 실제 문항 약 ${items}개 — 기대 범위 19~22`);
+// 확인 구간에선 텍스트가 '마무리'라 숫자를 못 읽는다 — 막대 폭이 바뀐 횟수로 문항 수를 센다
+const items = new Set(rows.map(r => r.width)).size;
+log(`  · 제출 ${rows.length}회 / 실제 문항 ${items}개 — 기대 범위 19~22`);
 
 await browser.close();
