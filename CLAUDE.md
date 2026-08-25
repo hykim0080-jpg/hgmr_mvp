@@ -76,18 +76,45 @@ npm run fetch-reports  # 단어 신고함 내려받기
 npm run admin          # 로컬 관리자 패널 (localhost:4000/admin.html)
 ```
 
+**릴리스 빌드** (화면 없는 맥에서도 로그만으로 돌아가도록 스크립트화)
+
+```bash
+zsh build_release.sh   # Android AAB + iOS 아카이브·내보내기 → _build4.log
+                       #   SKIP_ANDROID=1 / SKIP_ARCHIVE=1 로 부분 재실행
+zsh resign_ios.sh      # 내보낸 IPA 재서명 (Apple 로그인 엔타이틀먼트 복원) → _resign4.log
+```
+
+**E2E 테스트** (puppeteer-core + 설치된 Chrome, 아이폰 UA로 모바일 경로를 태운다)
+
+```bash
+node tests/retry_stats.mjs                       # 재출제 문항 오답 통계
+PROFILE=weak node tests/placement_progress.mjs   # 배치고사 진행 표시 (weak=수렴 경로)
+node tests/clean_test_stats.js --apply           # ⚠️ 테스트가 남긴 더미 답안 정리 — 실행 후 필수
+```
+
 ## 📐 구조 메모
 
-- **`index.html` 단일 파일 앱** (약 6,400줄). 전체가 하나의 `<script type="module">` 블록 — 함수는 모두 같은 스코프
+- **`index.html` 단일 파일 앱** (약 6,900줄). 전체가 하나의 `<script type="module">` 블록 — 함수는 모두 같은 스코프
 - `www/` 는 **빌드 산출물**. 직접 고치지 말고 루트 파일을 고친 뒤 `npm run build`
 - 화면·구역의 공식 명칭은 **`화면_명칭_가이드.md`** (DOM id와 1:1). 소통 시 이 명칭을 사용
 - `admin.html` 은 로컬 전용 — `.gitignore`에 있고 배포 번들에 넣지 않음
 - 사용자 행동 계측은 `track(name, params)` 사용. Firebase Analytics를 `isSupported()` + try/catch로 격리해 두었으므로 실패해도 학습 흐름은 안 막힘
+- **칭호는 두 갈래** — 자동(어휘 고도 등급 5단계, `ratingTier`) / 장착(7개, `buildTitleOptions`). 레벨로 칭호를 주던 `getLevelTitle()`은 호출부가 없어 삭제됨(2026-08-25)
+- **업적 해제 조건은 `ACHIEVEMENTS` 배열 한 곳에만 둔다** — 예전엔 홈 배지 개수·업적 모달·학습 분석 세 곳에 복제돼 있어, 조건을 바꿀 때마다 값이 서로 어긋났다
+- `www/shot.html` 은 **스토어 스크린샷 촬영 전용 페이지** — `make_shot.js`가 빌드 때 `index.html`에 전체화면 메타만 주입해 생성. 소스 파일은 따로 없다
 
 ## ⚠️ 현재 주의사항
 
 - ✅ **번들 ID 통일 완료** (2026-07-30) — iOS·Android·Capacitor 모두 **`com.hgmr.app`**. Firebase iOS 앱도 이 번들 ID로 재등록했고 구글 로그인 검증 완료. 구 `com.hyk.hgmr` iOS 앱은 Firebase 콘솔에서 정리 예정
 - **'❄️ 빙하 키보드'는 비활성** — `usesGlacierKeyboard()`가 `false` 하드코딩. 프로필 설정 시트의 선택 섹션은 **부모 div에 `display:none`이 걸려 이미 숨겨져 있음**(index.html 약 1882줄). 버튼 마크업만 보고 "노출 중"으로 오판하지 말 것. 재활성화하려면 그 `display:none` 제거 + 함수 원복(바로 윗줄 주석)
-- **`node_modules`가 git에 추적 중** (2,092개). `.gitignore`에는 추가됨 — `git rm -r --cached node_modules` 필요
+- ✅ **`node_modules` git 추적 해제 완료** (2026-08-25 확인 — `git ls-files node_modules` 0건)
 - **`terms.html`·`privacy.html`은 배포 여부를 내용으로 확인할 것** — `firebase.json`의 SPA 리라이트 때문에 서버에 없는 파일도 **HTTP 200에 앱 화면**을 반환함. 상태 코드만으로는 링크 깨짐이 안 잡힘
 - 외부 링크는 모두 **`hgmr.co.kr`** 로. `hgmr-9109e.web.app`은 백업 도메인이며 스토어 제출에 쓰지 않음
+- **HTML·`words.json`은 캐시 재검증 강제** (2026-08-25) — `firebase.json`의 `headers`에 `no-cache`. 기본값 `max-age=3600` 탓에 배포 후 한 시간 동안 옛 화면이 서빙돼 "고쳤는데 왜 그대로냐"를 두 번 겪었다. 루트(`/`)는 SPA 리라이트로 서빙되어 `**/*.html` 패턴에 안 걸리므로 별도 항목이 있다 — 지우지 말 것
+- **`index.html`에 standalone(전체화면) 메타를 넣지 말 것** — iOS 홈 화면 앱에서는 `window.open`이 Safari로 빠져나가 `signInWithPopup` 기반 구글·애플 로그인이 **실패**한다. 촬영용 전체화면 페이지는 `/shot.html`로 분리돼 있다
+- **어휘 고도는 내려갈 수 있다** (P17 개정, 2026-08-23) — 칭호와 최고 기록만 유지된다. *"한 번 오른 고도는 절대 내려가지 않아요"* 류의 문구를 다시 쓰지 말 것 (앱·스토어 문구에서 이미 한 번 걷어냈다)
+- **E2E 테스트는 운영 Firestore에 쓴다** — `tests/*.mjs`가 제출한 답이 `word_stats`에 남는다. 일반 학습뿐 아니라 **배치고사도** `recordWordStat()`을 탄다. 돌린 뒤 반드시 `node tests/clean_test_stats.js --apply`
+- **맥 릴리스 빌드의 두 함정** (둘 다 `build_release.sh`에 반영·주석 처리됨)
+  - AGP는 Java 17+ 필요한데 시스템 기본이 Corretto 11 → `JAVA_HOME`을 Android Studio 번들 JBR로 지정
+  - 같은 "Apple Distribution" 인증서가 **login 키체인에도** 있어, 검색 경로에 login이 남아 있으면 codesign이 그쪽 잠긴 키를 골라 **보이지 않는 암호 창에 영구히 멈춘다**. 서명 중에는 `security list-keychains -d user -s hgmrbuild.keychain`으로 한정하고, 끝나면 `trap`으로 반드시 복구할 것
+- **아카이브는 `CODE_SIGNING_ALLOWED=NO`로 만들고 `-exportArchive`에서 서명한다** (SPM 리소스 번들이 프로비저닝 프로파일을 못 받는 문제 회피). 그 대가로 `App.entitlements`의 `com.apple.developer.applesignin`이 빠지므로 `resign_ios.sh`로 재서명해야 한다 — 빼먹으면 애플 로그인이 죽은 채로 스토어에 올라간다
