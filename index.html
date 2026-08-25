@@ -2800,6 +2800,9 @@
         }
         let quizQueue = []; let totalQuestions = 0; let completedQuestions = 0; let retryCount = 0;
         let isWaiting = false; let hasFailedCurrent = false; let isShowingStats = false;
+        // 배치고사는 통계 패널을 띄우지 않아 isShowingStats가 서지 않는다.
+        // 정답을 공개하고 '다음' 대기 중인 상태를 따로 표시해 신고 대상이 밀리지 않게 한다.
+        let placementRevealed = false;
         let attemptCounted = false;   // 한 문항이 두 번 집계되지 않도록
         let kbHideTimer = null; // 키보드 하강 완료 후 숨김 타이머 핸들 (문제 전환 시 취소용)
         let selectedTopic = 'all';
@@ -3114,6 +3117,13 @@
         let learnedWords = {};
         let flaggedWords = {};
         let lastActiveWord = null;
+
+        // 🚩 화면에 실제로 보이는 단어를 돌려준다.
+        // 채점이 끝나면 큐는 이미 다음 문항을 가리키므로 quizQueue[0]을 쓰면 한 칸 밀린다.
+        function isAnswerRevealed() { return isShowingStats || placementRevealed; }
+        function screenWord() {
+            return isAnswerRevealed() ? lastActiveWord : (quizQueue.length > 0 ? quizQueue[0] : lastActiveWord);
+        }
 
         // iPadOS 13+는 UA가 "Macintosh"로 나오므로 멀티터치 지원 여부로 함께 판별
         const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -4514,6 +4524,7 @@
 
         function placementAdvance() {
             placementWrong = 0; // 다음 문항을 위해 오답 카운터 초기화
+            placementRevealed = true;   // 정답 공개됨 — 신고 대상은 lastActiveWord로 고정
             quizQueue.shift();
             completedQuestions++;   // 배치고사는 재출제가 없어 1문항 = 1카운트
             renderProgress();
@@ -4582,7 +4593,7 @@
         });
 
         async function loadQuestion() {
-            isWaiting = false; hasFailedCurrent = false; isShowingStats = false;
+            isWaiting = false; hasFailedCurrent = false; isShowingStats = false; placementRevealed = false;
             await updateDashboard();
 
             const statsBox = document.getElementById('inline-stats-container');
@@ -4733,6 +4744,7 @@
 
             const currentWord = quizQueue[0];
             lastActiveWord = currentWord;
+            placementRevealed = false;  // 새 문항 표시 — 정답 공개 상태 해제
 
             // 🛠️ 관리자(제보) 버튼 로드 시 flaggedWords에 존재 여부에 따라 상태 결정
             const flagBtn = document.getElementById('flag-word-btn');
@@ -5286,13 +5298,13 @@
         let reportTargetWord = null;
 
         function openReportModal() {
-            const currentWord = isShowingStats ? lastActiveWord : (quizQueue.length > 0 ? quizQueue[0] : lastActiveWord);
+            const currentWord = screenWord();
             if (!currentWord) return;
             reportTargetWord = currentWord;
             reportReason = null;
             // 정답이 아직 공개되지 않았을 수 있으므로 신고 모달에도 정답 단어를 노출하지 않음
             //  (뜻풀이 + 빈칸 예문으로 문제를 식별 — 관리자는 저장된 target으로 확인)
-            const answerRevealed = isShowingStats; // 통계 화면 = 이미 정답을 본 상태
+            const answerRevealed = isAnswerRevealed(); // 통계 화면·배치고사 정답 공개 = 이미 정답을 본 상태
             document.getElementById('report-word-target').textContent = answerRevealed ? currentWord.target : currentWord.meaning;
             const { suffix: rSuffix } = splitVerbEnding(currentWord);
             document.getElementById('report-word-sentence').textContent = answerRevealed
@@ -5400,7 +5412,7 @@
 
         async function toggleFlagWord() {
             // stats 화면을 보여주고 있거나 queue가 비어있는 등의 상태일 때, lastActiveWord를 우선적으로 사용합니다.
-            const currentWord = isShowingStats ? lastActiveWord : (quizQueue.length > 0 ? quizQueue[0] : lastActiveWord);
+            const currentWord = screenWord();
             if (!currentWord) return;
             const target = currentWord.target;
             const flagBtn = document.getElementById('flag-word-btn');
@@ -5613,7 +5625,7 @@
             }
 
             // 퀴즈 화면에 현재 해당 단어가 노출되고 있다면(풀이 중 혹은 통계 확인 중) 스타일 되돌림
-            const currentWord = isShowingStats ? lastActiveWord : (quizQueue.length > 0 ? quizQueue[0] : lastActiveWord);
+            const currentWord = screenWord();
             if (currentWord && currentWord.target === wordTarget) {
                 const flagBtn = document.getElementById('flag-word-btn');
                 if (flagBtn) {
