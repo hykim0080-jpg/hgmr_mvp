@@ -43,3 +43,11 @@ b2.sh
 pw.sh
 .claude/hooks/__pycache__/
 .claude/hooks/.write_test
+dist/
+
+# 릴리스 빌드 로그·중간 산출물
+_build4.log
+_resign4.log
+_upload4.log
+ios/export/out*/
+ios/export/*.xcarchive/
