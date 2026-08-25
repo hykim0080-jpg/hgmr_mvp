@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <polygon points="100,20 152,86 100,180 48,86" fill="#34D399"></polygon>
+  <polygon points="100,20 48,86 100,86" fill="#6EE7B7"></polygon>
+  <text x="100" y="110" text-anchor="middle" font-family="&#39;Noto Sans KR&#39;,sans-serif" font-weight="900" font-size="52" fill="#FFFFFF">ㅎ</text>
+</svg>

@@ -111,6 +111,7 @@ node tests/clean_test_stats.js --apply           # ⚠️ 테스트가 남긴 �
 - **`terms.html`·`privacy.html`은 배포 여부를 내용으로 확인할 것** — `firebase.json`의 SPA 리라이트 때문에 서버에 없는 파일도 **HTTP 200에 앱 화면**을 반환함. 상태 코드만으로는 링크 깨짐이 안 잡힘
 - 외부 링크는 모두 **`hgmr.co.kr`** 로. `hgmr-9109e.web.app`은 백업 도메인이며 스토어 제출에 쓰지 않음
 - **HTML·`words.json`은 캐시 재검증 강제** (2026-08-25) — `firebase.json`의 `headers`에 `no-cache`. 기본값 `max-age=3600` 탓에 배포 후 한 시간 동안 옛 화면이 서빙돼 "고쳤는데 왜 그대로냐"를 두 번 겪었다. 루트(`/`)는 SPA 리라이트로 서빙되어 `**/*.html` 패턴에 안 걸리므로 별도 항목이 있다 — 지우지 말 것
+- **`initializeAuth()`를 쓴다면 `popupRedirectResolver`를 반드시 함께 넘길 것** (2026-08-26) — `getAuth()`와 달리 `initializeAuth()`는 팝업/리다이렉트 리졸버를 자동으로 넣어주지 않는다. 빠지면 웹에서 `signInWithPopup`이 **팝업조차 열지 않고 `auth/argument-error`로 즉시 실패**한다. 구글·애플 로그인이 이 이유로 5/27부터 3개월간 웹에서 죽어 있었다(네이티브는 `signInWithCredential`이라 무사). 지금은 `browserPopupRedirectResolver`를 넘긴다 — 지우지 말 것
 - **`index.html`에 standalone(전체화면) 메타를 넣지 말 것** — iOS 홈 화면 앱에서는 `window.open`이 Safari로 빠져나가 `signInWithPopup` 기반 구글·애플 로그인이 **실패**한다. 촬영용 전체화면 페이지는 `/shot.html`로 분리돼 있다
 - **어휘 고도는 내려갈 수 있다** (P17 개정, 2026-08-23) — 칭호와 최고 기록만 유지된다. *"한 번 오른 고도는 절대 내려가지 않아요"* 류의 문구를 다시 쓰지 말 것 (앱·스토어 문구에서 이미 한 번 걷어냈다)
 - **E2E 테스트는 운영 Firestore에 쓴다** — `tests/*.mjs`가 제출한 답이 `word_stats`에 남는다. 일반 학습뿐 아니라 **배치고사도** `recordWordStat()`을 탄다. 돌린 뒤 반드시 `node tests/clean_test_stats.js --apply`

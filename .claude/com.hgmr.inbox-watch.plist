@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.hgmr.inbox-watch</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/Users/hyk/Desktop/hgmr/.claude/inbox_notify.py</string>
+    </array>
+
+    <!-- 이 파일들이 바뀌는 순간 위 스크립트가 실행된다 -->
+    <key>WatchPaths</key>
+    <array>
+        <string>/Users/hyk/Desktop/hgmr/_cowork_to_code.md</string>
+        <string>/Users/hyk/Desktop/hgmr/_code_to_cowork.md</string>
+    </array>
+
+    <!-- 로그인·로드 시점에는 실행하지 않는다 (변경이 있을 때만) -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/hgmr-inbox-watch.err</string>
+</dict>
+</plist>

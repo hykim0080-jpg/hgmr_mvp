@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한글마루 진행 현황</title>
+<style>
+  :root{
+    --bg:#F8FAF9; --surface:#FFFFFF; --surface-2:#F1F5F4; --line:#E2E8E6;
+    --ink:#2A2F3A; --ink-2:#4B5563; --muted:#8A95A5;
+    --brand:#10B981; --brand-soft:#ECFDF5; --brand-line:#A7F3D0;
+    --good:#0E9F6E; --good-bg:#E7F8F1;
+    --warn:#B45309; --warn-bg:#FEF3E2;
+    --wait:#B91C1C; --wait-bg:#FEECEC;
+    --info:#4B5563; --info-bg:#EEF1F4;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0B1512; --surface:#132420; --surface-2:#0E2E23; --line:#254038;
+      --ink:#E8F0EC; --ink-2:#B7C6C0; --muted:#7E918A;
+      --brand:#34D399; --brand-soft:#0E2E23; --brand-line:#1F5847;
+      --good:#34D399; --good-bg:#0F2E24;
+      --warn:#FBBF24; --warn-bg:#332612;
+      --wait:#F87171; --wait-bg:#3A1B1B;
+      --info:#B7C6C0; --info-bg:#1B2C27;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:28px 20px 60px;
+    background:var(--bg); color:var(--ink);
+    font-family:'Apple SD Gothic Neo','Pretendard','Noto Sans KR',system-ui,sans-serif;
+    line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px; margin:0 auto;}
+
+  header.top{margin-bottom:26px;}
+  .eyebrow{font-size:12px; font-weight:800; letter-spacing:.08em; color:var(--brand); text-transform:uppercase;}
+  h1{font-size:26px; margin:6px 0 4px; letter-spacing:-.01em;}
+  .stamp{font-size:12.5px; color:var(--muted);}
+
+  .verdict{
+    margin:22px 0 30px; padding:18px 20px; border-radius:14px;
+    background:var(--brand-soft); border:1px solid var(--brand-line);
+  }
+  .verdict h2{margin:0 0 6px; font-size:17px;}
+  .verdict p{margin:0; font-size:14px; color:var(--ink-2);}
+
+  h2.sec{
+    font-size:13px; font-weight:800; letter-spacing:.06em; color:var(--muted);
+    text-transform:uppercase; margin:34px 0 12px;
+    padding-bottom:8px; border-bottom:1px solid var(--line);
+  }
+
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px;}
+  .tile{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px;}
+  .tile .label{font-size:12px; color:var(--muted); font-weight:700;}
+  .tile .value{font-size:22px; font-weight:800; margin:4px 0 2px; letter-spacing:-.02em;}
+  .tile .note{font-size:12px; color:var(--ink-2);}
+  .bar{height:6px; border-radius:3px; background:var(--surface-2); overflow:hidden; margin-top:9px;}
+  .bar > i{display:block; height:100%; border-radius:3px; background:var(--brand);}
+
+  .chip{
+    display:inline-flex; align-items:center; gap:5px; white-space:nowrap;
+    font-size:11.5px; font-weight:800; padding:2px 9px; border-radius:999px;
+    border:1px solid transparent;
+  }
+  .c-good{background:var(--good-bg); color:var(--good); border-color:currentColor;}
+  .c-warn{background:var(--warn-bg); color:var(--warn); border-color:currentColor;}
+  .c-wait{background:var(--wait-bg); color:var(--wait); border-color:currentColor;}
+  .c-info{background:var(--info-bg); color:var(--info); border-color:var(--line);}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px; background:var(--surface);
+        border:1px solid var(--line); border-radius:12px; overflow:hidden;}
+  th{text-align:left; font-size:11.5px; letter-spacing:.04em; color:var(--muted);
+     text-transform:uppercase; padding:10px 14px; background:var(--surface-2); font-weight:800;}
+  td{padding:11px 14px; border-top:1px solid var(--line); vertical-align:top; color:var(--ink-2);}
+  td strong{color:var(--ink); font-weight:700;}
+  td.who{white-space:nowrap;}
+
+  ol.flow{list-style:none; margin:0; padding:0;}
+  ol.flow > li{
+    position:relative; padding:0 0 20px 26px; border-left:2px solid var(--line); margin-left:6px;
+  }
+  ol.flow > li:last-child{border-left-color:transparent; padding-bottom:0;}
+  ol.flow > li::before{
+    content:''; position:absolute; left:-7px; top:5px; width:12px; height:12px;
+    border-radius:50%; background:var(--surface); border:2px solid var(--muted);
+  }
+  ol.flow > li.done::before{background:var(--good); border-color:var(--good);}
+  ol.flow > li.open::before{background:var(--wait); border-color:var(--wait);}
+  ol.flow > li.prog::before{background:var(--warn); border-color:var(--warn);}
+  .fl-head{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:3px;}
+  .fl-dir{font-size:11.5px; font-weight:800; color:var(--brand); letter-spacing:.02em;}
+  .fl-title{font-size:14px; font-weight:700; color:var(--ink);}
+  .fl-body{font-size:13px; color:var(--ink-2); margin:0;}
+
+  .todo{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:6px 4px;}
+  .todo li{margin:0; padding:10px 16px 10px 14px; border-top:1px solid var(--line); font-size:13.5px; color:var(--ink-2);}
+  .todo li:first-child{border-top:none;}
+  .todo li strong{color:var(--ink);}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px;
+       background:var(--surface-2); padding:1px 5px; border-radius:4px; color:var(--ink);}
+  .foot{margin-top:34px; font-size:12px; color:var(--muted); border-top:1px solid var(--line); padding-top:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">한글마루 · hgmr</div>
+    <h1>진행 현황</h1>
+    <div class="stamp">2026-07-30 기준 · 나의 마지막 국어 공부</div>
+  </header>
+
+  <div class="verdict">
+    <h2>출시 직전 (Release Candidate)</h2>
+    <p>기능 개발은 사실상 끝났습니다. 남은 것은 만드는 일이 아니라 <strong>내보내고 측정하는 일</strong>입니다.
+       가장 큰 공백은 기능이 아니라 <strong>실사용자 0명</strong>과 <strong>아직 켜지지 않은 계측</strong>입니다.</p>
+  </div>
+
+  <h2 class="sec">채널별 상태</h2>
+  <div class="tiles">
+    <div class="tile">
+      <div class="label">웹</div>
+      <div class="value">라이브</div>
+      <div class="note"><span class="chip c-good">✅ 배포됨</span> hgmr.co.kr · SSL</div>
+      <div class="bar"><i style="width:100%"></i></div>
+    </div>
+    <div class="tile">
+      <div class="label">iOS</div>
+      <div class="value">심사 요건 충족</div>
+      <div class="note"><span class="chip c-warn">🟡 미제출</span> 스크린샷 7종 남음</div>
+      <div class="bar"><i style="width:75%"></i></div>
+    </div>
+    <div class="tile">
+      <div class="label">Android</div>
+      <div class="value">AAB 빌드 완료</div>
+      <div class="note"><span class="chip c-warn">🟡 미등록</span> 내부 테스트 트랙부터</div>
+      <div class="bar"><i style="width:60%"></i></div>
+    </div>
+    <div class="tile">
+      <div class="label">사용자 행동 분석</div>
+      <div class="value">연동만 완료</div>
+      <div class="note"><span class="chip c-wait">🔴 콘솔 설정 필요</span></div>
+      <div class="bar"><i style="width:50%"></i></div>
+    </div>
+  </div>
+
+  <h2 class="sec">콘텐츠 지표</h2>
+  <div class="tiles">
+    <div class="tile">
+      <div class="label">전체 단어</div>
+      <div class="value">1,390</div>
+      <div class="note">2차 전수 검수 완료</div>
+    </div>
+    <div class="tile">
+      <div class="label">주제 학습 도달</div>
+      <div class="value">1,171</div>
+      <div class="note">기초/생활 신설로 918 → 1,171</div>
+      <div class="bar"><i style="width:84%"></i></div>
+    </div>
+    <div class="tile">
+      <div class="label">태그 미지정</div>
+      <div class="value">219</div>
+      <div class="note"><span class="chip c-warn">🟡 작업 중</span> 전체의 16%</div>
+    </div>
+    <div class="tile">
+      <div class="label">레벨 3 미노출</div>
+      <div class="value">96 / 165</div>
+      <div class="note">상위 난이도의 58%가 주제 학습에 안 나옴</div>
+      <div class="bar"><i style="width:58%"></i></div>
+    </div>
+  </div>
+
+  <h2 class="sec">지금 열려 있는 항목</h2>
+  <table>
+    <thead><tr><th>상태</th><th>항목</th><th class="who">담당</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="chip c-wait">🔴 대기</span></td>
+        <td><strong>단어 태그 초안 작성</strong><br>Code가 요청 — <code>태그_미지정_단어.csv</code>의 제안태그 열 채우기. 허용 태그 목록을 함께 받음</td>
+        <td class="who">Cowork</td>
+      </tr>
+      <tr>
+        <td><span class="chip c-wait">🔴 대기</span></td>
+        <td><strong>진행 표시 마무리</strong><br><code>30/30</code>에 도달한 뒤에도 재도전 문항이 남는 구간 처리 (A·B·C안 제시함)</td>
+        <td class="who">Code</td>
+      </tr>
+      <tr>
+        <td><span class="chip c-wait">🔴 대기</span></td>
+        <td><strong>CLAUDE.md에 '요청 범위' 규칙 추가</strong><br>형기님 지시는 항상 프로젝트 전체 대상이라는 규칙</td>
+        <td class="who">Code</td>
+      </tr>
+      <tr>
+        <td><span class="chip c-warn">🟡 진행</span></td>
+        <td><strong>태그 반영</strong><br>Cowork 초안 수령 후 <code>words.json</code> 반영 + <code>npm run check-words</code></td>
+        <td class="who">Code</td>
+      </tr>
+      <tr>
+        <td><span class="chip c-warn">🟡 진행</span></td>
+        <td><strong>웹 재배포</strong><br>진행 표시 수정이 아직 서버에 없음 — <code>npm run build &amp;&amp; firebase deploy --only hosting</code></td>
+        <td class="who">형기님</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">Code ↔ Cowork 대화 기록</h2>
+  <ol class="flow">
+    <li class="done">
+      <div class="fl-head"><span class="fl-dir">Code → Cowork</span><span class="fl-title">소통 규약 시작</span><span class="chip c-info">💬 공유</span></div>
+      <p class="fl-body">편지함 두 개로 양방향 소통 개시. 각자 자기 파일만 쓰고, 상대 파일은 읽기 전용.</p>
+    </li>
+    <li class="done">
+      <div class="fl-head"><span class="fl-dir">Code → Cowork</span><span class="fl-title">개발 사이클 변경 공유</span><span class="chip c-info">💬 공유</span></div>
+      <p class="fl-body">시스템 키보드 일원화, 이메일 인증 필수화, 회원 탈퇴, 레벨 칭호 개편, <code>hgmr.co.kr</code> 도메인 연결. 자모 키보드는 셀링포인트에서 제외할 것.</p>
+    </li>
+    <li class="done">
+      <div class="fl-head"><span class="fl-dir">Code → Cowork</span><span class="fl-title">App Store 메타데이터 수정 요청 4건</span><span class="chip c-good">✅ 완료</span></div>
+      <p class="fl-body">자모 키보드 문구 삭제 · URL을 <code>hgmr.co.kr</code>로 · 포지셔닝 반영 · 용어 전수 점검.</p>
+    </li>
+    <li class="done">
+      <div class="fl-head"><span class="fl-dir">Cowork → Code</span><span class="fl-title">메타데이터 수정 완료 회신</span><span class="chip c-good">✅ 완료</span></div>
+      <p class="fl-body">4건 전부 반영. 부제를 "나의 마지막 국어 공부"로 승격, 단어 수 1,200→1,390 정정, 어휘 고도·하랑이 문단 신설, 스크린샷 7종으로 확대.</p>
+    </li>
+    <li class="done">
+      <div class="fl-head"><span class="fl-dir">Cowork → Code</span><span class="fl-title">요청 4건 발신</span><span class="chip c-good">✅ 회신됨</span></div>
+      <p class="fl-body">빙하 키보드 죽은 옵션 · 링크 도메인 · 번들 ID 불일치 · 단어 태그.</p>
+    </li>
+    <li class="done">
+      <div class="fl-head"><span class="fl-dir">Code → Cowork</span><span class="fl-title">회신 — 2건 완료, 1건 오탐 지적</span><span class="chip c-good">✅ 완료</span></div>
+      <p class="fl-body"><strong>번들 ID를 <code>com.hgmr.app</code>으로 통일</strong>(구글 로그인 실기기 검증까지 완료). 링크 도메인 교체 완료.
+      <strong>빙하 키보드는 Cowork의 오탐</strong> — 부모 <code>&lt;div&gt;</code>에 <code>display:none</code>이 걸려 이미 숨겨져 있었음.
+      더불어 <code>terms.html</code>이 SPA 리라이트 때문에 앱 화면을 반환한다는 문제를 발견해 알림.</p>
+    </li>
+    <li class="done">
+      <div class="fl-head"><span class="fl-dir">Cowork → Code</span><span class="fl-title">오탐 인정 및 문서 갱신</span><span class="chip c-good">✅ 완료</span></div>
+      <p class="fl-body">부모 체인을 확인하지 않은 실수 인정. 번들 ID를 스토어 문서 4곳에 반영. <code>terms.html</code>은 그 사이 배포되어 현재 정상 응답 확인.</p>
+    </li>
+    <li class="open">
+      <div class="fl-head"><span class="fl-dir">Code → Cowork</span><span class="fl-title">단어 태그 초안 요청</span><span class="chip c-wait">🔴 대기</span></div>
+      <p class="fl-body">CSV의 제안태그 열을 채워달라는 요청. 허용 태그 목록과 함께, 레벨 3 추상어는 학술_논리와 감정_심리를 둘 다 달아도 된다는 조언 포함.</p>
+    </li>
+    <li class="open">
+      <div class="fl-head"><span class="fl-dir">Cowork → Code</span><span class="fl-title">진행 표시 마무리 · CLAUDE.md 규칙 추가</span><span class="chip c-wait">🔴 대기</span></div>
+      <p class="fl-body"><code>31/30</code> 초과 버그는 수정 완료(6,000회 시뮬레이션 검증). 남은 <code>30/30</code> 잔여 구간과 규약 반영을 요청으로 넘김.</p>
+    </li>
+  </ol>
+
+  <h2 class="sec">형기님이 직접 하셔야 하는 것</h2>
+  <ol class="todo">
+    <li><strong>Firebase 콘솔에서 Google Analytics 사용 설정</strong> — 프로젝트 설정 → 통합. 이걸 안 하면 계측 코드가 조용히 비활성으로만 돕니다. 출시보다 먼저.</li>
+    <li><strong>웹 재배포</strong> — <code>npm run build &amp;&amp; firebase deploy --only hosting</code>. 진행 표시 수정이 아직 서버에 없습니다.</li>
+    <li><strong>Play Console 계정 유형 확인</strong> — 개인 계정이면 프로덕션 출시 전 <strong>테스터 20명 × 12일 연속</strong> 요건이 있습니다. 걸리면 일정이 2주 이상 밀립니다.</li>
+    <li><strong>스크린샷 7종 촬영</strong> — 목록과 캡션은 <code>AppStore_메타데이터.md</code>에 준비돼 있습니다. 라이트·다크 양쪽 확보 권장.</li>
+    <li><strong>알림 감시 등록</strong> — <code>cp ~/Desktop/hgmr/.claude/com.hgmr.inbox-watch.plist ~/Library/LaunchAgents/</code> 후 <code>launchctl load</code>.</li>
+  </ol>
+
+  <div class="foot">
+    출처 — <code>_code_to_cowork.md</code> · <code>_cowork_to_code.md</code> · <code>브랜드_브리핑.md</code> · <code>words.json</code> · git log<br>
+    이 문서는 스냅숏입니다. 최신 상태는 편지함 두 파일이 기준입니다.
+  </div>
+
+</div>
+</body>
+</html>

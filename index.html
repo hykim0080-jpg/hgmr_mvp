@@ -2880,7 +2880,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, deleteDoc, increment, arrayUnion, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, GoogleAuthProvider, OAuthProvider, signInWithPopup, signInWithCredential, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, reauthenticateWithCredential, reauthenticateWithPopup } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getAuth, initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, browserPopupRedirectResolver, GoogleAuthProvider, OAuthProvider, signInWithPopup, signInWithCredential, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, onAuthStateChanged, signOut, reauthenticateWithCredential, reauthenticateWithPopup } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
         import { getAnalytics, logEvent, isSupported } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-analytics.js";
 
         const firebaseConfig = {
@@ -2923,8 +2923,11 @@
             // iOS WKWebView(Capacitor) 환경에서 IndexedDB가 무한 대기(데드락)에 빠지는 치명적인 iOS 자체 버그가 있습니다.
             // 이를 완벽히 예방하기 위해 모바일 환경에서 매우 안정적이고 빠르며 무한 대기 버그가 없는
             // 로컬스토리지 기반(browserLocalPersistence)으로 명시적 초기화를 가장 먼저 시도합니다.
+            // ⚠️ initializeAuth 는 getAuth 와 달리 popup/redirect 리졸버를 자동으로 넣어주지 않습니다.
+            //    빠뜨리면 웹에서 signInWithPopup 이 auth/argument-error 로 즉시 실패합니다(팝업조차 안 열림).
             auth = initializeAuth(app, {
-                persistence: browserLocalPersistence
+                persistence: browserLocalPersistence,
+                popupRedirectResolver: browserPopupRedirectResolver
             });
             console.log("Firebase Auth browserLocalPersistence 초기화 성공:", auth);
         } catch (e) {

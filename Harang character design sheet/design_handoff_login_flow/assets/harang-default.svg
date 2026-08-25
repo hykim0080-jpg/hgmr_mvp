@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+  <defs><clipPath id="body"><path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z"></path></clipPath></defs>
+  <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+  <ellipse cx="160" cy="248" rx="88" ry="64" fill="#DFE3E9" clip-path="url(#body)"></ellipse>
+  <ellipse cx="94" cy="118" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 94 118)"></ellipse>
+  <ellipse cx="84" cy="150" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 84 150)"></ellipse>
+  <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="none" stroke="#3B4252" stroke-width="5"></path>
+  <ellipse cx="232" cy="288" rx="24" ry="12" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-18 232 288)"></ellipse>
+  <ellipse cx="250" cy="293" rx="17" ry="9" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(8 250 293)"></ellipse>
+  <path d="M88,206 Q160,230 232,206 L232,226 Q160,252 88,226 Z" fill="#10B981" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+  <g transform="rotate(10 132 246)">
+    <rect x="120" y="228" width="24" height="36" rx="11" fill="#10B981" stroke="#3B4252" stroke-width="5"></rect>
+    <rect x="120" y="228" width="24" height="11" rx="5" fill="#000000" opacity="0.14"></rect>
+  </g>
+  <ellipse cx="120" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(26 120 250)"></ellipse>
+  <ellipse cx="200" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-26 200 250)"></ellipse>
+  <circle cx="102" cy="184" r="11" fill="#F8B9C5"></circle>
+  <circle cx="218" cy="184" r="11" fill="#F8B9C5"></circle>
+  <circle cx="124" cy="150" r="16" fill="#262B36"></circle>
+  <circle cx="196" cy="150" r="16" fill="#262B36"></circle>
+  <circle cx="119" cy="144" r="5.5" fill="#FFFFFF"></circle>
+  <circle cx="191" cy="144" r="5.5" fill="#FFFFFF"></circle>
+  <path d="M150,170 C154,165 166,165 170,170 C167,178 153,178 150,170 Z" fill="#3B4252"></path>
+  <path d="M151,185 Q160,192 169,185" fill="none" stroke="#3B4252" stroke-width="3" stroke-linecap="round"></path>
+  <path d="M90,160 L110,164 M90,170 L110,171" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+  <path d="M230,160 L210,164 M230,170 L210,171" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+</svg>

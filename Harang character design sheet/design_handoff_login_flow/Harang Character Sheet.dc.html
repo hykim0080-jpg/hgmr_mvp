@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta charset="utf-8">
+  <title>Harang — Character Sheet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; background:#F6F7F9; }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; padding:48px 40px 64px; box-sizing:border-box; font-family:'Noto Sans KR','Apple SD Gothic Neo',sans-serif; color:#2A2F3A; --scarf:{{scarfColor}}; --blush:{{blushOpacity}};">
+  <div style="max-width:1240px; margin:0 auto; display:flex; flex-direction:column; gap:28px;">
+
+    <!-- Header -->
+    <header style="display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap;">
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="width:12px; height:12px; border-radius:50%; background:#10B981; display:inline-block;"></span>
+          <span style="font-size:13px; font-weight:700; letter-spacing:0.14em; color:#7A8494;">HANGUL MARU · MASCOT</span>
+        </div>
+        <h1 style="margin:0; font-family:'Baloo 2','Noto Sans KR',sans-serif; font-size:46px; line-height:1.1; font-weight:800;">하랑이 <span style="color:#10B981;">Harang</span></h1>
+        <p style="margin:0; font-size:15px; color:#66707F;">Baby harp seal · collects wisdom shards · character design sheet v1</p>
+      </div>
+      <div style="font-size:12px; color:#9AA3B2; text-align:right; line-height:1.7;">
+        Flat vector · no gradients · white/transparent bg<br>Must read clearly at 48px
+      </div>
+    </header>
+
+    <!-- Poses -->
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:20px;">
+
+      <!-- POSE 1 : DEFAULT -->
+      <div id="pose-default" data-screen-label="Pose 1 Default" style="background:#FFFFFF; border:1px solid #ECEFF3; border-radius:20px; padding:18px 16px 20px; display:flex; flex-direction:column; gap:10px;">
+        <svg viewBox="0 0 320 320" style="width:100%; height:auto; display:block;">
+          <defs><clipPath id="b1"><path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z"></path></clipPath></defs>
+          <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+          <ellipse cx="160" cy="248" rx="88" ry="64" fill="#DFE3E9" clip-path="url(#b1)"></ellipse>
+          <ellipse cx="94" cy="118" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 94 118)"></ellipse>
+          <ellipse cx="84" cy="150" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 84 150)"></ellipse>
+          <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="none" stroke="#3B4252" stroke-width="5"></path>
+          <ellipse cx="232" cy="288" rx="24" ry="12" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-18 232 288)"></ellipse>
+          <ellipse cx="250" cy="293" rx="17" ry="9" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(8 250 293)"></ellipse>
+          <path d="M88,206 Q160,230 232,206 L232,226 Q160,252 88,226 Z" style="fill:var(--scarf,#10B981);" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+          <g transform="rotate(10 132 246)">
+            <rect x="120" y="228" width="24" height="36" rx="11" style="fill:var(--scarf,#10B981);" stroke="#3B4252" stroke-width="5"></rect>
+            <rect x="120" y="228" width="24" height="11" rx="5" fill="#000000" opacity="0.14"></rect>
+          </g>
+          <circle cx="160" cy="240" r="46" fill="#6EE7B7" opacity="0.28"></circle>
+          <polygon points="160,198 192,236 160,284 128,236" fill="#34D399" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></polygon>
+          <polygon points="160,198 128,236 160,236" fill="#6EE7B7"></polygon>
+          <polygon points="192,236 160,284 160,250" fill="#6EE7B7" opacity="0.7"></polygon>
+          <text x="160" y="252" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-weight="900" font-size="32" fill="#FFFFFF" data-shard-letter="true">ㅎ</text>
+          <ellipse cx="120" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(26 120 250)"></ellipse>
+          <ellipse cx="200" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-26 200 250)"></ellipse>
+          <circle cx="102" cy="184" r="11" fill="#F8B9C5" style="opacity:var(--blush,0.8);"></circle>
+          <circle cx="218" cy="184" r="11" fill="#F8B9C5" style="opacity:var(--blush,0.8);"></circle>
+          <circle cx="124" cy="150" r="16" fill="#262B36"></circle>
+          <circle cx="196" cy="150" r="16" fill="#262B36"></circle>
+          <circle cx="119" cy="144" r="5.5" fill="#FFFFFF"></circle>
+          <circle cx="191" cy="144" r="5.5" fill="#FFFFFF"></circle>
+          <circle cx="129" cy="156" r="2.4" fill="#FFFFFF" opacity="0.9"></circle>
+          <circle cx="201" cy="156" r="2.4" fill="#FFFFFF" opacity="0.9"></circle>
+          <path d="M150,170 C154,165 166,165 170,170 C167,178 153,178 150,170 Z" fill="#3B4252"></path>
+          <path d="M151,185 Q160,192 169,185" fill="none" stroke="#3B4252" stroke-width="3" stroke-linecap="round"></path>
+          <path d="M90,160 L110,164 M90,170 L110,171" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+          <path d="M230,160 L210,164 M230,170 L210,171" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+        </svg>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="background:#10B981; color:#fff; font-size:11px; font-weight:700; border-radius:999px; padding:2px 8px;">01</span>
+            <span style="font-weight:700; font-size:15px;">기본 · Default</span>
+          </div>
+          <span style="font-size:12.5px; color:#7A8494;">Sitting upright, hugging the wisdom shard</span>
+        </div>
+      </div>
+
+      <!-- POSE 2 : CORRECT — SEAL CLAP -->
+      <div id="pose-correct" data-screen-label="Pose 2 Correct" style="background:#FFFFFF; border:1px solid #ECEFF3; border-radius:20px; padding:18px 16px 20px; display:flex; flex-direction:column; gap:10px;">
+        <svg viewBox="0 0 320 320" style="width:100%; height:auto; display:block;">
+          <defs><clipPath id="b2"><path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z"></path></clipPath></defs>
+          <g transform="translate(160 208) scale(1.08 0.92) translate(-160 -208) rotate(4 160 200)">
+            <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+            <ellipse cx="160" cy="224" rx="100" ry="84" fill="#DFE3E9" clip-path="url(#b2)"></ellipse>
+            <ellipse cx="94" cy="112" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 94 112)"></ellipse>
+            <ellipse cx="82" cy="142" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 82 142)"></ellipse>
+            <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="none" stroke="#3B4252" stroke-width="5"></path>
+            <path d="M88,192 Q160,216 232,192 L232,212 Q160,238 88,212 Z" style="fill:var(--scarf,#10B981);" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+            <g transform="rotate(10 132 232)">
+              <rect x="120" y="214" width="24" height="34" rx="11" style="fill:var(--scarf,#10B981);" stroke="#3B4252" stroke-width="5"></rect>
+              <rect x="120" y="214" width="24" height="11" rx="5" fill="#000000" opacity="0.14"></rect>
+            </g>
+            <ellipse cx="118" cy="234" rx="26" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(34 118 234)"></ellipse>
+            <ellipse cx="202" cy="234" rx="26" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-34 202 234)"></ellipse>
+            <ellipse cx="142" cy="286" rx="20" ry="11" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-28 142 286)"></ellipse>
+            <ellipse cx="178" cy="286" rx="20" ry="11" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(28 178 286)"></ellipse>
+            <circle cx="102" cy="168" r="11" fill="#F8B9C5" style="opacity:var(--blush,0.8);"></circle>
+            <circle cx="218" cy="168" r="11" fill="#F8B9C5" style="opacity:var(--blush,0.8);"></circle>
+            <path d="M110,138 Q124,124 138,138" fill="none" stroke="#262B36" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M182,138 Q196,124 210,138" fill="none" stroke="#262B36" stroke-width="6" stroke-linecap="round"></path>
+            <path d="M150,148 C154,143 166,143 170,148 C167,156 153,156 150,148 Z" fill="#3B4252"></path>
+            <path d="M134,166 Q160,158 186,166 Q181,198 160,200 Q139,198 134,166 Z" fill="#3B4252"></path>
+            <ellipse cx="160" cy="191" rx="14" ry="7" fill="#F58A9C"></ellipse>
+            <path d="M92,140 L110,143 M92,150 L110,151" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+            <path d="M228,140 L210,143 M228,150 L210,151" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+          </g>
+          <path d="M82,212 Q73,230 82,248" fill="none" stroke="#AEB6C2" stroke-width="3" stroke-linecap="round"></path>
+          <path d="M66,206 Q54,230 66,254" fill="none" stroke="#AEB6C2" stroke-width="3" stroke-linecap="round"></path>
+          <path d="M240,206 Q249,224 240,242" fill="none" stroke="#AEB6C2" stroke-width="3" stroke-linecap="round"></path>
+          <path d="M256,200 Q268,224 256,248" fill="none" stroke="#AEB6C2" stroke-width="3" stroke-linecap="round"></path>
+          <path d="M78,74 L83,82 L78,90 L73,82 Z" fill="#6EE7B7"></path>
+          <path d="M248,64 L253,72 L248,80 L243,72 Z" fill="#6EE7B7"></path>
+          <path d="M226,104 L230,110 L226,116 L222,110 Z" fill="#6EE7B7"></path>
+          <polygon points="118,42 120.9,50 129.4,50.3 122.8,55.6 125.1,63.7 118,59 110.9,63.7 113.3,55.6 106.6,50.3 115.1,50" fill="#10B981"></polygon>
+        </svg>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="background:#10B981; color:#fff; font-size:11px; font-weight:700; border-radius:999px; padding:2px 8px;">02</span>
+            <span style="font-weight:700; font-size:15px;">정답! · Correct</span>
+          </div>
+          <span style="font-size:12.5px; color:#7A8494;">The seal clap — joyful belly slap</span>
+        </div>
+      </div>
+
+      <!-- POSE 3 : WRONG — IT'S OKAY -->
+      <div id="pose-wrong" data-screen-label="Pose 3 Wrong" style="background:#FFFFFF; border:1px solid #ECEFF3; border-radius:20px; padding:18px 16px 20px; display:flex; flex-direction:column; gap:10px;">
+        <svg viewBox="0 0 320 320" style="width:100%; height:auto; display:block;">
+          <defs><clipPath id="b3"><path d="M160,64 C228,64 258,134 258,204 C258,266 216,292 160,292 C104,292 62,266 62,204 C62,134 92,64 160,64 Z"></path></clipPath></defs>
+          <path d="M160,64 C228,64 258,134 258,204 C258,266 216,292 160,292 C104,292 62,266 62,204 C62,134 92,64 160,64 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+          <ellipse cx="160" cy="250" rx="86" ry="62" fill="#DFE3E9" clip-path="url(#b3)"></ellipse>
+          <ellipse cx="96" cy="126" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 96 126)"></ellipse>
+          <ellipse cx="86" cy="158" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 86 158)"></ellipse>
+          <path d="M160,64 C228,64 258,134 258,204 C258,266 216,292 160,292 C104,292 62,266 62,204 C62,134 92,64 160,64 Z" fill="none" stroke="#3B4252" stroke-width="5"></path>
+          <ellipse cx="232" cy="290" rx="24" ry="12" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-18 232 290)"></ellipse>
+          <ellipse cx="250" cy="295" rx="17" ry="9" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(8 250 295)"></ellipse>
+          <path d="M88,212 Q160,236 232,212 L232,232 Q160,258 88,232 Z" style="fill:var(--scarf,#10B981);" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+          <g transform="rotate(10 132 252)">
+            <rect x="120" y="234" width="24" height="34" rx="11" style="fill:var(--scarf,#10B981);" stroke="#3B4252" stroke-width="5"></rect>
+            <rect x="120" y="234" width="24" height="11" rx="5" fill="#000000" opacity="0.14"></rect>
+          </g>
+          <ellipse cx="90" cy="256" rx="13" ry="26" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(16 90 256)"></ellipse>
+          <ellipse cx="230" cy="256" rx="13" ry="26" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-16 230 256)"></ellipse>
+          <circle cx="102" cy="190" r="11" fill="#F8B9C5" style="opacity:var(--blush,0.8);"></circle>
+          <circle cx="218" cy="190" r="11" fill="#F8B9C5" style="opacity:var(--blush,0.8);"></circle>
+          <path d="M110,138 L134,144" fill="none" stroke="#9AA3B2" stroke-width="4" stroke-linecap="round"></path>
+          <path d="M210,138 L186,144" fill="none" stroke="#9AA3B2" stroke-width="4" stroke-linecap="round"></path>
+          <circle cx="124" cy="160" r="15" fill="#262B36"></circle>
+          <circle cx="196" cy="160" r="15" fill="#262B36"></circle>
+          <circle cx="119.5" cy="155" r="5" fill="#FFFFFF"></circle>
+          <circle cx="191.5" cy="155" r="5" fill="#FFFFFF"></circle>
+          <circle cx="128" cy="166" r="2.2" fill="#FFFFFF" opacity="0.9"></circle>
+          <circle cx="200" cy="166" r="2.2" fill="#FFFFFF" opacity="0.9"></circle>
+          <path d="M124,182 C119,190 117,194 124,198 C131,194 129,190 124,182 Z" fill="#7DD3FC"></path>
+          <path d="M150,180 C154,175 166,175 170,180 C167,188 153,188 150,180 Z" fill="#3B4252"></path>
+          <path d="M152,197 Q160,201 168,197" fill="none" stroke="#3B4252" stroke-width="3" stroke-linecap="round"></path>
+          <path d="M90,170 L110,174 M90,180 L110,181" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+          <path d="M230,170 L210,174 M230,180 L210,181" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+        </svg>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="background:#10B981; color:#fff; font-size:11px; font-weight:700; border-radius:999px; padding:2px 8px;">03</span>
+            <span style="font-weight:700; font-size:15px;">괜찮아 · Wrong</span>
+          </div>
+          <span style="font-size:12.5px; color:#7A8494;">One small tear — “let’s try again together”</span>
+        </div>
+      </div>
+
+      <!-- POSE 4 : LEVEL UP -->
+      <div id="pose-levelup" data-screen-label="Pose 4 Level up" style="background:#FFFFFF; border:1px solid #ECEFF3; border-radius:20px; padding:18px 16px 20px; display:flex; flex-direction:column; gap:10px;">
+        <svg viewBox="0 0 320 320" style="width:100%; height:auto; display:block;">
+          <defs><clipPath id="b4"><path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z"></path></clipPath></defs>
+          <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+          <ellipse cx="160" cy="248" rx="88" ry="64" fill="#DFE3E9" clip-path="url(#b4)"></ellipse>
+          <ellipse cx="94" cy="122" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 94 122)"></ellipse>
+          <ellipse cx="84" cy="154" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 84 154)"></ellipse>
+          <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="none" stroke="#3B4252" stroke-width="5"></path>
+          <ellipse cx="232" cy="288" rx="24" ry="12" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-18 232 288)"></ellipse>
+          <ellipse cx="250" cy="293" rx="17" ry="9" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(8 250 293)"></ellipse>
+          <path d="M88,206 Q160,230 232,206 L232,226 Q160,252 88,226 Z" style="fill:var(--scarf,#10B981);" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+          <g transform="rotate(10 132 246)">
+            <rect x="120" y="228" width="24" height="36" rx="11" style="fill:var(--scarf,#10B981);" stroke="#3B4252" stroke-width="5"></rect>
+            <rect x="120" y="228" width="24" height="11" rx="5" fill="#000000" opacity="0.14"></rect>
+          </g>
+          <ellipse cx="82" cy="196" rx="14" ry="27" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-36 82 196)"></ellipse>
+          <ellipse cx="238" cy="196" rx="14" ry="27" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(36 238 196)"></ellipse>
+          <circle cx="102" cy="184" r="11" fill="#F8B9C5" style="opacity:var(--blush,0.8);"></circle>
+          <circle cx="218" cy="184" r="11" fill="#F8B9C5" style="opacity:var(--blush,0.8);"></circle>
+          <circle cx="124" cy="150" r="16" fill="#262B36"></circle>
+          <circle cx="196" cy="150" r="16" fill="#262B36"></circle>
+          <circle cx="119" cy="144" r="5.5" fill="#FFFFFF"></circle>
+          <circle cx="191" cy="144" r="5.5" fill="#FFFFFF"></circle>
+          <circle cx="129" cy="156" r="2.4" fill="#FFFFFF" opacity="0.9"></circle>
+          <circle cx="201" cy="156" r="2.4" fill="#FFFFFF" opacity="0.9"></circle>
+          <path d="M150,172 C154,167 166,167 170,172 C167,180 153,180 150,172 Z" fill="#3B4252"></path>
+          <path d="M144,186 Q160,180 176,186 Q172,206 160,207 Q148,206 144,186 Z" fill="#3B4252"></path>
+          <ellipse cx="160" cy="199" rx="9" ry="5" fill="#F58A9C"></ellipse>
+          <path d="M90,162 L110,166 M90,172 L110,173" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+          <path d="M230,162 L210,166 M230,172 L210,173" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+          <g transform="rotate(12 160 64)">
+            <polygon points="160,10 132,70 188,70" fill="#F97316" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></polygon>
+            <circle cx="160" cy="12" r="9" fill="#FDBA74" stroke="#3B4252" stroke-width="5"></circle>
+          </g>
+          <rect x="64" y="56" width="11" height="5.5" rx="2" fill="#F97316" transform="rotate(24 70 59)"></rect>
+          <rect x="246" y="46" width="11" height="5.5" rx="2" fill="#FBBF24" transform="rotate(-18 252 49)"></rect>
+          <rect x="38" y="136" width="11" height="5.5" rx="2" fill="#60A5FA" transform="rotate(-32 44 139)"></rect>
+          <rect x="270" y="128" width="11" height="5.5" rx="2" fill="#F472B6" transform="rotate(28 276 131)"></rect>
+          <rect x="96" y="30" width="11" height="5.5" rx="2" fill="#10B981" transform="rotate(10 102 33)"></rect>
+          <circle cx="284" cy="84" r="4" fill="#10B981"></circle>
+          <circle cx="36" cy="90" r="4" fill="#F472B6"></circle>
+          <circle cx="212" cy="26" r="4" fill="#FBBF24"></circle>
+          <circle cx="288" cy="180" r="3.5" fill="#60A5FA"></circle>
+        </svg>
+        <div style="display:flex; flex-direction:column; gap:2px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="background:#10B981; color:#fff; font-size:11px; font-weight:700; border-radius:999px; padding:2px 8px;">04</span>
+            <span style="font-weight:700; font-size:15px;">레벨 업! · Level up</span>
+          </div>
+          <span style="font-size:12.5px; color:#7A8494;">Tiny party hat + confetti</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom row: palette / prop / scale test -->
+    <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:20px;" data-screen-label="Specs row">
+
+      <!-- Palette -->
+      <div style="background:#FFFFFF; border:1px solid #ECEFF3; border-radius:20px; padding:22px; display:flex; flex-direction:column; gap:14px;">
+        <span style="font-size:12px; font-weight:700; letter-spacing:0.12em; color:#7A8494;">COLOR PALETTE</span>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;">
+          <div style="display:flex; flex-direction:column; gap:6px;"><span style="height:44px; border-radius:10px; background:#E5E8EE; border:1px solid #E0E3EA;"></span><span style="font-size:11.5px; color:#66707F;">Body <span style="font-family:monospace;">#E5E8EE</span></span></div>
+          <div style="display:flex; flex-direction:column; gap:6px;"><span style="height:44px; border-radius:10px; background:#DFE3E9; border:1px solid #DADEE6;"></span><span style="font-size:11.5px; color:#66707F;">Belly <span style="font-family:monospace;">#DFE3E9</span></span></div>
+          <div style="display:flex; flex-direction:column; gap:6px;"><span style="height:44px; border-radius:10px; background:#AEB6C2;"></span><span style="font-size:11.5px; color:#66707F;">Spots <span style="font-family:monospace;">#AEB6C2</span></span></div>
+          <div style="display:flex; flex-direction:column; gap:6px;"><span style="height:44px; border-radius:10px; background:#10B981;"></span><span style="font-size:11.5px; color:#66707F;">Scarf <span style="font-family:monospace;">#10B981</span></span></div>
+          <div style="display:flex; flex-direction:column; gap:6px;"><span style="height:44px; border-radius:10px; background:#34D399;"></span><span style="font-size:11.5px; color:#66707F;">Crystal <span style="font-family:monospace;">#34D399</span></span></div>
+          <div style="display:flex; flex-direction:column; gap:6px;"><span style="height:44px; border-radius:10px; background:#6EE7B7;"></span><span style="font-size:11.5px; color:#66707F;">Facet <span style="font-family:monospace;">#6EE7B7</span></span></div>
+        </div>
+        <span style="font-size:12px; color:#9AA3B2; line-height:1.6;">Accents: blush #F8B9C5 · face #262B36/#3B4252 · flippers #DCE0E8. Exactly two spot markings, always on the left side of the back.</span>
+      </div>
+
+      <!-- Prop -->
+      <div data-screen-label="Wisdom shard prop" style="background:#FFFFFF; border:1px solid #ECEFF3; border-radius:20px; padding:22px; display:flex; flex-direction:column; gap:10px;">
+        <span style="font-size:12px; font-weight:700; letter-spacing:0.12em; color:#7A8494;">PROP · WISDOM SHARD</span>
+        <svg viewBox="0 0 200 200" style="width:150px; height:150px; align-self:center;">
+          <circle cx="100" cy="100" r="62" fill="#6EE7B7" opacity="0.25"></circle>
+          <polygon points="100,34 146,92 100,168 54,92" fill="#34D399" stroke="#3B4252" stroke-width="4" stroke-linejoin="round"></polygon>
+          <polygon points="100,34 54,92 100,92" fill="#6EE7B7"></polygon>
+          <polygon points="146,92 100,168 100,114" fill="#6EE7B7" opacity="0.7"></polygon>
+          <text x="100" y="112" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-weight="900" font-size="46" fill="#FFFFFF" data-shard-letter="true">ㅎ</text>
+          <path d="M152,44 L156,52 L152,60 L148,52 Z" fill="#6EE7B7"></path>
+          <path d="M46,140 L49,146 L46,152 L43,146 Z" fill="#6EE7B7"></path>
+        </svg>
+        <span style="font-size:12px; color:#9AA3B2; line-height:1.6; text-align:center;">Faceted gem engraved with a consonant. One shard per learned letter; Harang hoards them.</span>
+      </div>
+
+      <!-- Scale test -->
+      <div data-screen-label="Scale test" style="background:#FFFFFF; border:1px solid #ECEFF3; border-radius:20px; padding:22px; display:flex; flex-direction:column; gap:14px;">
+        <span style="font-size:12px; font-weight:700; letter-spacing:0.12em; color:#7A8494;">SCALE TEST</span>
+        <div style="display:flex; align-items:flex-end; gap:18px; justify-content:center; flex:1;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <svg viewBox="0 0 320 320" style="width:96px; height:96px;"><use href="#icon-seal"></use></svg>
+            <span style="font-size:11px; color:#9AA3B2; font-family:monospace;">96px</span>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <span style="width:64px; height:64px; border-radius:16px; background:#10B981; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 320 320" style="width:52px; height:52px;"><use href="#icon-seal"></use></svg></span>
+            <span style="font-size:11px; color:#9AA3B2; font-family:monospace;">app icon</span>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <svg viewBox="0 0 320 320" style="width:48px; height:48px;"><use href="#icon-seal"></use></svg>
+            <span style="font-size:11px; color:#9AA3B2; font-family:monospace;">48px</span>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+            <svg viewBox="0 0 320 320" style="width:32px; height:32px;"><use href="#icon-seal"></use></svg>
+            <span style="font-size:11px; color:#9AA3B2; font-family:monospace;">32px</span>
+          </div>
+        </div>
+        <span style="font-size:12px; color:#9AA3B2; line-height:1.6;">Silhouette + eyes + scarf carry recognition; whiskers and spots may drop below 48px.</span>
+      </div>
+    </div>
+
+    <!-- Hidden reusable icon (simplified, no whiskers/spots detail loss at small size) -->
+    <svg width="0" height="0" style="position:absolute;">
+      <defs>
+        <g id="icon-seal">
+          <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+          <ellipse cx="94" cy="118" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 94 118)"></ellipse>
+          <ellipse cx="84" cy="150" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 84 150)"></ellipse>
+          <path d="M88,206 Q160,230 232,206 L232,226 Q160,252 88,226 Z" style="fill:var(--scarf,#10B981);" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+          <ellipse cx="120" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(26 120 250)"></ellipse>
+          <ellipse cx="200" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-26 200 250)"></ellipse>
+          <circle cx="102" cy="184" r="11" fill="#F8B9C5" style="opacity:var(--blush,0.8);"></circle>
+          <circle cx="218" cy="184" r="11" fill="#F8B9C5" style="opacity:var(--blush,0.8);"></circle>
+          <circle cx="124" cy="150" r="16" fill="#262B36"></circle>
+          <circle cx="196" cy="150" r="16" fill="#262B36"></circle>
+          <circle cx="119" cy="144" r="5.5" fill="#FFFFFF"></circle>
+          <circle cx="191" cy="144" r="5.5" fill="#FFFFFF"></circle>
+          <path d="M150,170 C154,165 166,165 170,170 C167,178 153,178 150,170 Z" fill="#3B4252"></path>
+          <path d="M151,185 Q160,192 169,185" fill="none" stroke="#3B4252" stroke-width="4" stroke-linecap="round"></path>
+        </g>
+      </defs>
+    </svg>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: {&quot;width&quot;: 1320, &quot;height&quot;: 1050},
+  &quot;scarfColor&quot;: {&quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#10B981&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;#10B981&quot;, &quot;#F59E0B&quot;, &quot;#60A5FA&quot;, &quot;#F472B6&quot;], &quot;section&quot;: &quot;Character&quot;},
+  &quot;shardLetter&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;ㅎ&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;ㅎ&quot;, &quot;ㄱ&quot;, &quot;ㅁ&quot;, &quot;ㅅ&quot;], &quot;section&quot;: &quot;Character&quot;},
+  &quot;blush&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Character&quot;}
+}">
+class Component extends DCLogic {
+  syncShardLetter() {
+    const letter = this.props.shardLetter ?? 'ㅎ';
+    document.querySelectorAll('text[data-shard-letter]').forEach(t => { t.textContent = letter; });
+  }
+  componentDidMount() { this.syncShardLetter(); }
+  componentDidUpdate() { this.syncShardLetter(); }
+  renderVals() {
+    return {
+      scarfColor: this.props.scarfColor ?? '#10B981',
+      shardLetter: this.props.shardLetter ?? 'ㅎ',
+      blushOpacity: (this.props.blush ?? true) ? 0.8 : 0
+    };
+  }
+}
+</script>
+</body>
+</html>

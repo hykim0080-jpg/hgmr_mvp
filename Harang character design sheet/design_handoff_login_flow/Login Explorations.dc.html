@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+  <meta charset="utf-8">
+  <meta name="design_doc_mode" content="canvas">
+  <title>Hangul Maru — Login Explorations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>body{margin:0;background:#f0eee9;font-family:'Noto Sans KR',system-ui,sans-serif}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}.dv-next{margin:22px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}
+  @keyframes screenIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}</style>
+</helmet>
+
+<section class="dv-turn" id="t2">
+  <div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">인터랙티브 플로우 — <a class="dv-oid" href="#1a">1a</a>에서 시작 → '이메일로 시작하기' 탭하면 <a class="dv-oid" href="#1b">1b</a>로 전환</span></div>
+  <div class="dv-opts">
+    <div class="dv-opt" id="2a" data-screen-label="2a Login flow prototype">
+      <div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>탭해서 전환해 보세요 (이메일 화면 ‹ 뒤로 지원)</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="390px,844px">
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+          <div style="height:100%; background:#ECFDF5; display:flex; flex-direction:column; align-items:center; padding:24px 24px 28px; box-sizing:border-box; font-family:'Noto Sans KR',sans-serif; animation:screenIn .28s ease;">
+            <div style="flex:1;"></div>
+            <div style="background:#FFFFFF; border:2.5px solid #3B4252; border-radius:18px; padding:12px 20px; position:relative; box-shadow:3px 3px 0 #3B4252;">
+              <span style="font-family:'Jua',sans-serif; font-size:20px; color:#2A2F3A;">안녕! 오늘도 같이 배워볼까?</span>
+              <span style="position:absolute; left:50%; bottom:-11px; width:18px; height:18px; background:#FFFFFF; border-right:2.5px solid #3B4252; border-bottom:2.5px solid #3B4252; transform:translateX(-50%) rotate(45deg);"></span>
+            </div>
+            <svg viewBox="0 0 320 320" style="width:216px; height:216px; margin-top:18px;">
+              <defs><clipPath id="fa1"><path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z"></path></clipPath></defs>
+              <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+              <ellipse cx="160" cy="248" rx="88" ry="64" fill="#DFE3E9" clip-path="url(#fa1)"></ellipse>
+              <ellipse cx="94" cy="118" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 94 118)"></ellipse>
+              <ellipse cx="84" cy="150" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 84 150)"></ellipse>
+              <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="none" stroke="#3B4252" stroke-width="5"></path>
+              <ellipse cx="232" cy="288" rx="24" ry="12" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-18 232 288)"></ellipse>
+              <ellipse cx="250" cy="293" rx="17" ry="9" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(8 250 293)"></ellipse>
+              <path d="M88,206 Q160,230 232,206 L232,226 Q160,252 88,226 Z" fill="#10B981" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+              <g transform="rotate(10 132 246)">
+                <rect x="120" y="228" width="24" height="36" rx="11" fill="#10B981" stroke="#3B4252" stroke-width="5"></rect>
+                <rect x="120" y="228" width="24" height="11" rx="5" fill="#000000" opacity="0.14"></rect>
+              </g>
+              <ellipse cx="120" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(26 120 250)"></ellipse>
+              <ellipse cx="200" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-26 200 250)"></ellipse>
+              <circle cx="102" cy="184" r="11" fill="#F8B9C5"></circle>
+              <circle cx="218" cy="184" r="11" fill="#F8B9C5"></circle>
+              <circle cx="124" cy="150" r="16" fill="#262B36"></circle>
+              <circle cx="196" cy="150" r="16" fill="#262B36"></circle>
+              <circle cx="119" cy="144" r="5.5" fill="#FFFFFF"></circle>
+              <circle cx="191" cy="144" r="5.5" fill="#FFFFFF"></circle>
+              <path d="M150,170 C154,165 166,165 170,170 C167,178 153,178 150,170 Z" fill="#3B4252"></path>
+              <path d="M151,185 Q160,192 169,185" fill="none" stroke="#3B4252" stroke-width="3" stroke-linecap="round"></path>
+              <path d="M90,160 L110,164 M90,170 L110,171" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+              <path d="M230,160 L210,164 M230,170 L210,171" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+            </svg>
+            <div style="font-family:'Jua',sans-serif; font-size:34px; color:#2A2F3A; margin-top:10px;">한글마루</div>
+            <div style="flex:1;"></div>
+            <div style="display:flex; flex-direction:column; gap:12px; width:100%;">
+              <button onClick="{{ goEmail }}" style="display:flex; align-items:center; justify-content:center; gap:10px; height:56px; border-radius:18px; background:#10B981; border:2.5px solid #3B4252; box-shadow:3px 3px 0 #3B4252; font-family:'Jua',sans-serif; font-size:19px; color:#FFFFFF; cursor:pointer;" style-active="transform:translate(2px,2px); box-shadow:1px 1px 0 #3B4252;">이메일로 시작하기</button>
+              <button style="display:flex; align-items:center; justify-content:center; gap:10px; height:56px; border-radius:18px; background:#FFFFFF; border:2.5px solid #3B4252; box-shadow:3px 3px 0 #3B4252; font-family:'Jua',sans-serif; font-size:19px; color:#2A2F3A; cursor:pointer;"><span style="width:24px; height:24px; border-radius:50%; background:#F3F4F6; display:flex; align-items:center; justify-content:center; font:700 15px 'Noto Sans KR',sans-serif; color:#4285F4;">G</span>Google로 계속하기</button>
+              <button style="height:44px; background:none; border:none; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:500; color:#6B7280; text-decoration:underline; text-underline-offset:3px; cursor:pointer;">로그인 없이 둘러보기</button>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isEmail }}" hint-placeholder-val="{{ false }}">
+          <div style="height:100%; background:#FFFFFF; display:flex; flex-direction:column; padding:68px 28px 28px; box-sizing:border-box; font-family:'Noto Sans KR',sans-serif; animation:screenIn .28s ease;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button onClick="{{ goHome }}" style="width:36px; height:36px; margin-left:-10px; border:none; background:none; font-size:24px; color:#2A2F3A; cursor:pointer; display:flex; align-items:center; justify-content:center;">‹</button>
+              <svg viewBox="0 0 200 200" style="width:26px; height:26px;">
+                <polygon points="100,20 152,86 100,180 48,86" fill="#34D399"></polygon>
+                <polygon points="100,20 48,86 100,86" fill="#6EE7B7"></polygon>
+                <text x="100" y="110" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-weight="900" font-size="52" fill="#FFFFFF">ㅎ</text>
+              </svg>
+              <span style="font-size:17px; font-weight:900; color:#2A2F3A;">한글마루</span>
+            </div>
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-top:36px;">
+              <div>
+                <h1 style="margin:0; font-size:26px; font-weight:900; color:#1F242E; line-height:1.35;">다시 만나서<br>반가워요</h1>
+                <p style="margin:8px 0 0; font-size:14px; color:#7A8494;">하랑이가 기다리고 있었어요</p>
+              </div>
+              <svg viewBox="0 0 320 320" style="width:88px; height:88px;">
+                <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+                <ellipse cx="94" cy="118" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 94 118)"></ellipse>
+                <ellipse cx="84" cy="150" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 84 150)"></ellipse>
+                <path d="M88,206 Q160,230 232,206 L232,226 Q160,252 88,226 Z" fill="#10B981" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+                <ellipse cx="120" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(26 120 250)"></ellipse>
+                <ellipse cx="200" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-26 200 250)"></ellipse>
+                <circle cx="102" cy="184" r="11" fill="#F8B9C5"></circle>
+                <circle cx="218" cy="184" r="11" fill="#F8B9C5"></circle>
+                <circle cx="124" cy="150" r="16" fill="#262B36"></circle>
+                <circle cx="196" cy="150" r="16" fill="#262B36"></circle>
+                <circle cx="119" cy="144" r="5.5" fill="#FFFFFF"></circle>
+                <circle cx="191" cy="144" r="5.5" fill="#FFFFFF"></circle>
+                <path d="M150,170 C154,165 166,165 170,170 C167,178 153,178 150,170 Z" fill="#3B4252"></path>
+                <path d="M151,185 Q160,192 169,185" fill="none" stroke="#3B4252" stroke-width="3" stroke-linecap="round"></path>
+              </svg>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top:32px;">
+              <input placeholder="이메일" style="height:52px; border-radius:14px; border:1.5px solid #E5E7EB; background:#F9FAFB; padding:0 16px; font-family:'Noto Sans KR',sans-serif; font-size:15px; color:#2A2F3A; outline:none; box-sizing:border-box;">
+              <input type="password" placeholder="비밀번호" style="height:52px; border-radius:14px; border:1.5px solid #E5E7EB; background:#F9FAFB; padding:0 16px; font-family:'Noto Sans KR',sans-serif; font-size:15px; color:#2A2F3A; outline:none; box-sizing:border-box;">
+              <button style="height:54px; border-radius:14px; background:#10B981; border:none; font-family:'Noto Sans KR',sans-serif; font-size:16px; font-weight:700; color:#FFFFFF; cursor:pointer; margin-top:4px;">로그인</button>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; margin:22px 0;">
+              <span style="flex:1; height:1px; background:#E5E7EB;"></span>
+              <span style="font-size:12px; color:#9AA3B2;">또는</span>
+              <span style="flex:1; height:1px; background:#E5E7EB;"></span>
+            </div>
+            <button style="display:flex; align-items:center; justify-content:center; gap:10px; height:54px; border-radius:14px; background:#FFFFFF; border:1.5px solid #E5E7EB; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:500; color:#2A2F3A; cursor:pointer;"><span style="width:22px; height:22px; border-radius:50%; background:#F3F4F6; display:flex; align-items:center; justify-content:center; font:700 14px 'Noto Sans KR',sans-serif; color:#4285F4;">G</span>Google로 계속하기</button>
+            <div style="flex:1;"></div>
+            <button style="height:44px; background:none; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; color:#7A8494; cursor:pointer;">로그인 없이 둘러보기 →</button>
+          </div>
+        </sc-if>
+      </x-import>
+    </div>
+  </div>
+  <p class="dv-next">다음 시도: "전환에 슬라이드 애니메이션 넣어줘" · "게스트 버튼도 홈 화면으로 연결" · "<a class="dv-oid" href="#1c">1c</a> 스타일로도 플로우 만들어줘"</p>
+</section>
+
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">로그인 화면 — 하랑이 비중 × 톤 3가지 (iOS · Google / 이메일 / 게스트)</span></div>
+  <div class="dv-opts">
+
+    <!-- 1a : MASCOT HERO -->
+    <div class="dv-opt" id="1a" data-screen-label="1a Mascot hero login">
+      <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>하랑이가 주인공 · 아주 귀엽게</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="390px,844px">
+        <div style="height:100%; background:#ECFDF5; display:flex; flex-direction:column; align-items:center; padding:24px 24px 28px; box-sizing:border-box; font-family:'Noto Sans KR',sans-serif;">
+          <div style="flex:1;"></div>
+          <div style="background:#FFFFFF; border:2.5px solid #3B4252; border-radius:18px; padding:12px 20px; position:relative; box-shadow:3px 3px 0 #3B4252;">
+            <span style="font-family:'Jua',sans-serif; font-size:20px; color:#2A2F3A;">안녕! 오늘도 같이 배워볼까?</span>
+            <span style="position:absolute; left:50%; bottom:-11px; width:18px; height:18px; background:#FFFFFF; border-right:2.5px solid #3B4252; border-bottom:2.5px solid #3B4252; transform:translateX(-50%) rotate(45deg);"></span>
+          </div>
+          <svg viewBox="0 0 320 320" style="width:216px; height:216px; margin-top:18px;">
+            <defs><clipPath id="la1"><path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z"></path></clipPath></defs>
+            <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+            <ellipse cx="160" cy="248" rx="88" ry="64" fill="#DFE3E9" clip-path="url(#la1)"></ellipse>
+            <ellipse cx="94" cy="118" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 94 118)"></ellipse>
+            <ellipse cx="84" cy="150" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 84 150)"></ellipse>
+            <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="none" stroke="#3B4252" stroke-width="5"></path>
+            <ellipse cx="232" cy="288" rx="24" ry="12" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-18 232 288)"></ellipse>
+            <ellipse cx="250" cy="293" rx="17" ry="9" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(8 250 293)"></ellipse>
+            <path d="M88,206 Q160,230 232,206 L232,226 Q160,252 88,226 Z" fill="#10B981" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+            <g transform="rotate(10 132 246)">
+              <rect x="120" y="228" width="24" height="36" rx="11" fill="#10B981" stroke="#3B4252" stroke-width="5"></rect>
+              <rect x="120" y="228" width="24" height="11" rx="5" fill="#000000" opacity="0.14"></rect>
+            </g>
+            <ellipse cx="120" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(26 120 250)"></ellipse>
+            <ellipse cx="200" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-26 200 250)"></ellipse>
+            <circle cx="102" cy="184" r="11" fill="#F8B9C5"></circle>
+            <circle cx="218" cy="184" r="11" fill="#F8B9C5"></circle>
+            <circle cx="124" cy="150" r="16" fill="#262B36"></circle>
+            <circle cx="196" cy="150" r="16" fill="#262B36"></circle>
+            <circle cx="119" cy="144" r="5.5" fill="#FFFFFF"></circle>
+            <circle cx="191" cy="144" r="5.5" fill="#FFFFFF"></circle>
+            <path d="M150,170 C154,165 166,165 170,170 C167,178 153,178 150,170 Z" fill="#3B4252"></path>
+            <path d="M151,185 Q160,192 169,185" fill="none" stroke="#3B4252" stroke-width="3" stroke-linecap="round"></path>
+            <path d="M90,160 L110,164 M90,170 L110,171" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+            <path d="M230,160 L210,164 M230,170 L210,171" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
+          </svg>
+          <div style="font-family:'Jua',sans-serif; font-size:34px; color:#2A2F3A; margin-top:10px;">한글마루</div>
+          <div style="flex:1;"></div>
+          <div style="display:flex; flex-direction:column; gap:12px; width:100%;">
+            <button style="display:flex; align-items:center; justify-content:center; gap:10px; height:56px; border-radius:18px; background:#10B981; border:2.5px solid #3B4252; box-shadow:3px 3px 0 #3B4252; font-family:'Jua',sans-serif; font-size:19px; color:#FFFFFF; cursor:pointer;">이메일로 시작하기</button>
+            <button style="display:flex; align-items:center; justify-content:center; gap:10px; height:56px; border-radius:18px; background:#FFFFFF; border:2.5px solid #3B4252; box-shadow:3px 3px 0 #3B4252; font-family:'Jua',sans-serif; font-size:19px; color:#2A2F3A; cursor:pointer;"><span style="width:24px; height:24px; border-radius:50%; background:#F3F4F6; display:flex; align-items:center; justify-content:center; font:700 15px 'Noto Sans KR',sans-serif; color:#4285F4;">G</span>Google로 계속하기</button>
+            <button style="height:44px; background:none; border:none; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:500; color:#6B7280; text-decoration:underline; text-underline-offset:3px; cursor:pointer;">로그인 없이 둘러보기</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- 1b : RESTRAINED -->
+    <div class="dv-opt" id="1b" data-screen-label="1b Restrained login">
+      <div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>절제된 프로덕트 톤 · 하랑이는 인사만</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="390px,844px">
+        <div style="height:100%; background:#FFFFFF; display:flex; flex-direction:column; padding:68px 28px 28px; box-sizing:border-box; font-family:'Noto Sans KR',sans-serif;">
+          <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+            <svg viewBox="0 0 200 200" style="width:26px; height:26px;">
+              <polygon points="100,20 152,86 100,180 48,86" fill="#34D399"></polygon>
+              <polygon points="100,20 48,86 100,86" fill="#6EE7B7"></polygon>
+              <text x="100" y="110" text-anchor="middle" font-family="'Noto Sans KR',sans-serif" font-weight="900" font-size="52" fill="#FFFFFF">ㅎ</text>
+            </svg>
+            <span style="font-size:17px; font-weight:900; color:#2A2F3A;">한글마루</span>
+          </div>
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-top:44px;">
+            <div>
+              <h1 style="margin:0; font-size:26px; font-weight:900; color:#1F242E; line-height:1.35;">다시 만나서<br>반가워요</h1>
+              <p style="margin:8px 0 0; font-size:14px; color:#7A8494;">하랑이가 기다리고 있었어요</p>
+            </div>
+            <svg viewBox="0 0 320 320" style="width:88px; height:88px;">
+              <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+              <ellipse cx="94" cy="118" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 94 118)"></ellipse>
+              <ellipse cx="84" cy="150" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 84 150)"></ellipse>
+              <path d="M88,206 Q160,230 232,206 L232,226 Q160,252 88,226 Z" fill="#10B981" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+              <ellipse cx="120" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(26 120 250)"></ellipse>
+              <ellipse cx="200" cy="250" rx="28" ry="14" fill="#DCE0E8" stroke="#3B4252" stroke-width="5" transform="rotate(-26 200 250)"></ellipse>
+              <circle cx="102" cy="184" r="11" fill="#F8B9C5"></circle>
+              <circle cx="218" cy="184" r="11" fill="#F8B9C5"></circle>
+              <circle cx="124" cy="150" r="16" fill="#262B36"></circle>
+              <circle cx="196" cy="150" r="16" fill="#262B36"></circle>
+              <circle cx="119" cy="144" r="5.5" fill="#FFFFFF"></circle>
+              <circle cx="191" cy="144" r="5.5" fill="#FFFFFF"></circle>
+              <path d="M150,170 C154,165 166,165 170,170 C167,178 153,178 150,170 Z" fill="#3B4252"></path>
+              <path d="M151,185 Q160,192 169,185" fill="none" stroke="#3B4252" stroke-width="3" stroke-linecap="round"></path>
+            </svg>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px; margin-top:32px;">
+            <input placeholder="이메일" style="height:52px; border-radius:14px; border:1.5px solid #E5E7EB; background:#F9FAFB; padding:0 16px; font-family:'Noto Sans KR',sans-serif; font-size:15px; color:#2A2F3A; outline:none; box-sizing:border-box;">
+            <input type="password" placeholder="비밀번호" style="height:52px; border-radius:14px; border:1.5px solid #E5E7EB; background:#F9FAFB; padding:0 16px; font-family:'Noto Sans KR',sans-serif; font-size:15px; color:#2A2F3A; outline:none; box-sizing:border-box;">
+            <button style="height:54px; border-radius:14px; background:#10B981; border:none; font-family:'Noto Sans KR',sans-serif; font-size:16px; font-weight:700; color:#FFFFFF; cursor:pointer; margin-top:4px;">로그인</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; margin:22px 0;">
+            <span style="flex:1; height:1px; background:#E5E7EB;"></span>
+            <span style="font-size:12px; color:#9AA3B2;">또는</span>
+            <span style="flex:1; height:1px; background:#E5E7EB;"></span>
+          </div>
+          <button style="display:flex; align-items:center; justify-content:center; gap:10px; height:54px; border-radius:14px; background:#FFFFFF; border:1.5px solid #E5E7EB; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:500; color:#2A2F3A; cursor:pointer;"><span style="width:22px; height:22px; border-radius:50%; background:#F3F4F6; display:flex; align-items:center; justify-content:center; font:700 14px 'Noto Sans KR',sans-serif; color:#4285F4;">G</span>Google로 계속하기</button>
+          <div style="flex:1;"></div>
+          <button style="height:44px; background:none; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; color:#7A8494; cursor:pointer;">로그인 없이 둘러보기 →</button>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- 1c : BACKGROUND ELEMENT -->
+    <div class="dv-opt" id="1c" data-screen-label="1c Background mascot login">
+      <div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>배경 요소로 은은하게 · 바텀 시트</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="390px,844px">
+        <div style="height:100%; background:#10B981; display:flex; flex-direction:column; box-sizing:border-box; font-family:'Noto Sans KR',sans-serif; position:relative; overflow:hidden;">
+          <svg viewBox="0 0 200 200" style="position:absolute; top:64px; left:-30px; width:130px; height:130px; opacity:0.18;"><polygon points="100,20 152,86 100,180 48,86" fill="#065F46"></polygon></svg>
+          <svg viewBox="0 0 200 200" style="position:absolute; top:30px; right:-24px; width:90px; height:90px; opacity:0.18;"><polygon points="100,20 152,86 100,180 48,86" fill="#065F46"></polygon></svg>
+          <div style="padding:64px 32px 0; position:relative;">
+            <h1 style="margin:0; font-size:30px; font-weight:900; color:#FFFFFF; line-height:1.4;">한글마루에<br>오신 걸 환영해요</h1>
+            <p style="margin:10px 0 0; font-size:14.5px; color:#D1FAE5;">하루 5분, 하랑이와 단어 지혜 조각 모으기</p>
+          </div>
+          <div style="flex:1;"></div>
+          <div style="position:relative; height:150px;">
+            <svg viewBox="0 0 320 250" style="position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); width:230px; height:180px;">
+              <path d="M160,56 C230,56 260,128 260,202 C260,264 216,290 160,290 C104,290 60,264 60,202 C60,128 90,56 160,56 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="5"></path>
+              <ellipse cx="94" cy="118" rx="12" ry="7.5" fill="#AEB6C2" transform="rotate(-32 94 118)"></ellipse>
+              <ellipse cx="84" cy="150" rx="9" ry="6" fill="#AEB6C2" transform="rotate(-24 84 150)"></ellipse>
+              <path d="M88,206 Q160,230 232,206 L232,226 Q160,252 88,226 Z" fill="#059669" stroke="#3B4252" stroke-width="5" stroke-linejoin="round"></path>
+              <circle cx="102" cy="184" r="11" fill="#F8B9C5"></circle>
+              <circle cx="218" cy="184" r="11" fill="#F8B9C5"></circle>
+              <circle cx="124" cy="150" r="16" fill="#262B36"></circle>
+              <circle cx="196" cy="150" r="16" fill="#262B36"></circle>
+              <circle cx="119" cy="144" r="5.5" fill="#FFFFFF"></circle>
+              <circle cx="191" cy="144" r="5.5" fill="#FFFFFF"></circle>
+              <path d="M150,170 C154,165 166,165 170,170 C167,178 153,178 150,170 Z" fill="#3B4252"></path>
+              <path d="M151,185 Q160,192 169,185" fill="none" stroke="#3B4252" stroke-width="3" stroke-linecap="round"></path>
+            </svg>
+          </div>
+          <div style="position:relative; background:#FFFFFF; border-radius:28px 28px 0 0; padding:28px 28px 34px; display:flex; flex-direction:column; gap:12px;">
+            <input placeholder="이메일" style="height:52px; border-radius:14px; border:1.5px solid #E5E7EB; background:#F9FAFB; padding:0 16px; font-family:'Noto Sans KR',sans-serif; font-size:15px; color:#2A2F3A; outline:none; box-sizing:border-box;">
+            <input type="password" placeholder="비밀번호" style="height:52px; border-radius:14px; border:1.5px solid #E5E7EB; background:#F9FAFB; padding:0 16px; font-family:'Noto Sans KR',sans-serif; font-size:15px; color:#2A2F3A; outline:none; box-sizing:border-box;">
+            <button style="height:54px; border-radius:14px; background:#10B981; border:none; font-family:'Noto Sans KR',sans-serif; font-size:16px; font-weight:700; color:#FFFFFF; cursor:pointer;">로그인</button>
+            <button style="display:flex; align-items:center; justify-content:center; gap:10px; height:54px; border-radius:14px; background:#FFFFFF; border:1.5px solid #E5E7EB; font-family:'Noto Sans KR',sans-serif; font-size:15px; font-weight:500; color:#2A2F3A; cursor:pointer;"><span style="width:22px; height:22px; border-radius:50%; background:#F3F4F6; display:flex; align-items:center; justify-content:center; font:700 14px 'Noto Sans KR',sans-serif; color:#4285F4;">G</span>Google로 계속하기</button>
+            <button style="height:40px; background:none; border:none; font-family:'Noto Sans KR',sans-serif; font-size:14px; color:#7A8494; cursor:pointer;">로그인 없이 둘러보기 →</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+  </div>
+  <p class="dv-next">다음 시도: "<a class="dv-oid" href="#1a">1a</a>의 말풍선을 <a class="dv-oid" href="#1c">1c</a>에 합쳐줘" · "<a class="dv-oid" href="#1b">1b</a>에 하랑이 애니메이션 추가" · "다른 방향 더 보여줘"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { screen: 'home' };
+  renderVals() {
+    return {
+      isHome: this.state.screen === 'home',
+      isEmail: this.state.screen === 'email',
+      goEmail: () => this.setState({ screen: 'email' }),
+      goHome: () => this.setState({ screen: 'home' })
+    };
+  }
+}
+</script>
+</body>
+</html>
