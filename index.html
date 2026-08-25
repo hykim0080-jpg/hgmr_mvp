@@ -2310,7 +2310,7 @@
                         <line id="alt-guide-marker-line" x1="58" y1="0" x2="318" y2="0" stroke="#059669" stroke-width="2"/>
                         <!-- 🦭 물범은 산에 살지 않는다. 그런데 여기까지 올라와 있다. -->
                         <ellipse id="alt-guide-shadow" cx="150" cy="0" rx="16" ry="3.5" fill="#047857" opacity="0.22"/>
-                        <svg id="alt-guide-harang" x="118" y="0" width="64" height="64" viewBox="10 10 300 300" style="overflow: visible;" aria-hidden="true"><use href="#fr-idle-1"></use></svg>
+                        <svg id="alt-guide-harang" x="118" y="0" width="64" height="64" viewBox="10 10 300 300" style="overflow: visible;" aria-hidden="true"><use id="alt-guide-harang-use" href="#fr-roll-a"></use></svg>
                         <rect id="alt-guide-marker-box" x="238" y="0" width="80" height="16" rx="8" fill="#059669"/>
                         <text id="alt-guide-marker-text" x="278" y="0" text-anchor="middle" font-size="9.5" font-weight="800" fill="#ffffff">현재 620m</text>
                     </g>
@@ -3462,6 +3462,9 @@
                 track('roll_pose', { pose: rollPoseThisSession });
             }
             useEl.setAttribute('href', '#' + rollPoseThisSession);
+            // 고도 안내 모달의 하랑이도 같은 모습으로 — 홈과 다른 자세면 다른 개체처럼 보인다
+            const guideUse = document.getElementById('alt-guide-harang-use');
+            if (guideUse) guideUse.setAttribute('href', '#' + rollPoseThisSession);
         }
         // 로그인 화면에서도 홈 마커는 이미 DOM에 있다. 대시보드가 그려지기 전에 한 번 정해 둔다.
         pickRollingHarang();

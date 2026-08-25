@@ -1,0 +1,7 @@
+feat(altitude): 어휘 고도 안내 모달의 하랑이도 굴러 오르는 모습으로
+
+홈 마커만 굴러 오르고 안내 모달은 서 있으면 다른 개체처럼 보인다.
+pickRollingHarang()이 두 곳의 <use>를 같은 모습으로 맞춘다.
+
+tests/alt_guide_harang.mjs: 홈과 같은 모습인지, 현재 고도선에 닿는지 확인
+(576m 기준 3px 오차)
