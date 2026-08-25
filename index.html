@@ -2549,6 +2549,10 @@
                     <div style="position: relative; margin-bottom: 30px;">
                         <div class="meaning" id="meaning-text" style="margin-bottom: 0;"></div>
 </div>
+                    <!-- 💡 두 번 틀렸을 때 같은 단어가 쓰인 다른 문장을 조용히 덧붙인다 (글자 수·초성 같은 형태 정보는 주지 않음) -->
+                    <div id="hint-line" style="display: none; margin-top: -18px; margin-bottom: 18px; padding: 9px 11px; border-radius: 10px; background: var(--info-soft); border: 1px solid var(--info-border); font-size: 13px; line-height: 1.55; color: var(--text-sub);">
+                        <span style="font-size: 10.5px; font-weight: 800; color: #0284c7; display: block; margin-bottom: 3px;">다른 문장에서는</span><span id="hint-text"></span>
+                    </div>
                 </div>
 
                 <div class="input-group" id="input-group"
@@ -2809,6 +2813,7 @@
         }
         let quizQueue = []; let totalQuestions = 0; let completedQuestions = 0; let retryCount = 0;
         let isWaiting = false; let hasFailedCurrent = false; let isShowingStats = false;
+        let wrongCurrent = 0;   // 이번 등장에서 틀린 횟수 — 두 번째부터 힌트 예문을 연다
         // 배치고사는 통계 패널을 띄우지 않아 isShowingStats가 서지 않는다.
         // 정답을 공개하고 '다음' 대기 중인 상태를 따로 표시해 신고 대상이 밀리지 않게 한다.
         let placementRevealed = false;
@@ -4549,7 +4554,7 @@
         });
 
         async function loadQuestion() {
-            isWaiting = false; hasFailedCurrent = false; isShowingStats = false; placementRevealed = false;
+            isWaiting = false; hasFailedCurrent = false; isShowingStats = false; placementRevealed = false; wrongCurrent = 0;
             await updateDashboard();
 
             const statsBox = document.getElementById('inline-stats-container');
@@ -4731,6 +4736,8 @@
             // 다시 틀리면 또 재출제되어 한 번에 맞출 때까지 세션 내 반복
             hasFailedCurrent = false;
             attemptCounted = false;
+            wrongCurrent = 0;
+            document.getElementById('hint-line').style.display = 'none';
             document.getElementById('quiz-box').classList.remove('stats-open');
             const { suffix: vSuffix } = splitVerbEnding(currentWord);
             sentenceEl.innerHTML = currentWord.sentence.replace('____', '<span style="color:var(--text-muted); border-bottom: 2px dashed var(--border-strong);">____</span>' + vSuffix);
@@ -5063,6 +5070,21 @@
             document.getElementById('progress-text').textContent = wrapUp ? '마무리' : (shown + '/' + totalQuestions);
         }
 
+        // 💡 두 번째 오답부터 같은 단어가 쓰인 다른 예문을 연다.
+        //    글자 수·초성 같은 형태 정보는 주지 않는다 — 문맥만 더 준다(브랜드: 문맥 속 빈칸채우기).
+        //    hint가 없는 단어에서는 아무 일도 일어나지 않는다.
+        //    배치고사는 측정 중이므로 호출하지 않는다.
+        function revealHint(word) {
+            const box = document.getElementById('hint-line');
+            if (!box || !word || !word.hint || box.style.display !== 'none') return;
+            const { suffix } = splitVerbEnding(word);
+            document.getElementById('hint-text').textContent =
+                word.hint.replace('____', '____' + suffix);
+            box.style.display = 'block';
+            track('hint_shown', { word: word.target });
+            if (isMobileDevice) requestAnimationFrame(fitQuizToKeyboard);
+        }
+
         function handleReinsertion(wordObj) {
             const minGap = 3;
             const maxGap = 6;
@@ -5206,6 +5228,8 @@
                 void inputGroup.offsetWidth; // 애니메이션 리셋을 위한 트릭
                 inputGroup.classList.add('wrong');
                 comboCount = 0; // 연속 정답 끊김
+                wrongCurrent++;
+                if (wrongCurrent >= 2) revealHint(currentWord);   // 두 번째 오답부터 다른 예문 공개
                 showHarangMotion('wrong', 1400); // 🦭 같이 아쉬워하기
                 inputEl.value = '';
                 jamoBuffer = []; // 🌟 자체 한글 가상 키보드 버퍼를 비워 처음부터 새로운 답을 입력할 수 있게 함

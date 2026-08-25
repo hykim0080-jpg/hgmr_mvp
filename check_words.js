@@ -92,6 +92,22 @@ words.forEach((w, i) => {
     seen.add(a);
   });
 
+  // 4-1) 힌트 예문(hint) — 두 번 틀렸을 때 여는 두 번째 빈칸 예문
+  //      정답을 그대로 노출하면 힌트가 아니라 답이 되므로 target 포함은 차단 대상.
+  if (w.hint !== undefined) {
+    if (typeof w.hint !== 'string' || !w.hint.trim()) integrity.push(`${loc}: hint가 빈 값`);
+    else {
+      if (!w.hint.includes('____'))        integrity.push(`${loc}: hint에 빈칸(____) 없음`);
+      if (w.hint.includes(w.target))       integrity.push(`${loc}: hint에 정답("${w.target}")이 그대로 노출됨`);
+      if (w.hint === w.sentence)           integrity.push(`${loc}: hint가 본 예문과 동일`);
+      if (w.hint.length < 12 || w.hint.length > 90) hygiene.push(`${loc}: hint 길이 ${w.hint.length}자 (12~90 권장)`);
+      const hp = trailingParticle(w.hint);
+      if (hp && !isVerb(w) && !particleFits(w.target, hp)) {
+        targetBugs.push({ i, target: w.target, particle: hp, sentence: w.hint });
+      }
+    }
+  }
+
   // 5) 유의어 뉘앙스 대조 예문 — ref 는 words.json 에 실존하는 표제어여야 함
   //    (유의어_뉘앙스_설계.md: nuance = { 유의어: {ref} | {s} }. 참조 깨짐은 렌더 시 빈 화면이 되므로 차단)
   if (w.nuance && typeof w.nuance === 'object') {
