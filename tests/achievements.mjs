@@ -49,9 +49,30 @@ log(`모달 열림: ${res.열림} · 카드 ${res.개수}장 · 목록 스크롤
 log('  상태  이름            조건');
 res.목록.forEach(b => log(`  ${b.잠김 ? '🔒' : '✅'}   ${b.이름.padEnd(14)} ${b.조건}`));
 
+// 칭호 목록도 같은 12개인지 — 업적과 칭호가 한 목록이라는 게 이 기능의 핵심
+await click('#close-achievement-btn'); await sleep(600);
+await click('#edit-profile-trigger'); await sleep(900);
+await click('#title-collapse-btn'); await sleep(500);
+const 칭호 = await page.evaluate(() => {
+    const p = document.getElementById('title-picker');
+    const opts = [...p.querySelectorAll('.title-opt')];
+    return {
+        개수: opts.length,
+        이름: opts.map(o => (o.childNodes[1]?.textContent || o.textContent).trim()),
+        잠김수: opts.filter(o => o.classList.contains('locked')).length,
+        장착: (() => { const o = opts.find(x => x.classList.contains('selected')); return o ? (o.childNodes[1]?.textContent || o.textContent).trim() : '(없음)'; })(),
+        홈칭호: (() => { const e = document.getElementById('home-level-title'); return getComputedStyle(e).display === 'none' ? '' : e.textContent.trim(); })(),
+    };
+});
+log(`\n칭호 목록: ${칭호.개수}개 · 잠김 ${칭호.잠김수}개 · 장착 "${칭호.장착}" · 홈 표시 "${칭호.홈칭호}"`);
+
 const 해제 = res.목록.filter(b => !b.잠김).length;
 log('\n판정');
 log(`  · 카드 12장: ${res.개수 === 12 ? '✅' : '❌ ' + res.개수}`);
 log(`  · 신규 계정에서 전부 잠김: ${해제 === 0 ? '✅' : '❌ 해제 ' + 해제 + '개'}`);
 log(`  · 홈 카운트와 모달 해제 수 일치: ${homeCount === `${해제}개` ? '✅' : `❌ 홈 ${homeCount} vs 모달 ${해제}개`}`);
+log(`  · 칭호 목록도 12개 (업적과 같은 목록): ${칭호.개수 === 12 ? '✅' : '❌ ' + 칭호.개수}`);
+log(`  · 업적 이름과 칭호 이름이 같은 순서: ${JSON.stringify(칭호.이름) === JSON.stringify(res.목록.map(b => b.이름)) ? '✅' : '❌'}`);
+log(`  · 잠김 수 일치: ${칭호.잠김수 === res.목록.filter(b => b.잠김).length ? '✅' : '❌'}`);
+log(`  · 미해제 칭호는 홈에 뜨지 않음: ${칭호.홈칭호 === '' ? '✅' : `❌ "${칭호.홈칭호}"`}`);
 await browser.close();
