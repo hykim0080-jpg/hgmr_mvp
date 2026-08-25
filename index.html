@@ -2009,60 +2009,7 @@
 
                 <div id="modal-badge-list"
                     style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; text-align: left; max-height: 350px; overflow-y: auto; padding-right: 4px;">
-                    <!-- 🌿 어휘 산책 -->
-                    <div class="badge-card locked-badge" id="modal-badge-sprout"
-                        style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 16px; border: 2px solid var(--border);">
-                        <span style="font-size: 28px; display:flex; align-items:center;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:28px;height:28px;" aria-hidden="true"><use href="#ic-boot"></use></svg></span>
-                        <div>
-                            <strong style="font-size: 13px; color: var(--text-primary); display: block;">어휘 산책</strong>
-                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">누적 완료 단어 10개 이상 달성</span>
-                        </div>
-                    </div>
-                    <!-- 🧭 어휘 탐험 -->
-                    <div class="badge-card locked-badge" id="modal-badge-collector"
-                        style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 16px; border: 2px solid var(--border);">
-                        <span style="font-size: 28px; display:flex; align-items:center;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:28px;height:28px;" aria-hidden="true"><use href="#ic-globe"></use></svg></span>
-                        <div>
-                            <strong style="font-size: 13px; color: var(--text-primary); display: block;">어휘 탐험</strong>
-                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">누적 완료 단어 50개 이상 달성</span>
-                        </div>
-                    </div>
-                    <!-- 🏔 어휘 등반 -->
-                    <div class="badge-card locked-badge" id="modal-badge-conqueror"
-                        style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 16px; border: 2px solid var(--border);">
-                        <span style="font-size: 28px; display:flex; align-items:center;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:28px;height:28px;" aria-hidden="true"><use href="#ic-mount"></use></svg></span>
-                        <div>
-                            <strong style="font-size: 13px; color: var(--text-primary); display: block;">어휘 등반</strong>
-                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">누적 완료 단어 150개 이상 달성</span>
-                        </div>
-                    </div>
-                    <!-- 🔥 작심삼일 극복 -->
-                    <div class="badge-card locked-badge" id="modal-badge-streak"
-                        style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 16px; border: 2px solid var(--border);">
-                        <span style="font-size: 28px; display:flex; align-items:center;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:28px;height:28px;" aria-hidden="true"><use href="#ic-flame"></use></svg></span>
-                        <div>
-                            <strong style="font-size: 13px; color: var(--text-primary); display: block;">작심삼일 극복</strong>
-                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">연속 학습 3일 이상 달성</span>
-                        </div>
-                    </div>
-                    <!-- 📜 조선어학회 회원 -->
-                    <div class="badge-card locked-badge" id="modal-badge-scholar"
-                        style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 16px; border: 2px solid var(--border);">
-                        <span style="font-size: 28px; display:flex; align-items:center;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:28px;height:28px;" aria-hidden="true"><use href="#ic-book"></use></svg></span>
-                        <div>
-                            <strong style="font-size: 13px; color: var(--text-primary); display: block;">조선어학회 회원</strong>
-                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">학습 레벨 30 이상 달성</span>
-                        </div>
-                    </div>
-                    <!-- 🏆 마루 등정 -->
-                    <div class="badge-card locked-badge" id="modal-badge-master"
-                        style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 16px; border: 2px solid var(--border);">
-                        <span style="font-size: 28px; display:flex; align-items:center;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:28px;height:28px;" aria-hidden="true"><use href="#ic-trophy"></use></svg></span>
-                        <div>
-                            <strong style="font-size: 13px; color: var(--text-primary); display: block;">마루 등정</strong>
-                            <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">학습 레벨 50 이상 달성</span>
-                        </div>
-                    </div>
+                    <!-- 카드는 ACHIEVEMENTS 배열에서 렌더 — 마크업과 조건이 어긋나지 않도록 -->
                 </div>
 
                 <button id="close-achievement-btn"
@@ -4308,24 +4255,36 @@
         // 🏅 업적 정의 한 곳 — 홈 배지 개수·업적 모달·학습 분석이 모두 이걸 본다.
         // 예전엔 세 곳에 조건이 복제돼 있어 해제 기준을 바꿀 때마다 값이 어긋났다.
         const ACHIEVEMENTS = [
-            { el: 'modal-badge-sprout', color: '#10b981', test: () => totalLearnedWords >= 10 },
-            { el: 'modal-badge-collector', color: '#3b82f6', test: () => totalLearnedWords >= 50 },
-            { el: 'modal-badge-conqueror', color: '#8b5cf6', test: () => totalLearnedWords >= 150 },
-            { el: 'modal-badge-streak', color: '#ef4444', test: () => streakDays >= 3 },
-            { el: 'modal-badge-scholar', color: '#b45309', test: () => Math.floor(currentExp / 200) + 1 >= 30 },
-            { el: 'modal-badge-master', color: '#f59e0b', test: () => Math.floor(currentExp / 200) + 1 >= 50 },
+            { icon: 'chick',  name: '첫걸음',        desc: '첫 학습을 마침',            color: '#0d9488', test: () => totalLearnedWords >= 1 },
+            { icon: 'boot',   name: '어휘 산책',     desc: '누적 완료 단어 50개 이상',   color: '#10b981', test: () => totalLearnedWords >= 50 },
+            { icon: 'globe',  name: '어휘 탐험',     desc: '누적 완료 단어 80개 이상',   color: '#3b82f6', test: () => totalLearnedWords >= 80 },
+            { icon: 'mount',  name: '어휘 등반',     desc: '누적 완료 단어 150개 이상',  color: '#8b5cf6', test: () => totalLearnedWords >= 150 },
+            { icon: 'ridge',  name: '어휘 종주',     desc: '누적 완료 단어 250개 이상',  color: '#0ea5e9', test: () => totalLearnedWords >= 250 },
+            { icon: 'summit', name: '어휘 대장정',   desc: '누적 완료 단어 1,000개 이상', color: '#047857', test: () => totalLearnedWords >= 1000 },
+            { icon: 'flame',  name: '작심삼일 극복', desc: '연속 학습 3일 이상',         color: '#ef4444', test: () => streakDays >= 3 },
+            { icon: 'calendar', name: '이레 연속',   desc: '연속 학습 7일 이상',         color: '#f97316', test: () => streakDays >= 7 },
+            { icon: 'star',   name: '보름 연속',     desc: '연속 학습 15일 이상',        color: '#d97706', test: () => streakDays >= 15 },
+            { icon: 'medal',  name: '한 달 연속',    desc: '연속 학습 30일 이상',        color: '#9a3412', test: () => streakDays >= 30 },
+            { icon: 'book',   name: '조선어학회 회원', desc: '학습 레벨 30 이상 달성',   color: '#b45309', test: () => Math.floor(currentExp / 200) + 1 >= 30 },
+            { icon: 'trophy', name: '마루 등정',     desc: '학습 레벨 50 이상 달성',     color: '#f59e0b', test: () => Math.floor(currentExp / 200) + 1 >= 50 },
         ];
         const achievementCount = () => ACHIEVEMENTS.filter(a => a.test()).length;
 
         // 독립형 업적 팝업 데이터 연동 및 스타일링 함수
         function updateAchievementModal() {
-            ACHIEVEMENTS.forEach(a => {
-                const el = document.getElementById(a.el);
-                if (!el) return;
+            const list = document.getElementById('modal-badge-list');
+            if (!list) return;
+            list.innerHTML = ACHIEVEMENTS.map(a => {
                 const on = a.test();
-                el.classList.toggle('locked-badge', !on);
-                el.style.border = `2px solid ${on ? a.color : '#e2e8f0'}`;
-            });
+                return `<div class="badge-card${on ? '' : ' locked-badge'}"
+                    style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 16px; border: 2px solid ${on ? a.color : 'var(--border-strong)'};">
+                    <span style="display: flex; align-items: center;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:28px;height:28px;" aria-hidden="true"><use href="#ic-${a.icon}"></use></svg></span>
+                    <div>
+                        <strong style="font-size: 13px; color: var(--text-primary); display: block;">${escapeHTML(a.name)}</strong>
+                        <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">${escapeHTML(a.desc)}</span>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         function goToHome() {
@@ -6307,8 +6266,8 @@
             const currentLevel = Math.floor(currentExp / 200) + 1;
             const titles = [
                 { name: "🐣 첫걸음", unlocked: true },
-                { name: "🌿 어휘 산책", unlocked: totalLearnedWords >= 10 },
-                { name: "🧭 어휘 탐험", unlocked: totalLearnedWords >= 50 },
+                { name: "🌿 어휘 산책", unlocked: totalLearnedWords >= 50 },
+                { name: "🧭 어휘 탐험", unlocked: totalLearnedWords >= 80 },
                 { name: "🏔 어휘 등반", unlocked: totalLearnedWords >= 150 },
                 { name: "🔥 작심삼일 극복", unlocked: streakDays >= 3 },
                 // 📜 칭호의 무게를 지키는 한 줄 — 게임적 소비가 아니라 역사에 대한 존중임을 전달 (브랜드 원칙 P16)

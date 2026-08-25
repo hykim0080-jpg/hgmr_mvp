@@ -62,3 +62,4 @@ hint_todo.json
 _build*.log
 _resign*.log
 _upload*.log
+_test8.log
