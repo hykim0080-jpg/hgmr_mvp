@@ -2191,6 +2191,9 @@
                     <!-- 현재 위치 마커 (JS로 배치) -->
                     <g id="alt-guide-marker" style="display: none;">
                         <line id="alt-guide-marker-line" x1="58" y1="0" x2="318" y2="0" stroke="#059669" stroke-width="2"/>
+                        <!-- 🦭 물범은 산에 살지 않는다. 그런데 여기까지 올라와 있다. -->
+                        <ellipse id="alt-guide-shadow" cx="150" cy="0" rx="16" ry="3.5" fill="#047857" opacity="0.22"/>
+                        <svg id="alt-guide-harang" x="118" y="0" width="64" height="64" viewBox="10 10 300 300" style="overflow: visible;" aria-hidden="true"><use href="#fr-idle-1"></use></svg>
                         <rect id="alt-guide-marker-box" x="238" y="0" width="80" height="16" rx="8" fill="#059669"/>
                         <text id="alt-guide-marker-text" x="278" y="0" text-anchor="middle" font-size="9.5" font-weight="800" fill="#ffffff">현재 620m</text>
                     </g>
@@ -2591,7 +2594,9 @@
                             <path d="M0 118 L70 58 L112 86 L170 24 L228 82 L272 54 L340 118 Z" fill="var(--brand-mint)" stroke="#34d399" stroke-width="1.5"></path>
                             <path d="M170 24 L190 45 L150 45 Z" fill="var(--surface)" opacity="0.9"></path>
                             <line id="home-mtn-line" x1="0" y1="90" x2="340" y2="90" stroke="#059669" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.8"></line>
-                            <circle id="home-mtn-dot" cx="96" cy="90" r="6" fill="#047857" stroke="var(--surface)" stroke-width="2.5"></circle>
+                            <!-- 🦭 산으로 간 물범 — 지금 오른 높이에 하랑이가 선다 -->
+                            <ellipse id="home-mtn-shadow" cx="96" cy="90" rx="13" ry="3" fill="#047857" opacity="0.22"></ellipse>
+                            <svg id="home-mtn-harang" x="70" y="38" width="52" height="52" viewBox="10 10 300 300" style="overflow: visible;" aria-hidden="true"><use href="#fr-idle-1"></use></svg>
                             <text x="336" y="114" text-anchor="end" font-size="9" font-weight="700" fill="#059669" opacity="0.85">해발 0m</text>
                         </svg>
                     </button>
@@ -4353,7 +4358,9 @@
                 const y = Math.round(112 - Math.max(0, Math.min(1, alt / 1100)) * 86);
                 document.getElementById('home-mtn-line').setAttribute('y1', y);
                 document.getElementById('home-mtn-line').setAttribute('y2', y);
-                document.getElementById('home-mtn-dot').setAttribute('cy', y);
+                // 하랑이가 선을 밟고 서도록 — 발끝이 선에 닿게 높이만큼 위로 올린다
+                document.getElementById('home-mtn-shadow').setAttribute('cy', y);
+                document.getElementById('home-mtn-harang').setAttribute('y', y - 50);
             } else {
                 altitudeEl.style.display = 'none'; // 측정 전에는 표시하지 않음 (배치고사 안내가 담당)
             }
@@ -7073,6 +7080,8 @@
                 document.getElementById('alt-guide-marker-line').setAttribute('y1', y);
                 document.getElementById('alt-guide-marker-line').setAttribute('y2', y);
                 document.getElementById('alt-guide-marker-box').setAttribute('y', y - 8);
+                document.getElementById('alt-guide-shadow').setAttribute('cy', y);
+                document.getElementById('alt-guide-harang').setAttribute('y', y - 62);
                 const txt = document.getElementById('alt-guide-marker-text');
                 txt.setAttribute('y', y + 3.5);
                 txt.textContent = `현재 ${alt.toLocaleString()}m`;
