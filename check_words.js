@@ -105,6 +105,14 @@ words.forEach((w, i) => {
       if (hp && !isVerb(w) && !particleFits(w.target, hp)) {
         targetBugs.push({ i, target: w.target, particle: hp, sentence: w.hint });
       }
+      // 유의어도 정답으로 인정되므로, 힌트에 accepts가 노출되면 답을 준 것이나 같다.
+      (w.accepts || []).forEach(a => {
+        if (a === w.target) return;
+        const stem = /다$/.test(a) && a.length > 2 ? a.slice(0, -1) : a;
+        if (stem && w.hint.includes(stem)) {
+          integrity.push(`${loc}: hint에 유의어("${a}")가 노출됨 — 그대로 입력하면 정답 처리된다`);
+        }
+      });
       // 동형이의어(수렴·지표·역학·수용성 …)는 표제어가 같아도 뜻이 다르다.
       // 같은 힌트를 공유하면 엉뚱한 뜻의 문맥을 보여주게 되므로 차단한다.
       const twin = words.find((o, j) => j !== i && o.target === w.target && o.hint === w.hint);
