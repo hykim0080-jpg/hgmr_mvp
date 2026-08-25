@@ -53,3 +53,5 @@ ios/export/out*/
 ios/export/*.xcarchive/
 _test.log
 tests/shots/
+_test2.log
+_test3.log

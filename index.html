@@ -2191,7 +2191,7 @@
                 <!-- 하랑이 첫 소개 — 이름 유래(하늘+랑) 기반 공식 한 줄 서사 (화면_명칭_가이드.md 7절) -->
                 <p style="margin: 6px 0 0; font-size: 13px; color: var(--text-secondary); line-height: 1.55;">안녕, 나는 <b style="color:#0d9488;">하랑이</b>!<br>하늘처럼 넓은 어휘의 세계를<br><b>너랑</b> 함께 오르는 친구야.</p>
                 <h3 style="margin: 10px 0 6px; font-size: 19px; font-weight: 900; color: var(--text-primary);">먼저 네 어휘 실력을<br>알아볼게!</h3>
-                <p style="margin: 0 0 4px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">최대 20문제로 딱 맞는 난이도를 찾아요.<br>맞힌 단어는 낱말 조각으로 남고,<br>끝나면 <b style="color:#0284c7;">지혜 조각 +15</b>를 드려요!</p>
+                <p style="margin: 0 0 4px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;">스무 문제 안팎으로 딱 맞는 난이도를 찾아요.<br>맞힌 단어는 낱말 조각으로 남고,<br>끝나면 <b style="color:#0284c7;">지혜 조각 +15</b>를 드려요!</p>
                 <button id="placement-start-btn" style="width: 100%; margin-top: 14px; padding: 14px; background: #10b981; color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-seal"></use></svg> 실력 알아보기 시작</button>
                 <button id="placement-later-btn" style="width: 100%; margin-top: 8px; padding: 10px; background: none; color: var(--text-muted); border: none; font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">나중에 하기</button>
             </div>
@@ -2539,7 +2539,7 @@
                     <div class="progress-bar" style="flex: 1; margin-bottom: 0;">
                         <div class="progress-fill" id="progress"></div>
                     </div>
-                    <span id="progress-text" style="flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--text-secondary); min-width: 42px; text-align: right;">0/0</span>
+                    <span id="progress-text" style="flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--text-secondary); min-width: 52px; text-align: right;">0/0</span>
                 </div>
 
                 <div id="word-tag-display" style="display:none; text-align:left; margin-bottom:8px;"></div>
@@ -4413,7 +4413,7 @@
             placementAnchors.forEach(w => { const i = placementPool.indexOf(w); if (i >= 0) placementPool.splice(i, 1); });
             placementBandsSeen = new Set();
             vocabRating = 1200; vocabRatingN = 0; sessionRatingDelta = 0;
-            completedQuestions = 0; totalQuestions = PLACEMENT_MAX;
+            completedQuestions = 0; totalQuestions = PLACEMENT_MAX; placementBarPct = 0;
             retryCount = 0; comboCount = 0; sessionBlueShards = 0; sessionNewWords = 0;
             document.getElementById('home-box').style.display = 'none';
             document.getElementById('setup-screen').style.display = 'none';
@@ -5033,7 +5033,26 @@
             }
         }
 
+        // 진행 막대가 뒤로 가지 않도록 최고치를 기억 (배치고사 전용)
+        let placementBarPct = 0;
+
         function renderProgress() {
+            // 🦭 배치고사는 끝나는 문항 수가 유동적이다(수렴 시점에 따라 19~22문항).
+            //    'n/22'로 표시하면 19문항에서 끝났을 때 약속을 어긴 것처럼 보인다.
+            //    수렴 전에는 분모를 보이지 않고, 확인 구간에 들어가 남은 수가 확정되면
+            //    그때부터 100%까지 채운다.
+            if (isPlacement) {
+                const done = completedQuestions;
+                const raw = placementConfirmLeft >= 0
+                    ? (done / Math.max(1, done + placementConfirmLeft)) * 100   // 남은 수 확정 구간
+                    : (done / PLACEMENT_MAX) * 100;                            // 아직 모르는 구간
+                placementBarPct = Math.max(placementBarPct, Math.min(raw, 100));
+                progressEl.style.width = placementBarPct + '%';
+                document.getElementById('progress-text').textContent =
+                    placementConfirmLeft >= 0 ? '마무리' : `${done}문항`;
+                return;
+            }
+
             const shown = Math.min(completedQuestions, totalQuestions);
             const pct = totalQuestions > 0 ? (shown / totalQuestions) * 100 : 0;
             progressEl.style.width = pct + '%';
