@@ -92,6 +92,23 @@ words.forEach((w, i) => {
     seen.add(a);
   });
 
+  // 4-2) 뜻풀이 누출 — 뜻풀이 안에 정답이나 유의어가 그대로 있으면 읽고 베끼면 그만이다.
+  //      이 경우 인출 없이 정답 처리되고 어휘 지수까지 오른다(유의어 분기도 rateAnswer 1).
+  //      기존 데이터에 다수 있어 경고로 둔다.
+  {
+    const stemOf = (a) => (/다$/.test(a) && a.length > 2 ? a.slice(0, -1) : a);
+    if (w.meaning) {
+      if (stemOf(w.target) && w.meaning.includes(stemOf(w.target))) {
+        hygiene.push(`${loc}: 뜻풀이에 정답이 그대로 노출`);
+      }
+      (w.accepts || []).forEach(a => {
+        if (a !== w.target && stemOf(a) && w.meaning.includes(stemOf(a))) {
+          hygiene.push(`${loc}: 뜻풀이에 유의어("${a}")가 노출 — 읽고 그대로 치면 정답 처리된다`);
+        }
+      });
+    }
+  }
+
   // 4-1) 힌트 예문(hint) — 두 번 틀렸을 때 여는 두 번째 빈칸 예문
   //      정답을 그대로 노출하면 힌트가 아니라 답이 되므로 target 포함은 차단 대상.
   if (w.hint !== undefined) {
