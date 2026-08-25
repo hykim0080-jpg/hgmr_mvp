@@ -97,6 +97,8 @@ node tests/clean_test_stats.js --apply           # ⚠️ 테스트가 남긴 �
 - **`index.html` 단일 파일 앱** (약 6,900줄). 전체가 하나의 `<script type="module">` 블록 — 함수는 모두 같은 스코프
 - `www/` 는 **빌드 산출물**. 직접 고치지 말고 루트 파일을 고친 뒤 `npm run build`
 - 화면·구역의 공식 명칭은 **`화면_명칭_가이드.md`** (DOM id와 1:1). 소통 시 이 명칭을 사용
+- **하랑이 스프라이트는 `<defs>` 안의 `<g id="fr-...">`** — 대기 `fr-idle-*`, 칭찬 `fr-clap-*`, 오답 `fr-wrong-*`, 레벨업 `fr-lv-*`, 그리고 **굴러 오르는 `fr-roll-a|b|c`**. 좌표계는 320×320이고 발끝(접지선)이 y≈300에 오도록 그린다 — 홈 산 마커가 `y = 능선y - 50`, 높이 52, viewBox `10 10 300 300`으로 붙이기 때문. 목도리는 반드시 `var(--scarf-color, #10B981)`을 쓸 것(사용자 설정 색을 따라야 한다)
+- **굴러 오르는 하랑이는 접속마다 바뀐다** — `pickRollingHarang()`이 `localStorage.hgmrRollPose`에 직전 모습을 남기고 그것을 뺀 나머지에서 뽑는다. 한 세션 안에서는 `rollPoseThisSession`으로 고정. 함수 정의 직후 한 번, 대시보드 그릴 때 한 번 호출한다(로그인 화면에서도 마커가 이미 DOM에 있어서, 대시보드 호출만으로는 기본값 A안이 굳는다)
 - `admin.html` 은 로컬 전용 — `.gitignore`에 있고 배포 번들에 넣지 않음
 - 사용자 행동 계측은 `track(name, params)` 사용. Firebase Analytics를 `isSupported()` + try/catch로 격리해 두었으므로 실패해도 학습 흐름은 안 막힘
 - **칭호는 두 갈래** — 자동(어휘 고도 등급 5단계, `ratingTier`) / 장착(7개, `buildTitleOptions`). 레벨로 칭호를 주던 `getLevelTitle()`은 호출부가 없어 삭제됨(2026-08-25)
