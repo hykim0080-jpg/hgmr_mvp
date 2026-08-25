@@ -10,8 +10,8 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 VER=1.0
-BUILD=4
-LOG=~/Desktop/hgmr/_build4.log
+BUILD=${BUILD:-5}          # BUILD=6 zsh build_release.sh 처럼 덮어쓸 수 있다
+LOG=~/Desktop/hgmr/_build$BUILD.log
 : > "$LOG"
 exec >> "$LOG" 2>&1
 
@@ -52,7 +52,7 @@ security list-keychains -d user -s hgmrbuild.keychain
 security find-identity -v -p codesigning
 
 step "iOS 아카이브 (서명 없이 — SPM 리소스 번들 충돌 회피)"
-ARCH=~/Desktop/hgmr/ios/export/App4.xcarchive
+ARCH=~/Desktop/hgmr/ios/export/App$BUILD.xcarchive
 if [ -n "$SKIP_ARCHIVE" ] && [ -d "$ARCH" ]; then
   echo "SKIP_ARCHIVE 지정됨 — 기존 아카이브 재사용: $ARCH"
 else
@@ -64,7 +64,7 @@ xcodebuild -project ios/App/App.xcodeproj -scheme App \
 fi
 
 step "IPA 내보내기 (여기서 서명)"
-OUT=~/Desktop/hgmr/ios/export/out4
+OUT=~/Desktop/hgmr/ios/export/out$BUILD
 rm -rf "$OUT"
 xcodebuild -exportArchive -archivePath "$ARCH" \
   -exportOptionsPlist ios/export/ExportOptions.plist \
@@ -73,10 +73,10 @@ ls -la "$OUT"
 
 step "엔타이틀먼트 검증"
 IPA=$(ls "$OUT"/*.ipa | head -1)
-rm -rf /tmp/ent4 && mkdir -p /tmp/ent4 && ( cd /tmp/ent4 && unzip -q "$IPA" )
-codesign -d --entitlements - --xml /tmp/ent4/Payload/App.app 2>/dev/null > /tmp/ent4/ent.plist
-plutil -p /tmp/ent4/ent.plist
-if plutil -p /tmp/ent4/ent.plist | grep -q "com.apple.developer.applesignin"; then
+rm -rf /tmp/ent$BUILD && mkdir -p /tmp/ent$BUILD && ( cd /tmp/ent$BUILD && unzip -q "$IPA" )
+codesign -d --entitlements - --xml /tmp/ent$BUILD/Payload/App.app 2>/dev/null > /tmp/ent$BUILD/ent.plist
+plutil -p /tmp/ent$BUILD/ent.plist
+if plutil -p /tmp/ent$BUILD/ent.plist | grep -q "com.apple.developer.applesignin"; then
   echo "OK: applesignin 엔타이틀먼트 있음"
 else
   echo "!!!!! applesignin 엔타이틀먼트 누락 — 재서명 필요"
@@ -85,7 +85,7 @@ else
 fi
 
 step "버전 확인"
-plutil -p /tmp/ent4/Payload/App.app/Info.plist | grep -E "CFBundleVersion|CFBundleShortVersionString|CFBundleIdentifier"
+plutil -p /tmp/ent$BUILD/Payload/App.app/Info.plist | grep -E "CFBundleVersion|CFBundleShortVersionString|CFBundleIdentifier"
 
 cp "$IPA" "dist/hgmr-$VER-$BUILD.ipa"
 ls -la "dist/hgmr-$VER-$BUILD.ipa"

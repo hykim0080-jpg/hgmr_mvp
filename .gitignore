@@ -59,3 +59,6 @@ _test4.log
 _test5.log
 _test6.log
 hint_todo.json
+_build*.log
+_resign*.log
+_upload*.log

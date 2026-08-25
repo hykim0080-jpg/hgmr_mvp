@@ -8,12 +8,12 @@ setopt pipefail
 cd ~/Desktop/hgmr || exit 1
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 
-VER=1.0; BUILD=4
+VER=1.0; BUILD=${BUILD:-5}
 ID=19601AE691A4417E59B89F7C0AE5C8CF8A06578C
-SRC=~/Desktop/hgmr/ios/export/out4/App.ipa
-WORK=/tmp/resign4
+SRC=~/Desktop/hgmr/ios/export/out$BUILD/App.ipa
+WORK=/tmp/resign$BUILD
 OUT=~/Desktop/hgmr/dist/hgmr-$VER-$BUILD.ipa
-LOG=~/Desktop/hgmr/_resign4.log
+LOG=~/Desktop/hgmr/_resign$BUILD.log
 : > "$LOG"; exec >> "$LOG" 2>&1
 
 die() { echo "!!!!! 실패: $1"; echo "STATUS=FAILED"; exit 1; }
@@ -29,7 +29,7 @@ echo "## IPA 펼치기"
 rm -rf "$WORK" && mkdir -p "$WORK" && ( cd "$WORK" && unzip -q "$SRC" ) || die "unzip"
 echo "IPA 최상위 구성: $(ls "$WORK" | tr '\n' ' ')"
 
-cat > /tmp/ent4.plist <<'PL'
+cat > /tmp/ent$BUILD.plist <<'PL'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -44,15 +44,15 @@ cat > /tmp/ent4.plist <<'PL'
 PL
 
 echo "## 앱 번들 재서명"
-codesign --force --sign "$ID" --entitlements /tmp/ent4.plist \
+codesign --force --sign "$ID" --entitlements /tmp/ent$BUILD.plist \
   --generate-entitlement-der --timestamp=none \
   "$WORK/Payload/App.app" || die "codesign"
 
 echo "## 검증"
 codesign --verify --strict --verbose=2 "$WORK/Payload/App.app" || die "codesign --verify"
-codesign -d --entitlements - --xml "$WORK/Payload/App.app" 2>/dev/null > /tmp/ent4.out
-plutil -p /tmp/ent4.out
-plutil -p /tmp/ent4.out | grep -q "applesignin" || die "applesignin 여전히 없음"
+codesign -d --entitlements - --xml "$WORK/Payload/App.app" 2>/dev/null > /tmp/ent$BUILD.out
+plutil -p /tmp/ent$BUILD.out
+plutil -p /tmp/ent$BUILD.out | grep -q "applesignin" || die "applesignin 여전히 없음"
 
 echo "## 다시 압축 (Payload 외 최상위 항목도 모두 포함)"
 rm -f "$OUT"
