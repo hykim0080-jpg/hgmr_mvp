@@ -4877,6 +4877,12 @@
             const submitBtn = document.getElementById('submit-btn');
             const showAnswerBtn = document.getElementById('show-answer-btn');
             const word = currentWordObj.target; const accepts = currentWordObj.accepts || [];
+            // 🏷 통계창 라벨은 채점 규칙과 같은 기준을 써야 한다.
+            //    '미진하다'는 사용자가 어간 '미진'만 입력하고 화면이 '하다'를 붙여 주므로,
+            //    표제어와만 비교하면 정답을 친 사람이 「오답」으로 표시된다.
+            const correctForms = new Set([word, splitVerbEnding(currentWordObj).stem]);
+            const synonymForms = new Set([...accepts, ...acceptedStems(currentWordObj)]);
+            correctForms.forEach(f => synonymForms.delete(f));
             // 재출제(아까 놓친) 단어를 이번엔 한 번에 맞힌 경우 → 하랑이 말풍선으로 축하 멘트
             if (isRecovery) {
                 harangSay('<span style="font-size:12.5px; font-weight:800; color:#059669;">아까 놓쳤던 거, 이번엔 떠올랐네!</span>', 3000);
@@ -4937,10 +4943,10 @@
                 sortedAnswers.forEach(([submittedWord, count]) => {
                     const rate = total > 0 ? Math.round((count / total) * 100) : 0;
                     let badgeHtml = ''; let barColor = ''; let textColor = '';
-                    if (submittedWord === word) {
+                    if (correctForms.has(submittedWord)) {
                         badgeHtml = '<span style="font-size: 11px; background: #d1fae5; color: #047857; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">정답</span>';
                         barColor = '#10b981'; textColor = '#047857';
-                    } else if (accepts.includes(submittedWord)) {
+                    } else if (synonymForms.has(submittedWord)) {
                         badgeHtml = '<span style="font-size: 11px; background: #dbeafe; color: #1d4ed8; padding: 3px 6px; border-radius: 6px; margin-left: 8px; font-weight: bold;">유의어</span>';
                         barColor = '#3b82f6'; textColor = '#1d4ed8';
                     } else {
