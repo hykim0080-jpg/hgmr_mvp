@@ -19,7 +19,7 @@
             --bg-subtle: #f8fafc;
             --bg-muted: #f1f5f9;
             --surface: #ffffff;
-            --border: var(--border);
+            --border: #e2e8f0;
             --border-strong: #cbd5e1;
             --text-primary: #1e293b;
             --text-body: #334155;
@@ -27,17 +27,17 @@
             --text-secondary: #64748b;
             --text-muted: #94a3b8;
             --ink-text: #2a2f3a;
-            --ink-border: var(--ink-border);
+            --ink-border: var(--border-strong);
             --brand-mint: #ecfdf5;
-            --mint-border: var(--mint-border);
+            --mint-border: #a7f3d0;
             --info-soft: #f0f9ff;
             --info-bg: #eff6ff;
-            --info-border: var(--info-border);
+            --info-border: #bae6fd;
             --amber-soft: #fffbeb;
             --lime-soft: #f7fee7;
             --teal-soft: #f0fdfa;
             --danger-bg: #fef2f2;
-            --danger-border: var(--danger-border);
+            --danger-border: #fecaca;
             --indigo-bg: #eef2ff;
             --overlay: rgba(0, 0, 0, 0.4);
             --toast-bg: rgba(30, 41, 59, 0.95);
@@ -1485,7 +1485,7 @@
             width: 100%;
             padding: 11px 12px;
             border-radius: 12px;
-            border: 2px solid var(--border);
+            border: 2px solid var(--border-strong);
             background: var(--bg-subtle);
             font-size: 14px;
             font-weight: 700;
@@ -1512,7 +1512,7 @@
             flex: 1;
             padding: 12px 0;
             border-radius: 12px;
-            border: 2px solid var(--border);
+            border: 2px solid var(--border-strong);
             background: var(--bg-subtle);
             font-size: 15px;
             font-weight: 800;
@@ -2012,7 +2012,7 @@
                         style="display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; font-weight: bold;">닉네임
                         (활동명)</label>
                     <input type="text" id="input-nickname" placeholder="이름을 입력하세요"
-                        style="width: 100%; padding: 13px; border: 2px solid var(--border); border-radius: 12px; font-size: 16px; text-align: center; font-weight: bold; outline: none; box-sizing: border-box;">
+                        style="width: 100%; padding: 13px; border: 2px solid var(--border-strong); border-radius: 12px; font-size: 16px; text-align: center; font-weight: bold; outline: none; box-sizing: border-box;">
                 </div>
                 <div style="margin-bottom: 20px; text-align: left;">
                     <label
@@ -2020,7 +2020,7 @@
                         칭호 설정</label>
                     <!-- 접힌 상태: 현재 칭호 + 펼치기 -->
                     <button id="title-collapse-btn"
-                        style="width: 100%; padding: 13px 38px; border-radius: 12px; border: 2px solid var(--border); background: var(--bg-subtle); font-size: 15px; font-weight: 700; color: var(--text-body); cursor: pointer; position: relative; text-align: center; box-sizing: border-box;">
+                        style="width: 100%; padding: 13px 38px; border-radius: 12px; border: 2px solid var(--border-strong); background: var(--bg-subtle); font-size: 15px; font-weight: 700; color: var(--text-body); cursor: pointer; position: relative; text-align: center; box-sizing: border-box;">
                         <span id="title-collapse-label"><svg class="ui-ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-chick"></use></svg> 첫걸음</span>
                         <span id="title-collapse-arrow" style="color: var(--text-muted); font-size: 12px; position: absolute; right: 14px; top: 50%; transform: translateY(-50%);">▼</span>
                     </button>
@@ -2058,15 +2058,20 @@
 
                 <!-- 🧭 화면 배치 — 대부분의 사용자는 건드릴 일이 없다. 눈에 띄지 않게 작은 글씨 한 줄로 둔다. -->
                 <button id="open-layout-btn"
-                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 0 0; margin-top: 20px; background: none; border: none; cursor: pointer; font-size: 11.5px; font-weight: 600; color: var(--text-muted);">
-                    <svg class="ui-ic" viewBox="0 0 24 24" style="width:12px;height:12px;" aria-hidden="true"><use href="#ic-clipboard"></use></svg>
-                    <span>화면 배치</span>
-                    <span id="layout-current-label" style="color: var(--text-secondary); font-weight: 700;">행동 우선</span>
+                    style="width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 12px 4px; margin-top: 18px; background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text-muted);">
+                    <span style="display: flex; align-items: center; gap: 6px;">
+                        <svg class="ui-ic" viewBox="0 0 24 24" style="width:12px;height:12px;" aria-hidden="true"><use href="#ic-clipboard"></use></svg>
+                        화면 배치
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span id="layout-current-label" style="color: var(--text-secondary); font-weight: 700;">행동 우선</span>
+                        <span style="font-size: 14px; line-height: 1;">&#8250;</span>
+                    </span>
                 </button>
 
                 <!-- 👤 계정 관리 진입 — 로그아웃·회원 탈퇴는 서브 모달로 격리 (오인 탭 방지, 2026-07-31) -->
                 <button id="open-account-btn"
-                    style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 15px 16px; margin-top: 26px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 14px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--text-primary); box-sizing: border-box;">
+                    style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 15px 16px; margin-top: 26px; background: var(--bg-subtle); border: 1px solid var(--border-strong); border-radius: 14px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--text-primary); box-sizing: border-box;">
                     계정 관리
                     <span style="color: var(--text-muted); font-weight: 400; font-size: 18px; line-height: 1;">›</span>
                 </button>
@@ -2401,7 +2406,7 @@
                 <p style="margin: 0 0 18px; font-size: 12.5px; color: var(--text-secondary); text-align: center; line-height: 1.6;">홈 화면에 놓이는 것은 셋 다 같습니다.<br>순서와 밀도만 다릅니다.</p>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <button class="layout-opt" data-layout="a"
-                        style="width: 100%; display: flex; gap: 16px; align-items: flex-start; text-align: left; padding: 16px; border-radius: 18px; border: 2px solid var(--border-strong); background: var(--surface); cursor: pointer;">
+                        style="width: 100%; min-width: 0; box-sizing: border-box; display: flex; gap: 16px; align-items: flex-start; text-align: left; padding: 16px; border-radius: 18px; border: 2px solid var(--border-strong); background: var(--surface); cursor: pointer;">
                         <svg viewBox="0 0 160 200" style="width: 96px; height: 120px; flex-shrink: 0; border-radius: 10px; background: var(--bg-subtle); border: 1px solid var(--border-strong);" aria-hidden="true" fill="none" stroke-width="1.4">
 <rect x="8" y="8" width="34" height="34" rx="17" fill="#a7f3d0"></rect>
         <rect x="48" y="14" width="52" height="7" rx="3.5" fill="#cbd5e1"></rect>
@@ -2419,11 +2424,11 @@
                                 <span style="font-size: 16px; font-weight: 900; color: var(--text-primary);">행동 우선</span><span style="font-size:10px; font-weight:800; color:#047857; background:var(--brand-mint); border-radius:999px; padding:2px 8px;">기본</span>
                                 <span class="layout-check" style="display: none; margin-left: auto; color: #047857;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-check"></use></svg></span>
                             </span>
-                            <span style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub);">인사를 한 줄로 접고 어휘 고도를 그 자리에 올린 뒤, 학습 시작 버튼을 첫 화면 위쪽에 둡니다. 통계는 학습을 마친 뒤 보는 정보라 아래로 내렸습니다.</span>
+                            <span class="layout-desc" style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub); white-space: normal; overflow-wrap: anywhere; word-break: keep-all;">인사를 한 줄로 접고 어휘 고도를 그 자리에 올린 뒤, 학습 시작 버튼을 첫 화면 위쪽에 둡니다. 통계는 학습을 마친 뒤 보는 정보라 아래로 내렸습니다.</span>
                         </span>
                     </button>
                     <button class="layout-opt" data-layout="b"
-                        style="width: 100%; display: flex; gap: 16px; align-items: flex-start; text-align: left; padding: 16px; border-radius: 18px; border: 2px solid var(--border-strong); background: var(--surface); cursor: pointer;">
+                        style="width: 100%; min-width: 0; box-sizing: border-box; display: flex; gap: 16px; align-items: flex-start; text-align: left; padding: 16px; border-radius: 18px; border: 2px solid var(--border-strong); background: var(--surface); cursor: pointer;">
                         <svg viewBox="0 0 160 200" style="width: 96px; height: 120px; flex-shrink: 0; border-radius: 10px; background: var(--bg-subtle); border: 1px solid var(--border-strong);" aria-hidden="true" fill="none" stroke-width="1.4">
 <path d="M8 62 L44 30 L66 46 L96 12 L126 44 L152 62 Z" fill="#a7f3d0" stroke="#34d399"></path>
         <line x1="8" y1="46" x2="152" y2="46" stroke="#059669" stroke-dasharray="3 3"></line>
@@ -2442,11 +2447,11 @@
                                 <span style="font-size: 16px; font-weight: 900; color: var(--text-primary);">고도 중심</span>
                                 <span class="layout-check" style="display: none; margin-left: auto; color: #047857;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-check"></use></svg></span>
                             </span>
-                            <span style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub);">하랑이 산과 해발 숫자를 첫 화면의 주인공으로 올립니다. 홈을 열 때마다 어디까지 올라왔는지가 먼저 보입니다. 통계는 한 줄로 줄어듭니다.</span>
+                            <span class="layout-desc" style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub); white-space: normal; overflow-wrap: anywhere; word-break: keep-all;">하랑이 산과 해발 숫자를 첫 화면의 주인공으로 올립니다. 홈을 열 때마다 어디까지 올라왔는지가 먼저 보입니다. 통계는 한 줄로 줄어듭니다.</span>
                         </span>
                     </button>
                     <button class="layout-opt" data-layout="c"
-                        style="width: 100%; display: flex; gap: 16px; align-items: flex-start; text-align: left; padding: 16px; border-radius: 18px; border: 2px solid var(--border-strong); background: var(--surface); cursor: pointer;">
+                        style="width: 100%; min-width: 0; box-sizing: border-box; display: flex; gap: 16px; align-items: flex-start; text-align: left; padding: 16px; border-radius: 18px; border: 2px solid var(--border-strong); background: var(--surface); cursor: pointer;">
                         <svg viewBox="0 0 160 200" style="width: 96px; height: 120px; flex-shrink: 0; border-radius: 10px; background: var(--bg-subtle); border: 1px solid var(--border-strong);" aria-hidden="true" fill="none" stroke-width="1.4">
 <rect x="62" y="8" width="36" height="36" rx="18" fill="#a7f3d0"></rect>
         <rect x="56" y="52" width="48" height="8" rx="4" fill="#cbd5e1"></rect>
@@ -2463,7 +2468,7 @@
                                 <span style="font-size: 16px; font-weight: 900; color: var(--text-primary);">정돈</span>
                                 <span class="layout-check" style="display: none; margin-left: auto; color: #047857;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-check"></use></svg></span>
                             </span>
-                            <span style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub);">지금 홈의 순서를 그대로 지키되, 겹쳐 있던 카드를 한 겹으로 펴고 여백을 다시 잡았습니다. 가장 익숙한 배치입니다.</span>
+                            <span class="layout-desc" style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub); white-space: normal; overflow-wrap: anywhere; word-break: keep-all;">지금 홈의 순서를 그대로 지키되, 겹쳐 있던 카드를 한 겹으로 펴고 여백을 다시 잡았습니다. 가장 익숙한 배치입니다.</span>
                         </span>
                     </button>
                 </div>
