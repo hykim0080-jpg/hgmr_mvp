@@ -51,3 +51,5 @@ _resign4.log
 _upload4.log
 ios/export/out*/
 ios/export/*.xcarchive/
+_test.log
+tests/shots/
