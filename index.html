@@ -2968,7 +2968,7 @@
             return `<svg class="ui-ic" viewBox="0 0 24 24"${st} aria-hidden="true"><use href="#ic-${name}"></use></svg>`;
         }
         // 저장된 칭호 문자열("🐣 아기 병아리")을 아이콘+텍스트 HTML로 (데이터는 그대로, 렌더만 교체)
-        const TITLE_ICON_MAP = { '🐣': 'chick', '🌱': 'sprout', '🌿': 'boot', '🧭': 'globe', '🏔': 'mount', '📚': 'book', '👑': 'crown', '🔥': 'flame', '🏆': 'trophy', '🏅': 'medal', '⭐': 'star' };
+        const TITLE_ICON_MAP = { '🐣': 'chick', '🌱': 'sprout', '🌿': 'boot', '🧭': 'globe', '🏔': 'mount', '📚': 'book', '📜': 'book', '👑': 'crown', '🔥': 'flame', '🏆': 'trophy', '🏅': 'medal', '⭐': 'star' };
         // 장착 칭호 개명 마이그레이션 (2026-08-05, 브랜드 원칙 '자동=신분·장착=행적') — Firestore에 옛 이름이 남은 계정을 로드 시 새 이름으로
         const TITLE_MIGRATE = {
             '🐣 아기 병아리': '🐣 첫걸음',
@@ -4154,14 +4154,6 @@
 
             // 파이어베이스 동기화(learnedWords 직렬화 + IndexedDB)는 무거워 페이드 후 유휴 시점으로 지연 → 전환 프레임 확보
             deferHeavy(() => syncUserData().catch((error) => console.error("사용자 데이터 비동기 동기화 실패:", error)));
-        }
-
-        function getLevelTitle(level) {
-            if (level >= 5) return "👑 세종의 후예";
-            if (level >= 4) return "📜 조선어학회 회원";
-            if (level >= 3) return "📚 어휘 수집가";
-            if (level >= 2) return "🌱 어휘 새싹";
-            return "🐣 낱말 알망이";
         }
 
         function showHomeScreen() {
@@ -6271,13 +6263,21 @@
                 { name: "🧭 어휘 탐험", unlocked: totalLearnedWords >= 50 },
                 { name: "🏔 어휘 등반", unlocked: totalLearnedWords >= 150 },
                 { name: "🔥 작심삼일 극복", unlocked: streakDays >= 3 },
+                // 📜 칭호의 무게를 지키는 한 줄 — 게임적 소비가 아니라 역사에 대한 존중임을 전달 (브랜드 원칙 P16)
+                {
+                    name: "📜 조선어학회 회원", unlocked: currentLevel >= 4,
+                    note: "일제강점기, 우리말 사전을 지키려 낱말을 모았던 분들의 이름이야"
+                },
                 { name: "🏆 마루 등정", unlocked: currentLevel >= 5 }
             ];
 
             titles.forEach(t => {
                 const btn = document.createElement('button');
                 btn.className = 'title-opt' + (t.unlocked ? '' : ' locked') + (t.name === equippedTitle ? ' selected' : '');
-                btn.innerHTML = t.unlocked ? renderTitle(t.name) : `${renderTitle(t.name)} ${uiIcon('lock')}`;
+                const label = t.unlocked ? renderTitle(t.name) : `${renderTitle(t.name)} ${uiIcon('lock')}`;
+                btn.innerHTML = t.note
+                    ? `${label}<span style="display:block; margin-top:3px; font-size:10.5px; font-weight:600; color:var(--text-muted); line-height:1.4;">${escapeHTML(t.note)}</span>`
+                    : label;
                 if (t.unlocked) {
                     btn.addEventListener('click', () => {
                         tempTitle = t.name;
@@ -6660,6 +6660,7 @@
             if (totalLearnedWords >= 50) badgeCount++;
             if (totalLearnedWords >= 150) badgeCount++;
             if (streakDays >= 3) badgeCount++;
+            if (currentLevel >= 4) badgeCount++;
             if (currentLevel >= 5) badgeCount++;
             const tier = ratingTier(vocabPeak);
             const measured = (placementDone || vocabRatingN > 0) && vocabPeak > 0;
@@ -6671,7 +6672,7 @@
                 ['누적 학습 어휘', `${learnedVal}개`, `오늘 +${todayCount}`, '#059669'],
                 ['연속 학습', `${streakDays}일차`, `총 출석 ${attendedDays}일`, '#d97706'],
                 ['현재 레벨', `Lv.${currentLevel}`, `${currentExp} EXP`, '#7c3aed'],
-                ['달성 업적', `${badgeCount} / 5`, '', '#dc2626'],
+                ['달성 업적', `${badgeCount} / 6`, '', '#dc2626'],
             ];
             const chipsHtml = chips.map(([label, value, sub, color]) => `
                 <div style="background:var(--bg-subtle); border:1px solid var(--border); border-radius:14px; padding:10px 12px; text-align:left;">
