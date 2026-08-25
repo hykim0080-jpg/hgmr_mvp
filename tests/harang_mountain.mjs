@@ -92,6 +92,17 @@ const 모달 = await page.evaluate(() => {
         보임: h.getBoundingClientRect().height > 0,
     };
 });
+const 한줄 = await page.evaluate(() => {
+    const box = document.querySelector('#altitude-guide-modal > div');
+    const p = [...box.querySelectorAll('p')].find(x => x.textContent.includes('산에 살지 않아'));
+    if (!p) return { 있음: false };
+    const r = p.getBoundingClientRect(), br = box.getBoundingClientRect();
+    return { 있음: true, 문구: p.textContent.replace(/\s+/g, ' ').trim(),
+             화면안: r.top >= 0 && r.bottom <= window.innerHeight,
+             박스안: r.right <= br.right + 1, 줄수: Math.round(r.height / (parseFloat(getComputedStyle(p).fontSize) * 1.7)) };
+});
+log(`하랑이 한 줄: ${한줄.있음 ? `"${한줄.문구}" (${한줄.줄수}줄)` : '없음'}`);
+
 log(`안내 모달  ${모달.마커} · 선 y=${모달.선y} · 하랑 y=${모달.하랑y}(높이 ${모달.하랑높이}) · 그림자 y=${모달.그림자y} · 보임 ${모달.보임}`);
 await page.screenshot({ path: `${SHOT}/harang-guide-mtn.png` });
 
@@ -103,4 +114,6 @@ ok('홈: 그림자가 고도선 위에', 홈.그림자y === 홈.선y);
 ok('모달 산에 하랑이가 보임', 모달.보임);
 ok('모달: 하랑이 발끝이 고도선에 닿음', Math.abs((모달.하랑y + 모달.하랑높이) - 모달.선y) <= 3);
 ok('모달: 그림자가 고도선 위에', 모달.그림자y === 모달.선y);
+ok('하랑이 한 줄이 모달에 있음', 한줄.있음);
+ok('한 줄이 박스를 넘지 않음', 한줄.박스안);
 await browser.close();
