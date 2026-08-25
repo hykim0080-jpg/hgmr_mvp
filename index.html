@@ -3445,6 +3445,26 @@
         const progressEl = document.getElementById('progress'); const dashboard = document.getElementById('dashboard');
 
 
+
+        // ⛰ 안내 모달 산의 왼쪽 실루엣 위 x좌표.
+        //    본체 path `... C80,224 66,214 66,192 C66,112 100,30 170,30 Z` 의 마지막 3차 베지에다.
+        //    y는 t가 커질수록 단조 감소하므로 이분법으로 t를 찾는다.
+        function mountainEdgeX(targetY) {
+            const P = [[66, 192], [66, 112], [100, 30], [170, 30]];
+            const at = (t, i) => {
+                const u = 1 - t;
+                return u * u * u * P[0][i] + 3 * u * u * t * P[1][i] + 3 * u * t * t * P[2][i] + t * t * t * P[3][i];
+            };
+            const y = Math.max(32, Math.min(190, targetY));
+            let lo = 0, hi = 1;
+            for (let i = 0; i < 40; i++) {
+                const mid = (lo + hi) / 2;
+                if (at(mid, 1) > y) lo = mid; else hi = mid;
+            }
+            return at((lo + hi) / 2, 0);
+        }
+        window.mountainEdgeX = mountainEdgeX;   // E2E 검증용 — tests/alt_guide_harang.mjs
+
         // 🎳 산으로 간 물범 — 굴러서 오르는 세 모습(웅크린 공 / 데굴데굴 / 회전 잔상).
         //    한 세션에 하나로 고정되고, 다시 접속하면 직전과 다른 모습이 나온다.
         //    localStorage 접근은 사파리 프라이빗 모드에서 던질 수 있어 통째로 감싼다.
@@ -7252,7 +7272,12 @@
                 document.getElementById('alt-guide-marker-line').setAttribute('y1', y);
                 document.getElementById('alt-guide-marker-line').setAttribute('y2', y);
                 document.getElementById('alt-guide-marker-box').setAttribute('y', y - 8);
+                // 하랑이는 산 안쪽이 아니라 산 실루엣(왼쪽 비탈) 위에 걸터앉는다.
+                // 왼쪽 비탈은 산 본체 path의 마지막 곡선 — (66,192)에서 정상(170,30)까지 올라간다.
+                const ex = mountainEdgeX(y);
+                document.getElementById('alt-guide-shadow').setAttribute('cx', ex);
                 document.getElementById('alt-guide-shadow').setAttribute('cy', y);
+                document.getElementById('alt-guide-harang').setAttribute('x', ex - 32);
                 document.getElementById('alt-guide-harang').setAttribute('y', y - 62);
                 const txt = document.getElementById('alt-guide-marker-text');
                 txt.setAttribute('y', y + 3.5);

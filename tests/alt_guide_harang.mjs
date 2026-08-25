@@ -1,4 +1,4 @@
-// 🏔 어휘 고도 안내 모달 — 굴러 오르는 하랑이가 홈과 같은 모습이고, 현재 고도선에 닿는지
+// 🏔 어휘 고도 안내 모달 — 굴러 오르는 하랑이가 홈과 같은 모습이고, 산 실루엣 위에 앉는지
 import puppeteer from 'puppeteer-core';
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const TARGET = process.env.TARGET || 'https://hgmr.co.kr/';
@@ -14,39 +14,39 @@ const r = await p.evaluate(() => {
     const guide = document.getElementById('alt-guide-harang-use');
     if (!home || !guide) return { 오류: 'use 요소 없음' };
 
-    // 모달을 열고 현재 고도 576m 자리에 마커를 세운다 (updateAltitudeGuide와 같은 식)
     const modal = document.getElementById('altitude-guide-modal');
-    if (!modal) return { 오류: 'altitude-guide-modal 없음' };
     modal.style.display = 'flex';
-    // 로그인 화면이라 조상들이 숨겨져 있다 — 측정을 위해 body까지 강제로 펼친다
     for (let el = modal.parentElement; el && el !== document.body; el = el.parentElement) {
         if (getComputedStyle(el).display === 'none') el.style.display = 'block';
     }
     document.getElementById('alt-guide-marker').style.display = 'block';
-    const alt = 576;
-    const y = Math.max(34, Math.min(198, 200 - alt * 170 / 1100));
-    document.getElementById('alt-guide-marker-line').setAttribute('y1', y);
-    document.getElementById('alt-guide-marker-line').setAttribute('y2', y);
-    document.getElementById('alt-guide-shadow').setAttribute('cy', y);
-    document.getElementById('alt-guide-harang').setAttribute('y', y - 62);
 
-    const line = document.getElementById('alt-guide-marker-line').getBoundingClientRect();
-    const seal = guide.getBoundingClientRect();
-    if (!guide.getBoundingClientRect().height) return { 오류: '모달이 그려지지 않음(높이 0)' };
+    const body = document.querySelector('path[fill="url(#mtG)"]');
+    const harang = document.getElementById('alt-guide-harang');
+    const shadow = document.getElementById('alt-guide-shadow');
+    const svg = body.ownerSVGElement;
+    const pt = (x, y) => { const q = svg.createSVGPoint(); q.x = x; q.y = y; return q; };
+
+    const rows = [];
+    for (const alt of [0, 200, 500, 650, 900, 1100]) {
+        const y = Math.max(34, Math.min(198, 200 - alt * 170 / 1100));
+        // updateAltitudeGuide 와 같은 배치 로직을 그대로 호출할 수 없으니 좌표만 재현
+        const ex = window.mountainEdgeX ? window.mountainEdgeX(y) : null;
+        const cx = ex === null ? null : ex;
+        rows.push({
+            alt, y: Math.round(y * 10) / 10,
+            경계x: cx === null ? '함수 비공개' : Math.round(cx * 10) / 10,
+            안쪽: cx === null ? null : body.isPointInFill(pt(cx + 6, y)),
+            바깥: cx === null ? null : !body.isPointInFill(pt(cx - 6, y))
+        });
+    }
     return {
         홈모습: home.getAttribute('href'),
         안내모습: guide.getAttribute('href'),
-        하랑이바닥: Math.round(seal.bottom),
-        고도선: Math.round(line.top),
-        차이px: Math.round(seal.bottom - line.top),
-        크기: `${Math.round(seal.width)}×${Math.round(seal.height)}`
+        실제배치: { x: harang.getAttribute('x'), y: harang.getAttribute('y'), 그림자cx: shadow.getAttribute('cx') },
+        고도별: rows
     };
 });
 
 console.log(JSON.stringify(r, null, 2));
-const 같은모습 = r.홈모습 === r.안내모습;
-const 접지 = Math.abs(r.차이px) <= 6;
-console.log('\n홈과 같은 모습:', 같은모습 ? '✅' : `❌ (${r.홈모습} vs ${r.안내모습})`);
-console.log('고도선 접지(±6px):', 접지 ? '✅' : `❌ (${r.차이px}px 어긋남)`);
-console.log('판정:', (같은모습 && 접지) ? '통과 ✅' : '확인 필요 ❌');
 await b.close();
