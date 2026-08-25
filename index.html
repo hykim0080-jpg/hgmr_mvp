@@ -1052,6 +1052,79 @@
             }
         }
 
+
+        /* ===== 🏠 홈 화면 배치안 (A 기본 / B 고도 중심 / C 정돈) =====
+           요소는 셋이 동일하다. 순서(order)와 밀도만 바꾼다 —
+           마크업을 안마다 복제하지 않아야 이벤트 핸들러와 상태가 갈리지 않는다. */
+        #home-box { gap: 0; }
+        #home-identity { display: flex; }
+        #home-avatar-wrap { flex-shrink: 0; }
+        #home-avatar-btn { width: 52px; height: 52px; }
+        #home-harang { width: 44px; height: 44px; }
+        #home-nameblock { flex: 1; min-width: 0; text-align: left; }
+        #home-title-row { display: flex; align-items: center; gap: 7px; }
+        #home-greeting { display: none; }
+        /* 고도 히어로는 기본 숨김 — 각 배치안이 자기 것만 켠다.
+           인라인 style로 숨기면 클래스 규칙이 이기지 못하므로 여기서 처리한다. */
+        #home-altitude-hero, #home-mountain { display: none; }
+        #home-altitude-title { display: none !important; }
+
+        .home-stat { border: none; padding: 12px 13px; text-align: left; border-radius: 0; cursor: pointer; }
+        .home-stat-label { font-size: 11px; color: var(--text-secondary); font-weight: 700; display: block; margin-bottom: 3px; }
+        .home-stat-value { font-size: 18px; font-weight: 800; }
+        #home-stats-grid {
+            display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+            border: 1px solid var(--border-strong); border-radius: 16px; overflow: hidden;
+        }
+        #home-stats-grid > *:nth-child(1), #home-stats-grid > *:nth-child(3) { border-right: 1px solid var(--border-strong); }
+        #home-stats-grid > *:nth-child(1), #home-stats-grid > *:nth-child(2) { border-bottom: 1px solid var(--border-strong); }
+
+        /* 측정 전(배치고사 미실시)에는 고도 자리를 비운다 */
+        .home-unmeasured #home-altitude-hero,
+        .home-unmeasured #home-mountain { display: none !important; }
+
+        /* ── A안 · 행동 우선 — 시작 버튼을 첫 화면 위쪽으로 ── */
+        .home-a #home-identity { align-items: center; gap: 12px; margin-bottom: 16px; }
+        .home-a #home-topic-wrap { flex-shrink: 0; }
+        .home-a #home-altitude-hero { display: flex; order: 2; margin-bottom: 14px; }
+        .home-a #home-identity { order: 1; }
+        .home-a #home-action { order: 3; }
+        .home-a #home-story-wrap { order: 4; margin-top: 12px; }
+        .home-a #home-stats { order: 5; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-strong); }
+
+        /* ── B안 · 고도 중심 — 산 은유를 첫 화면 히어로로 ── */
+        .home-b #home-mountain { display: block; order: 1; margin: -6px -8px 10px; }
+        .home-b #home-identity { order: 2; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .home-b #home-avatar-btn { width: 40px; height: 40px; }
+        .home-b #home-harang { width: 34px; height: 34px; }
+        .home-b #home-level-badge { display: none; }
+        .home-b #home-nickname-row { font-size: 17px; }
+        .home-b #home-action { order: 3; }
+        .home-b #home-story-wrap { order: 4; margin-top: 12px; }
+        .home-b #home-stats { order: 5; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-strong); }
+        .home-b #home-stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); border: none; border-radius: 0; }
+        .home-b .home-stat { padding: 0; }
+        .home-b .home-stat-label { font-size: 10.5px; color: var(--text-muted); }
+        .home-b .home-stat-value { font-size: 16px; }
+        .home-b #home-stats-grid > * { border: none !important; }
+
+        /* ── C안 · 정돈 — 지금 순서를 지키되 중첩 카드를 걷어냄 ── */
+        .home-c #home-identity { order: 1; flex-direction: column; align-items: center; margin-bottom: 20px; }
+        .home-c #home-avatar-btn { width: 76px; height: 76px; }
+        .home-c #home-harang { width: 66px; height: 66px; }
+        .home-c #home-nameblock { text-align: center; margin-top: 16px; }
+        .home-c #home-title-row { justify-content: center; }
+        .home-c #home-greeting { display: block; }
+        .home-c #home-altitude-title { display: inline-block !important; }
+        .home-c #home-topic-wrap { margin-top: 12px; }
+        .home-c #home-action { order: 2; }
+        .home-c #home-story-wrap { order: 3; margin-top: 12px; }
+        .home-c #home-stats { order: 4; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-strong); }
+        .home-c #home-stats-grid { border: none; border-radius: 0; gap: 14px 10px; }
+        .home-c .home-stat { padding: 0; }
+        .home-c #home-stats-grid > * { border: none !important; }
+        .home-c #home-action, .home-c #home-story-wrap, .home-c #home-stats-head { text-align: left; }
+
         .avatar-glow {
             animation: breathe 4s ease-in-out infinite;
         }
@@ -1983,6 +2056,14 @@
                     <span style="display: block; font-size: 11px; color: var(--text-muted); margin-top: 8px; text-align: center;">※ 다음 문제부터 적용됩니다.</span>
                 </div>
 
+                <!-- 🧭 화면 배치 — 대부분의 사용자는 건드릴 일이 없다. 눈에 띄지 않게 작은 글씨 한 줄로 둔다. -->
+                <button id="open-layout-btn"
+                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 0 0; margin-top: 20px; background: none; border: none; cursor: pointer; font-size: 11.5px; font-weight: 600; color: var(--text-muted);">
+                    <svg class="ui-ic" viewBox="0 0 24 24" style="width:12px;height:12px;" aria-hidden="true"><use href="#ic-clipboard"></use></svg>
+                    <span>화면 배치</span>
+                    <span id="layout-current-label" style="color: var(--text-secondary); font-weight: 700;">행동 우선</span>
+                </button>
+
                 <!-- 👤 계정 관리 진입 — 로그아웃·회원 탈퇴는 서브 모달로 격리 (오인 탭 방지, 2026-07-31) -->
                 <button id="open-account-btn"
                     style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 15px 16px; margin-top: 26px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 14px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--text-primary); box-sizing: border-box;">
@@ -2312,6 +2393,85 @@
             </div>
         </div>
 
+        <!-- 🧭 화면 배치 전용 창 — 진입은 작게, 안은 크게 -->
+        <div id="layout-modal" class="home-modal-overlay"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); justify-content: center; align-items: center; z-index: 2200; backdrop-filter: blur(2px);">
+            <div style="background: var(--surface); padding: 24px 20px; border-radius: 22px; width: 94%; max-width: 460px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); box-sizing: border-box; animation: slideUp 0.25s ease;">
+                <h3 style="margin: 0 0 4px; color: var(--text-primary); font-size: 20px; font-weight: 900; text-align: center;">화면 배치</h3>
+                <p style="margin: 0 0 18px; font-size: 12.5px; color: var(--text-secondary); text-align: center; line-height: 1.6;">홈 화면에 놓이는 것은 셋 다 같습니다.<br>순서와 밀도만 다릅니다.</p>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="layout-opt" data-layout="a"
+                        style="width: 100%; display: flex; gap: 16px; align-items: flex-start; text-align: left; padding: 16px; border-radius: 18px; border: 2px solid var(--border-strong); background: var(--surface); cursor: pointer;">
+                        <svg viewBox="0 0 160 200" style="width: 96px; height: 120px; flex-shrink: 0; border-radius: 10px; background: var(--bg-subtle); border: 1px solid var(--border-strong);" aria-hidden="true" fill="none" stroke-width="1.4">
+<rect x="8" y="8" width="34" height="34" rx="17" fill="#a7f3d0"></rect>
+        <rect x="48" y="14" width="52" height="7" rx="3.5" fill="#cbd5e1"></rect>
+        <rect x="48" y="26" width="34" height="9" rx="4.5" fill="#94a3b8"></rect>
+        <rect x="122" y="16" width="30" height="14" rx="7" fill="#e0e7ff"></rect>
+        <rect x="8" y="50" width="144" height="26" rx="9" fill="#d1fae5" stroke="#6ee7b7"></rect>
+        <rect x="8" y="84" width="144" height="30" rx="9" fill="#10b981"></rect>
+        <rect x="8" y="122" width="144" height="18" rx="7" fill="#f1f5f9" stroke="#e2e8f0"></rect>
+        <rect x="8" y="150" width="144" height="40" rx="9" fill="none" stroke="#cbd5e1"></rect>
+        <line x1="80" y1="150" x2="80" y2="190" stroke="#cbd5e1"></line>
+        <line x1="8" y1="170" x2="152" y2="170" stroke="#cbd5e1"></line>
+                        </svg>
+                        <span style="flex: 1; min-width: 0;">
+                            <span style="display: flex; align-items: center; gap: 7px; margin-bottom: 6px;">
+                                <span style="font-size: 16px; font-weight: 900; color: var(--text-primary);">행동 우선</span><span style="font-size:10px; font-weight:800; color:#047857; background:var(--brand-mint); border-radius:999px; padding:2px 8px;">기본</span>
+                                <span class="layout-check" style="display: none; margin-left: auto; color: #047857;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-check"></use></svg></span>
+                            </span>
+                            <span style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub);">인사를 한 줄로 접고 어휘 고도를 그 자리에 올린 뒤, 학습 시작 버튼을 첫 화면 위쪽에 둡니다. 통계는 학습을 마친 뒤 보는 정보라 아래로 내렸습니다.</span>
+                        </span>
+                    </button>
+                    <button class="layout-opt" data-layout="b"
+                        style="width: 100%; display: flex; gap: 16px; align-items: flex-start; text-align: left; padding: 16px; border-radius: 18px; border: 2px solid var(--border-strong); background: var(--surface); cursor: pointer;">
+                        <svg viewBox="0 0 160 200" style="width: 96px; height: 120px; flex-shrink: 0; border-radius: 10px; background: var(--bg-subtle); border: 1px solid var(--border-strong);" aria-hidden="true" fill="none" stroke-width="1.4">
+<path d="M8 62 L44 30 L66 46 L96 12 L126 44 L152 62 Z" fill="#a7f3d0" stroke="#34d399"></path>
+        <line x1="8" y1="46" x2="152" y2="46" stroke="#059669" stroke-dasharray="3 3"></line>
+        <circle cx="58" cy="46" r="4" fill="#047857"></circle>
+        <rect x="8" y="72" width="26" height="26" rx="13" fill="#a7f3d0"></rect>
+        <rect x="40" y="80" width="46" height="9" rx="4.5" fill="#94a3b8"></rect>
+        <rect x="8" y="106" width="144" height="30" rx="9" fill="#10b981"></rect>
+        <rect x="8" y="144" width="144" height="18" rx="7" fill="#f1f5f9" stroke="#e2e8f0"></rect>
+        <rect x="8" y="172" width="30" height="16" rx="5" fill="#e2e8f0"></rect>
+        <rect x="46" y="172" width="30" height="16" rx="5" fill="#e2e8f0"></rect>
+        <rect x="84" y="172" width="30" height="16" rx="5" fill="#e2e8f0"></rect>
+        <rect x="122" y="172" width="30" height="16" rx="5" fill="#e2e8f0"></rect>
+                        </svg>
+                        <span style="flex: 1; min-width: 0;">
+                            <span style="display: flex; align-items: center; gap: 7px; margin-bottom: 6px;">
+                                <span style="font-size: 16px; font-weight: 900; color: var(--text-primary);">고도 중심</span>
+                                <span class="layout-check" style="display: none; margin-left: auto; color: #047857;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-check"></use></svg></span>
+                            </span>
+                            <span style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub);">하랑이 산과 해발 숫자를 첫 화면의 주인공으로 올립니다. 홈을 열 때마다 어디까지 올라왔는지가 먼저 보입니다. 통계는 한 줄로 줄어듭니다.</span>
+                        </span>
+                    </button>
+                    <button class="layout-opt" data-layout="c"
+                        style="width: 100%; display: flex; gap: 16px; align-items: flex-start; text-align: left; padding: 16px; border-radius: 18px; border: 2px solid var(--border-strong); background: var(--surface); cursor: pointer;">
+                        <svg viewBox="0 0 160 200" style="width: 96px; height: 120px; flex-shrink: 0; border-radius: 10px; background: var(--bg-subtle); border: 1px solid var(--border-strong);" aria-hidden="true" fill="none" stroke-width="1.4">
+<rect x="62" y="8" width="36" height="36" rx="18" fill="#a7f3d0"></rect>
+        <rect x="56" y="52" width="48" height="8" rx="4" fill="#cbd5e1"></rect>
+        <rect x="62" y="66" width="36" height="10" rx="5" fill="#94a3b8"></rect>
+        <rect x="52" y="82" width="56" height="7" rx="3.5" fill="#e2e8f0"></rect>
+        <rect x="8" y="100" width="144" height="30" rx="9" fill="#10b981"></rect>
+        <rect x="8" y="138" width="144" height="18" rx="7" fill="#f1f5f9" stroke="#e2e8f0"></rect>
+        <line x1="8" y1="166" x2="152" y2="166" stroke="#e2e8f0"></line>
+        <rect x="8" y="174" width="62" height="16" rx="5" fill="#e2e8f0"></rect>
+        <rect x="90" y="174" width="62" height="16" rx="5" fill="#e2e8f0"></rect>
+                        </svg>
+                        <span style="flex: 1; min-width: 0;">
+                            <span style="display: flex; align-items: center; gap: 7px; margin-bottom: 6px;">
+                                <span style="font-size: 16px; font-weight: 900; color: var(--text-primary);">정돈</span>
+                                <span class="layout-check" style="display: none; margin-left: auto; color: #047857;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-check"></use></svg></span>
+                            </span>
+                            <span style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub);">지금 홈의 순서를 그대로 지키되, 겹쳐 있던 카드를 한 겹으로 펴고 여백을 다시 잡았습니다. 가장 익숙한 배치입니다.</span>
+                        </span>
+                    </button>
+                </div>
+                <button id="layout-close-btn"
+                    style="width: 100%; margin-top: 18px; padding: 13px 0; background: var(--bg-muted); color: var(--text-secondary); border: none; border-radius: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer;">닫기</button>
+            </div>
+        </div>
+
         <!-- 📖 낱말 이야기 모달 -->
         <div id="story-modal" class="home-modal-overlay"
             style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px);">
@@ -2369,121 +2529,124 @@
 
         <div class="app-wrapper">
             <!-- 🌟 모바일 앱 스타일 프로필 중심 홈 화면 (Home View) -->
-            <div class="quiz-container" id="home-box"
-                style="display: none; text-align: center; border-radius: 24px; box-shadow: 0 20px 45px rgba(0,0,0,0.08); animation: slideUp 0.3s ease; margin-bottom: 20px; padding: 35px 25px;">
+            <div class="quiz-container home-a" id="home-box"
+                style="display: none; border-radius: 24px; box-shadow: 0 20px 45px rgba(0,0,0,0.08); animation: slideUp 0.3s ease; margin-bottom: 20px; padding: 22px 20px; flex-direction: column;">
 
-                <!-- 아바타 히어로 영역 -->
-                <div
-                    style="display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; position: relative;">
-                    <div class="avatar-glow" id="home-avatar-btn" title="프로필 설정"
-                        style="width: 100px; height: 100px; border-radius: 50%; background: var(--brand-mint); display: flex; justify-content: center; align-items: center; border: 4px solid white; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.25); position: relative; cursor: pointer;">
-                        <svg id="home-harang" viewBox="10 10 300 300" style="width: 88px; height: 88px;" aria-label="프로필 하랑이"><use id="home-harang-use" href="#fr-idle-1"></use></svg>
-                        <div id="home-level-badge"
-                            style="position: absolute; bottom: -8px; background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25); white-space: nowrap;">
-                            Lv.-</div>
+                <!-- ① 나 — 아바타·칭호·닉네임·주제. 배치안에 따라 가로 한 줄 또는 세로 가운데 정렬 -->
+                <div id="home-identity">
+                    <div id="home-avatar-wrap">
+                        <div class="avatar-glow" id="home-avatar-btn" title="프로필 설정"
+                            style="border-radius: 50%; background: var(--brand-mint); display: flex; justify-content: center; align-items: center; border: 3px solid var(--surface); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.22); position: relative; cursor: pointer;">
+                            <svg id="home-harang" viewBox="10 10 300 300" aria-label="프로필 하랑이"><use id="home-harang-use" href="#fr-idle-1"></use></svg>
+                            <div id="home-level-badge"
+                                style="position: absolute; bottom: -7px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); color: white; padding: 2px 9px; border-radius: 11px; font-size: 10px; font-weight: 800; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25); white-space: nowrap;">
+                                Lv.-</div>
+                        </div>
                     </div>
-                    <!-- 중점 학습 주제 칩 (터치하면 주제 선택 창 표시) -->
-                    <button id="home-topic-chip" title="중점 학습 주제 변경"
-                        style="margin-top: 12px; border: none; background: var(--indigo-bg); color: #4f46e5; padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                        <svg class="ui-ic" viewBox="0 0 24 24" style="width:13px;height:13px;" aria-hidden="true"><use href="#ic-target"></use></svg> <span id="home-topic-chip-label">전체</span>
+
+                    <div id="home-nameblock">
+                        <div id="home-title-row">
+                            <span id="home-level-title" style="color: #6366f1; font-size: 12px; font-weight: 800; letter-spacing: 0.3px;">첫걸음</span>
+                            <span id="home-altitude-title" style="display: none; color: #047857; font-size: 12px; font-weight: 800; background: var(--brand-mint); border: 1px solid var(--mint-border); border-radius: 999px; padding: 2px 9px; cursor: pointer;"></span>
+                        </div>
+                        <h2 id="home-nickname-row" style="color: var(--text-primary); margin: 3px 0 0; font-weight: 800; font-size: 19px; line-height: 1.25;"><span id="home-nickname">사용자</span>님</h2>
+                        <p id="home-greeting" style="color: var(--text-secondary); font-size: 12.5px; margin: 4px 0 0; font-weight: 500;">오늘도 하랑이와 지혜 조각을 모아볼까요?</p>
+                    </div>
+
+                    <div id="home-topic-wrap">
+                        <button id="home-topic-chip" title="중점 학습 주제 변경"
+                            style="border: none; background: var(--indigo-bg); color: #4f46e5; padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            <svg class="ui-ic" viewBox="0 0 24 24" style="width:13px;height:13px;" aria-hidden="true"><use href="#ic-target"></use></svg> <span id="home-topic-chip-label">전체</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ② 어휘 고도 — A안에서는 띠, B안에서는 아래 산 그림이 대신한다 -->
+                <button id="home-altitude-hero" title="어휘 고도 안내"
+                    style="width: 100%; align-items: center; gap: 10px; background: var(--brand-mint); border: 1px solid var(--mint-border); border-radius: 16px; padding: 12px 14px; cursor: pointer; text-align: left;">
+                    <svg class="ui-ic" viewBox="0 0 24 24" style="width:20px;height:20px; color:#047857;" aria-hidden="true"><use href="#ic-mount"></use></svg>
+                    <span style="flex: 1; min-width: 0;">
+                        <span style="display: block; font-size: 10.5px; font-weight: 700; color: #059669;">어휘 고도</span>
+                        <span style="display: block; font-size: 19px; font-weight: 900; color: #047857; line-height: 1.2;"><span id="home-alt-value">-</span><span id="home-alt-tier" style="font-size: 12px; font-weight: 800; color: #059669;"></span></span>
+                    </span>
+                    <span style="color: #059669; font-size: 15px;">&#8250;</span>
+                </button>
+
+                <!-- ③ 하랑이 산 — B안 전용 히어로 -->
+                <div id="home-mountain">
+                    <button id="home-mtn-btn" title="어휘 고도 안내" style="width: 100%; border: none; background: transparent; padding: 0; cursor: pointer; display: block;">
+                        <div style="display: flex; align-items: flex-end; justify-content: space-between; padding: 0 2px 2px;">
+                            <span style="text-align: left;">
+                                <span style="display: block; font-size: 10.5px; font-weight: 800; color: #059669; letter-spacing: 0.3px;">어휘 고도</span>
+                                <span style="display: block; font-size: 30px; font-weight: 900; color: #047857; line-height: 1.1; letter-spacing: -0.8px;"><span id="home-mtn-value">-</span></span>
+                            </span>
+                            <span id="home-mtn-tier" style="display: inline-flex; align-items: center; gap: 5px; background: var(--surface); border: 1px solid var(--mint-border); border-radius: 999px; padding: 3px 10px; font-size: 11.5px; font-weight: 800; color: #047857;"></span>
+                        </div>
+                        <svg viewBox="0 0 340 118" style="width: 100%; height: 118px; display: block;" aria-label="하랑이 산에서의 현재 위치">
+                            <path d="M0 118 L70 58 L112 86 L170 24 L228 82 L272 54 L340 118 Z" fill="var(--brand-mint)" stroke="#34d399" stroke-width="1.5"></path>
+                            <path d="M170 24 L190 45 L150 45 Z" fill="var(--surface)" opacity="0.9"></path>
+                            <line id="home-mtn-line" x1="0" y1="90" x2="340" y2="90" stroke="#059669" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.8"></line>
+                            <circle id="home-mtn-dot" cx="96" cy="90" r="6" fill="#047857" stroke="var(--surface)" stroke-width="2.5"></circle>
+                            <text x="336" y="114" text-anchor="end" font-size="9" font-weight="700" fill="#059669" opacity="0.85">해발 0m</text>
+                        </svg>
                     </button>
                 </div>
 
-                <!-- 닉네임 및 레벨 타이틀 -->
-                <div style="margin-bottom: 25px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;">
-                        <span id="home-level-title"
-                            style="color: #6366f1; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">어휘
-                            새싹</span>
-                        <span id="home-altitude-title" style="display: none; color: #047857; font-size: 12.5px; font-weight: 800; background: var(--brand-mint); border: 1px solid var(--mint-border); border-radius: 999px; padding: 2px 9px; cursor: pointer;"></span>
-                    </div>
-                    <h2 style="color: var(--text-primary); margin: 0 0 6px 0; font-weight: 800; font-size: 24px;"><span
-                            id="home-nickname">사용자</span>님</h2>
-                    <p style="color: var(--text-secondary); font-size: 13px; margin: 0; font-weight: 500;">오늘도 하랑이와 지혜 조각을 모아볼까요?
-                    </p>
+                <!-- ④ 오늘의 학습 -->
+                <div id="home-action">
+                    <button id="start-study-btn"
+                        style="width: 100%; padding: 18px; font-size: 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 16px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                        onmouseover="this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
+                        <span>오늘의 학습 시작하기 (<span id="home-target-count-text">30</span>개)</span> &#10141;
+                    </button>
+                    <div id="review-due-text" style="display: none; font-size: 12px; color: #d97706; font-weight: 700; margin-top: 9px;"></div>
                 </div>
 
-                <!-- 모바일 앱 스타일 대시보드 성과 피드 -->
-                <div
-                    style="background: linear-gradient(135deg, var(--bg-subtle) 0%, var(--border) 100%); color: var(--text-primary); padding: 16px 16px; border-radius: 24px; text-align: left; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04); border: 1px solid var(--border-strong); position: relative; overflow: hidden;">
-                    <div
-                        style="font-size: 13px; color: var(--text-sub); font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                        <span>학습 분석 요약 피드</span>
-                        <span style="margin-left: auto; font-size: 11px; font-weight: 800; color: var(--text-secondary);"><span id="home-exp-text">0</span> / 200 EXP</span>
-                    </div>
+                <!-- ⑤ 오늘의 낱말 이야기 -->
+                <div id="home-story-wrap">
+                    <button id="home-story-chip"
+                        style="display: none; width: 100%; padding: 11px 14px; background: var(--bg-subtle); border: 1.5px solid var(--border-strong); border-radius: 14px; cursor: pointer; align-items: center; gap: 8px; text-align: left;">
+                        <svg class="ui-ic" viewBox="0 0 24 24" style="width:15px;height:15px; flex-shrink:0;" aria-hidden="true"><use href="#ic-book"></use></svg>
+                        <span style="flex: 1; min-width: 0;">
+                            <span style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted);">오늘의 낱말 이야기</span>
+                            <span id="home-story-title" style="display: block; font-size: 14px; font-weight: 800; color: var(--text-primary);">-</span>
+                        </span>
+                        <span id="home-story-read" style="display: none; font-size: 10px; font-weight: 800; color: #047857; background: var(--brand-mint); border-radius: 999px; padding: 2px 7px;">읽음</span>
+                        <span style="color: var(--text-muted); font-size: 15px;">&#8250;</span>
+                    </button>
+                </div>
 
-                    <!-- 2x2 모바일 통계 그리드 -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                        <div id="home-streak-card"
-                            class="feed-stat-card"
-                            style="border: 1px solid var(--border-strong); padding: 10px 12px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
-                            <span
-                                style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">연속
-                                학습</span>
-                            <strong style="font-size: 18px; color: #d97706; font-weight: 800;"
-                                id="home-streak-text">-일차</strong>
+                <!-- ⑥ 학습 분석 -->
+                <div id="home-stats">
+                    <div id="home-stats-head" style="display: flex; align-items: baseline; margin-bottom: 10px;">
+                        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 0.3px;">학습 분석</span>
+                        <span style="margin-left: auto; font-size: 10.5px; font-weight: 800; color: var(--text-muted);"><span id="home-exp-text">0</span> / 200 EXP</span>
+                    </div>
+                    <div id="home-stats-grid">
+                        <div id="home-streak-card" class="feed-stat-card home-stat">
+                            <span class="home-stat-label">연속 학습</span>
+                            <strong class="home-stat-value" style="color: #d97706;" id="home-streak-text">-일차</strong>
                         </div>
-                        <div id="home-words-card"
-                            class="feed-stat-card"
-                            style="border: 1px solid var(--border-strong); padding: 10px 12px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
-                            <span
-                                style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">학습
-                                어휘</span>
-                            <strong style="font-size: 18px; color: #059669; font-weight: 800;"
-                                id="home-words-text">0개</strong>
+                        <div id="home-words-card" class="feed-stat-card home-stat">
+                            <span class="home-stat-label">학습 어휘</span>
+                            <strong class="home-stat-value" style="color: #059669;" id="home-words-text">0개</strong>
                         </div>
-                        <div id="home-accuracy-card"
-                            class="feed-stat-card"
-                            style="border: 1px solid var(--border-strong); padding: 10px 12px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
-                            <span
-                                style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">평균
-                                정답률</span>
-                            <strong style="font-size: 18px; color: #2563eb; font-weight: 800;"
-                                id="home-accuracy-text">-</strong>
+                        <div id="home-accuracy-card" class="feed-stat-card home-stat">
+                            <span class="home-stat-label">평균 정답률</span>
+                            <strong class="home-stat-value" style="color: #2563eb;" id="home-accuracy-text">-</strong>
                         </div>
-                        <div id="home-badges-card"
-                            class="feed-stat-card"
-                            style="border: 1px solid var(--border-strong); padding: 10px 12px; border-radius: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.01);">
-                            <span
-                                style="font-size: 11px; color: var(--text-secondary); font-weight: bold; display: block; margin-bottom: 4px;">업적
-                                달성</span>
-                            <strong style="font-size: 18px; color: #d97706; font-weight: 800;"
-                                id="home-badges-text">0개</strong>
+                        <div id="home-badges-card" class="feed-stat-card home-stat">
+                            <span class="home-stat-label">업적 달성</span>
+                            <strong class="home-stat-value" style="color: #d97706;" id="home-badges-text">0개</strong>
                         </div>
                     </div>
-
-                    <!-- 성과 카드의 레벨 바 — 수치는 제목 줄로 올리고 막대만 남김 -->
-                    <div
-                        style="width: 100%; height: 5px; background-color: var(--border-strong); border-radius: 3px; overflow: hidden;"
-                        title="다음 레벨 진척도">
-                        <div class="exp-fill" id="home-exp-bar"
-                            style="width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.5s ease;">
-                        </div>
+                    <div style="margin-top: 14px; width: 100%; height: 5px; background-color: var(--border-strong); border-radius: 3px; overflow: hidden;" title="다음 레벨 진척도">
+                        <div class="exp-fill" id="home-exp-bar" style="width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.5s ease;"></div>
                     </div>
                 </div>
 
-                <!-- 오늘의 학습 시작하기 버튼 -->
-                <button id="start-study-btn"
-                    style="width: 100%; padding: 18px; font-size: 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; border-radius: 16px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
-                    onmouseover="this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <span>오늘의 학습 시작하기 (<span id="home-target-count-text">30</span>개)</span> ➔
-                </button>
-                <div id="review-due-text" style="display: none; text-align: center; font-size: 12px; color: #d97706; font-weight: 700; margin-top: 10px;"></div>
-
-                <!-- 📖 오늘의 낱말 이야기 — 기본 학습과 별개인 읽을거리. 하루 한 편만 내민다. -->
-                <button id="home-story-chip"
-                    style="display: none; width: 100%; margin-top: 10px; padding: 11px 14px; background: var(--bg-subtle); border: 1.5px solid var(--border); border-radius: 14px; cursor: pointer; align-items: center; gap: 8px; text-align: left;">
-                    <svg class="ui-ic" viewBox="0 0 24 24" style="width:15px;height:15px; flex-shrink:0;" aria-hidden="true"><use href="#ic-book"></use></svg>
-                    <span style="flex: 1; min-width: 0;">
-                        <span style="display: block; font-size: 10.5px; font-weight: 700; color: var(--text-muted);">오늘의 낱말 이야기</span>
-                        <span id="home-story-title" style="display: block; font-size: 14px; font-weight: 800; color: var(--text-primary);">-</span>
-                    </span>
-                    <span id="home-story-read" style="display: none; font-size: 10px; font-weight: 800; color: #047857; background: var(--brand-mint); border-radius: 999px; padding: 2px 7px;">읽음</span>
-                    <span style="color: var(--text-muted); font-size: 15px;">›</span>
-                </button>
-
-                <!-- 🛠️ 개발자 단어 검토 버튼 -->
+                <!-- 개발자 단어 검토 -->
                 <button id="open-dev-panel-btn"
                     style="margin-top: 12px; width: 100%; padding: 14px; font-size: 14px; background: #475569; color: white; border: none; border-radius: 16px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(71, 85, 105, 0.15); transition: all 0.2s;"
                     onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
@@ -2927,6 +3090,7 @@
         let ratingHistory = [];        // [{d, r}] 일별 지수 기록 (최대 90)
         let placementDone = false;     // 배치고사 완료 여부
         let storiesRead = [];          // 읽은 낱말 이야기 id 목록
+        let homeLayout = 'a';          // 홈 화면 배치안 — 'a' 행동 우선(기본) | 'b' 고도 중심 | 'c' 정돈
         let vocabPeak = 0;             // 최고 기록 — 절대 내려가지 않음 (칭호 기준·「최고 해발」 표기)
         // 📏 P17 개정 (2026-08-23): 표시 고도는 내려갈 수 있다.
         // 측정(vocabRating)은 대칭 Elo 그대로 두고 «표시»만 완만하게 따라간다.
@@ -3603,6 +3767,7 @@
                 totalLearnedWords = masteredCount();
                 flaggedWords = data.flaggedWords || {};
                 storiesRead = Array.isArray(data.storiesRead) ? data.storiesRead : [];
+                homeLayout = ['a', 'b', 'c'].includes(data.homeLayout) ? data.homeLayout : 'a';
                 selectedTopic = data.selectedTopic || 'all';
 
                 // 📏 어휘 지수 로드 — 없으면 학습 이력 기반 초기화 (기존 유저는 배치고사 생략)
@@ -4157,15 +4322,30 @@
             document.getElementById('home-streak-text').textContent = `${streakDays}일차`;
             document.getElementById('home-words-text').textContent = `${totalLearnedWords}개`;
 
-            // 📏 어휘 고도: 프로필 칭호 옆 배지 텍스트
+            // 📏 어휘 고도 — 배치안마다 쓰는 자리가 달라 세 곳을 한 번에 채운다.
+            //    C안은 칭호 옆 배지, A안은 띠, B안은 산 그림. 어느 것이 보일지는 CSS가 정한다.
             const altitudeEl = document.getElementById('home-altitude-title');
-            if ((placementDone || vocabRatingN > 0) && vocabPeak > 0) {
+            const measured = (placementDone || vocabRatingN > 0) && vocabPeak > 0;
+            if (measured) {
                 const tier = ratingTier(vocabPeak);
-                altitudeEl.innerHTML = `${uiIcon(tier.ic, '12px')} ${tier.name} · ${shownAltitude().toLocaleString()}m`;
+                const alt = shownAltitude();
+                altitudeEl.innerHTML = `${uiIcon(tier.ic, '12px')} ${tier.name} · ${alt.toLocaleString()}m`;
                 altitudeEl.style.display = 'inline-block';
+
+                document.getElementById('home-alt-value').textContent = `해발 ${alt.toLocaleString()}m`;
+                document.getElementById('home-alt-tier').textContent = ` · ${tier.name}`;
+                document.getElementById('home-mtn-value').innerHTML = `${alt.toLocaleString()}<span style="font-size:17px; font-weight:800;">m</span>`;
+                document.getElementById('home-mtn-tier').innerHTML = `${uiIcon(tier.ic, '12px')} ${tier.name}`;
+                // 산 그림의 현재 위치: 해발 0~1,100m를 그림 바닥(y=112)에서 정상(y=26)에 대응
+                const y = Math.round(112 - Math.max(0, Math.min(1, alt / 1100)) * 86);
+                document.getElementById('home-mtn-line').setAttribute('y1', y);
+                document.getElementById('home-mtn-line').setAttribute('y2', y);
+                document.getElementById('home-mtn-dot').setAttribute('cy', y);
             } else {
                 altitudeEl.style.display = 'none'; // 측정 전에는 표시하지 않음 (배치고사 안내가 담당)
             }
+            // 측정 전에는 고도 자리를 비운다 — A·B안의 히어로가 빈 채로 뜨지 않도록
+            document.getElementById('home-box').classList.toggle('home-unmeasured', !measured);
 
             // 🦭 첫 로그인(학습 이력 없음) → 배치고사 안내
             setTimeout(maybeShowPlacementIntro, 400);
@@ -4204,9 +4384,10 @@
 
             document.getElementById('home-badges-text').textContent = `${unlockedCount}개`; // "N개" 단일 카운트 표시
 
+            applyHomeLayout();    // 🧭 홈 화면 배치
             refreshStoryChip();   // 📖 오늘의 낱말 이야기
 
-            document.getElementById('home-box').style.display = 'block';
+            document.getElementById('home-box').style.display = 'flex';
 
             updateShardCount();
 
@@ -6417,6 +6598,43 @@
             });
         });
 
+        // ===== 🧭 홈 화면 배치 =====
+        // 요소는 셋 다 같고 순서와 밀도만 다르다. 마크업을 복제하지 않고 클래스만 바꾼다 —
+        // 안마다 DOM을 따로 두면 이벤트 핸들러와 상태가 갈린다.
+        const LAYOUT_NAMES = { a: '행동 우선', b: '고도 중심', c: '정돈' };
+
+        function applyHomeLayout() {
+            const box = document.getElementById('home-box');
+            if (!box) return;
+            box.classList.remove('home-a', 'home-b', 'home-c');
+            box.classList.add('home-' + homeLayout);
+            const label = document.getElementById('layout-current-label');
+            if (label) label.textContent = LAYOUT_NAMES[homeLayout] || LAYOUT_NAMES.a;
+            document.querySelectorAll('#layout-modal .layout-opt').forEach(btn => {
+                const on = btn.dataset.layout === homeLayout;
+                btn.style.borderColor = on ? '#10b981' : 'var(--border-strong)';
+                btn.style.background = on ? 'var(--brand-mint)' : 'var(--surface)';
+                btn.querySelector('.layout-check').style.display = on ? 'inline-flex' : 'none';
+            });
+        }
+
+        document.getElementById('open-layout-btn').addEventListener('click', () => {
+            applyHomeLayout();
+            openHomeModal('layout-modal');
+            track('layout_open', { current: homeLayout });
+        });
+        document.getElementById('layout-close-btn').addEventListener('click', () => closeHomeModal('layout-modal'));
+        document.querySelectorAll('#layout-modal .layout-opt').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const next = btn.dataset.layout;
+                if (!LAYOUT_NAMES[next] || next === homeLayout) return;
+                homeLayout = next;
+                applyHomeLayout();
+                setDoc(userDocRef, { homeLayout: homeLayout }, { merge: true }).catch(() => {});
+                track('layout_change', { to: homeLayout });
+            });
+        });
+
         // ===== 📖 낱말 이야기 =====
         // 기본 학습과 별개인 읽을거리. 서고처럼 뒤적이게 하지 않고 하루 한 편만 내민다 —
         // 목록을 열어 고르게 만들면 30문항 세션과 시간을 다투는 별개 콘텐츠가 되어 버린다.
@@ -6850,6 +7068,8 @@
             openHomeModal('altitude-guide-modal');
         }
         document.getElementById('home-altitude-title').addEventListener('click', openAltitudeGuide);
+        document.getElementById('home-altitude-hero').addEventListener('click', openAltitudeGuide);
+        document.getElementById('home-mtn-btn').addEventListener('click', openAltitudeGuide);
         document.getElementById('alt-guide-close-btn').addEventListener('click', () => closeHomeModal('altitude-guide-modal'));
         document.getElementById('alt-guide-stats-btn').addEventListener('click', () => {
             closeHomeModal('altitude-guide-modal');
