@@ -4593,12 +4593,7 @@
             if (measured) {
                 // 바다 상태(측정 전)에서 건드린 것들을 되돌린다 — 배치고사를 방금 마친 경우
                 {
-                    const valWrap = document.getElementById('home-mtn-value').parentElement;
-                    valWrap.style.fontSize = '';
-                    valWrap.style.fontWeight = '';
-                    valWrap.style.lineHeight = '';
-                    valWrap.style.color = '';
-                    valWrap.style.paddingTop = '';
+                    document.getElementById('home-mtn-value').parentElement.style.color = '';
                     const tierEl = document.getElementById('home-mtn-tier');
                     tierEl.style.borderColor = '';
                     tierEl.style.color = '';
@@ -4636,13 +4631,10 @@
 
                 // 🌊 아직 바다에 있다 — 같은 산 좌표계에서 창만 수면 아래로 내린다.
                 //    배치고사를 마치면 이 창이 그대로 산으로 올라간다.
+                //   숫자 자리는 크기를 그대로 두고 '???m' 만 채운다 — 측정 후와 자리가 흔들리지 않는다
                 const valWrap = document.getElementById('home-mtn-value').parentElement;
-                valWrap.style.fontSize = '15px';
-                valWrap.style.fontWeight = '800';
-                valWrap.style.lineHeight = '1.5';
-                valWrap.style.color = 'var(--text-secondary)';
-                valWrap.style.paddingTop = '4px';
-                document.getElementById('home-mtn-value').textContent = '아직 재지 않았어요';
+                valWrap.style.color = 'var(--text-muted)';
+                document.getElementById('home-mtn-value').innerHTML = '???<span style="font-size:17px; font-weight:800;">m</span>';
 
                 const tierEl = document.getElementById('home-mtn-tier');
                 tierEl.textContent = '측정 전';
