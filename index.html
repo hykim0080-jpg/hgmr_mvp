@@ -1053,7 +1053,7 @@
         }
 
 
-        /* ===== 🏠 홈 화면 배치안 (A 기본 / B 고도 중심 / C 정돈) =====
+        /* ===== 🏠 홈 화면 배치안 (B 고도 중심 = 기본 / A 행동 우선 / C 정돈) =====
            요소는 셋이 동일하다. 순서(order)와 밀도만 바꾼다 —
            마크업을 안마다 복제하지 않아야 이벤트 핸들러와 상태가 갈리지 않는다. */
         #home-box { gap: 0; }
@@ -1104,7 +1104,7 @@
         .home-a #home-story-wrap { order: 4; margin-top: 12px; }
         .home-a #home-stats { order: 5; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-strong); }
 
-        /* ── B안 · 고도 중심 — 산 은유를 첫 화면 히어로로 ── */
+        /* ── B안 · 고도 중심 (기본) — 하랑이 산 크롭을 첫 화면 히어로로 ── */
         .home-b #home-mountain { display: block; order: 1; margin: -6px -8px 10px; }
         .home-b #home-identity { order: 2; align-items: center; gap: 10px; margin-bottom: 14px; }
         .home-b #home-avatar-btn { width: 40px; height: 40px; }
@@ -2233,7 +2233,7 @@
                         화면 배치
                     </span>
                     <span style="display: flex; align-items: center; gap: 5px;">
-                        <span id="layout-current-label" style="color: var(--text-secondary); font-weight: 700;">행동 우선</span>
+                        <span id="layout-current-label" style="color: var(--text-secondary); font-weight: 700;">고도 중심</span>
                         <span style="font-size: 14px; line-height: 1;">&#8250;</span>
                     </span>
                 </button>
@@ -2559,7 +2559,7 @@
                         </svg>
                         <span style="flex: 1; min-width: 0;">
                             <span style="display: flex; align-items: center; gap: 7px; margin-bottom: 6px;">
-                                <span style="font-size: 16px; font-weight: 900; color: var(--text-primary);">행동 우선</span><span style="font-size:10px; font-weight:800; color:#047857; background:var(--brand-mint); border-radius:999px; padding:2px 8px;">기본</span>
+                                <span style="font-size: 16px; font-weight: 900; color: var(--text-primary);">행동 우선</span>
                                 <span class="layout-check" style="display: none; margin-left: auto; color: #047857;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-check"></use></svg></span>
                             </span>
                             <span class="layout-desc" style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub); white-space: normal; overflow-wrap: anywhere; word-break: keep-all;">인사를 한 줄로 접고 어휘 고도를 그 자리에 올린 뒤, 학습 시작 버튼을 첫 화면 위쪽에 둡니다. 통계는 학습을 마친 뒤 보는 정보라 아래로 내렸습니다.</span>
@@ -2582,7 +2582,7 @@
                         </svg>
                         <span style="flex: 1; min-width: 0;">
                             <span style="display: flex; align-items: center; gap: 7px; margin-bottom: 6px;">
-                                <span style="font-size: 16px; font-weight: 900; color: var(--text-primary);">고도 중심</span>
+                                <span style="font-size: 16px; font-weight: 900; color: var(--text-primary);">고도 중심</span><span style="font-size:10px; font-weight:800; color:#047857; background:var(--brand-mint); border-radius:999px; padding:2px 8px;">기본</span>
                                 <span class="layout-check" style="display: none; margin-left: auto; color: #047857;"><svg class="ui-ic" viewBox="0 0 24 24" style="width:18px;height:18px;" aria-hidden="true"><use href="#ic-check"></use></svg></span>
                             </span>
                             <span class="layout-desc" style="display: block; font-size: 12.5px; line-height: 1.6; color: var(--text-sub); white-space: normal; overflow-wrap: anywhere; word-break: keep-all;">하랑이 산과 해발 숫자를 첫 화면의 주인공으로 올립니다. 홈을 열 때마다 어디까지 올라왔는지가 먼저 보입니다. 통계는 한 줄로 줄어듭니다.</span>
@@ -2672,7 +2672,7 @@
 
         <div class="app-wrapper">
             <!-- 🌟 모바일 앱 스타일 프로필 중심 홈 화면 (Home View) -->
-            <div class="quiz-container home-a" id="home-box"
+            <div class="quiz-container home-b" id="home-box"
                 style="display: none; border-radius: 24px; box-shadow: 0 20px 45px rgba(0,0,0,0.08); animation: slideUp 0.3s ease; margin-bottom: 20px; padding: 22px 20px; flex-direction: column;">
 
                 <!-- ① 나 — 아바타·칭호·닉네임·주제. 배치안에 따라 가로 한 줄 또는 세로 가운데 정렬 -->
@@ -2864,7 +2864,7 @@
                     <div id="harang-companion" style="display: none; position: absolute; right: 8px; top: -28px; z-index: 5; pointer-events: none;">
                         <!-- 조각 획득 스프라이트 무대 (하랑이 머리 위) -->
                         <div id="harang-gain" style="position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%); display: flex; gap: 6px; white-space: nowrap;"></div>
-                        <div id="harang-bubble" style="display: none; position: absolute; right: 62px; top: 2px; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: 14px 14px 4px 14px; padding: 8px 10px; box-shadow: 0 6px 16px rgba(0,0,0,0.14); white-space: nowrap; max-width: 230px;"></div>
+                        <div id="harang-bubble" style="display: none; position: absolute; right: 62px; top: 2px; background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: 14px 14px 4px 14px; padding: 8px 10px; box-shadow: 0 6px 16px rgba(0,0,0,0.14); max-width: 230px; width: max-content; line-height: 1.5; text-align: left; word-break: keep-all; overflow-wrap: anywhere;"></div>
                         <!-- 기본: 동글 하랑이 -->
                         <svg id="hc-idle" width="54" height="41" viewBox="0 0 64 46" style="display: block; animation: hcBob 2.8s ease-in-out infinite;" aria-label="하랑이">
                             <path d="M32,4 C48,4 56,16 56,30 C56,42 46,46 32,46 C18,46 8,42 8,30 C8,16 16,4 32,4 Z" fill="#E5E8EE" stroke="#3B4252" stroke-width="2.4"/>
@@ -3262,7 +3262,7 @@
         let ratingHistory = [];        // [{d, r}] 일별 지수 기록 (최대 90)
         let placementDone = false;     // 배치고사 완료 여부
         let storiesRead = [];          // 읽은 낱말 이야기 id 목록
-        let homeLayout = 'a';          // 홈 화면 배치안 — 'a' 행동 우선(기본) | 'b' 고도 중심 | 'c' 정돈
+        let homeLayout = 'b';          // 홈 화면 배치안 — 'b' 고도 중심(기본) | 'a' 행동 우선 | 'c' 정돈
         let vocabPeak = 0;             // 최고 기록 — 절대 내려가지 않음 (칭호 기준·「최고 해발」 표기)
         // 📏 P17 개정 (2026-08-23): 표시 고도는 내려갈 수 있다.
         // 측정(vocabRating)은 대칭 Elo 그대로 두고 «표시»만 완만하게 따라간다.
@@ -3992,7 +3992,7 @@
                 totalLearnedWords = masteredCount();
                 flaggedWords = data.flaggedWords || {};
                 storiesRead = Array.isArray(data.storiesRead) ? data.storiesRead : [];
-                homeLayout = ['a', 'b', 'c'].includes(data.homeLayout) ? data.homeLayout : 'a';
+                homeLayout = ['a', 'b', 'c'].includes(data.homeLayout) ? data.homeLayout : 'b';
                 selectedTopic = data.selectedTopic || 'all';
 
                 // 📏 어휘 지수 로드 — 없으면 학습 이력 기반 초기화 (기존 유저는 배치고사 생략)
@@ -5599,7 +5599,7 @@
                     inputEl.value = '';
                     jamoBuffer = [];
                     inputEl.placeholder = '정답 입력';   // 안내는 하랑이 말풍선으로만 — 답안 작성란에는 표시하지 않음
-                    harangSay('<span style="font-size:12.5px; font-weight:700; color:var(--text-body);">좋은 단어야! 근데 아까 본 단어가 더 딱 맞아. 떠올려 볼까?</span>', 2800);
+                    harangSay('<span style="font-size:12.5px; font-weight:700; color:var(--text-body);">좋은 단어야! 근데 아까 본 단어가 더 딱 맞아.</span>', 2800);
                     isWaiting = false;
                     return;
                 }
@@ -6864,7 +6864,7 @@
             box.classList.remove('home-a', 'home-b', 'home-c');
             box.classList.add('home-' + homeLayout);
             const label = document.getElementById('layout-current-label');
-            if (label) label.textContent = LAYOUT_NAMES[homeLayout] || LAYOUT_NAMES.a;
+            if (label) label.textContent = LAYOUT_NAMES[homeLayout] || LAYOUT_NAMES.b;
             document.querySelectorAll('#layout-modal .layout-opt').forEach(btn => {
                 const on = btn.dataset.layout === homeLayout;
                 btn.style.borderColor = on ? '#10b981' : 'var(--border-strong)';
