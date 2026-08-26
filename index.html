@@ -1066,6 +1066,18 @@
         #home-greeting { display: none; }
         /* 고도 히어로는 기본 숨김 — 각 배치안이 자기 것만 켠다.
            인라인 style로 숨기면 클래스 규칙이 이기지 못하므로 여기서 처리한다. */
+        /* ⛰ 하랑이 산 히어로 — 크롭 창이 눌린다는 걸 보이게 한다 */
+        #home-mtn-hint {
+            position: absolute; right: 8px; bottom: 8px;
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 3px 8px 3px 6px; border-radius: 999px;
+            background: rgba(4, 120, 87, 0.72);
+            color: #ffffff; font-size: 10px; font-weight: 800; letter-spacing: 0.2px;
+            pointer-events: none;
+        }
+        #home-mtn-svg { transition: transform 0.12s ease, filter 0.12s ease; }
+        #home-mtn-btn:active #home-mtn-svg { transform: scale(0.985); filter: brightness(0.96); }
+        @media (prefers-reduced-motion: reduce) { #home-mtn-svg { transition: none; } }
         #home-altitude-hero, #home-mountain { display: none; }
         #home-altitude-title { display: none !important; }
 
@@ -1655,6 +1667,46 @@
           <path d="M230,160 L210,164 M230,170 L210,171" stroke="#C6CDD9" stroke-width="2.5" stroke-linecap="round"></path>
         </g>
         <g id="fr-idle-1"><use href="#sb"></use><use href="#shard"></use><use href="#fl-hug"></use><use href="#f-open"></use></g>
+        <!-- ⛰ 하랑이 산 본체 — 홈 히어로와 「어휘 고도란?」 모달이 같은 정의를 쓴다.
+             좌표계: 정상 y=30, 바닥 y=224, 좌우 66~274. 바다는 y=200부터. -->
+        <linearGradient id="mtG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4ade80"></stop><stop offset="55%" stop-color="#10b981"></stop><stop offset="100%" stop-color="#047857"></stop>
+        </linearGradient>
+        <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7dd3fc"></stop><stop offset="100%" stop-color="#0284c7"></stop>
+        </linearGradient>
+        <g id="mt-core">
+          <path d="M170,30 C240,30 274,112 274,192 C274,214 260,224 170,224 C80,224 66,214 66,192 C66,112 100,30 170,30 Z" fill="url(#mtG)" stroke="#065f46" stroke-width="3"></path>
+          <path d="M66,196 C46,192 40,204 48,214 C56,222 72,220 78,212 Z" fill="#059669" stroke="#065f46" stroke-width="2.5"></path>
+          <path d="M274,196 C294,192 300,204 292,214 C284,222 268,220 262,212 Z" fill="#059669" stroke="#065f46" stroke-width="2.5"></path>
+          <path d="M170,30 C205,30 226,50 232,72 C216,64 204,74 192,66 C180,58 166,70 154,62 C142,54 124,64 112,68 C120,48 138,30 170,30 Z" fill="#ffffff" opacity="0.92"></path>
+          <circle cx="143" cy="96" r="9" fill="#1e3a2f"></circle><circle cx="197" cy="96" r="9" fill="#1e3a2f"></circle>
+          <circle cx="140" cy="93" r="3" fill="#ffffff"></circle><circle cx="194" cy="93" r="3" fill="#ffffff"></circle>
+          <path d="M164,108 C167,105 173,105 176,108 C174,113 166,113 164,108 Z" fill="#1e3a2f"></path>
+          <path d="M165,117 Q170,121 175,117" fill="none" stroke="#1e3a2f" stroke-width="2.2" stroke-linecap="round"></path>
+          <circle cx="124" cy="112" r="7" fill="#f8b9c5" opacity="0.65"></circle><circle cx="216" cy="112" r="7" fill="#f8b9c5" opacity="0.65"></circle>
+          <path d="M104,104 L120,107 M104,112 L120,112" stroke="#d1fae5" stroke-width="1.8" stroke-linecap="round"></path>
+          <path d="M236,104 L220,107 M236,112 L220,112" stroke="#d1fae5" stroke-width="1.8" stroke-linecap="round"></path>
+        </g>
+        <g id="mt-sky-ladder">
+          <g stroke="#b45309" stroke-linecap="round">
+            <line x1="166" y1="30" x2="166" y2="-12" stroke-width="2"></line>
+            <line x1="174" y1="30" x2="174" y2="-12" stroke-width="2"></line>
+            <line x1="166" y1="22" x2="174" y2="22" stroke-width="1.8"></line>
+            <line x1="166" y1="14" x2="174" y2="14" stroke-width="1.8"></line>
+            <line x1="166" y1="6" x2="174" y2="6" stroke-width="1.8"></line>
+            <line x1="166" y1="-2" x2="174" y2="-2" stroke-width="1.8" opacity="0.7"></line>
+            <line x1="166" y1="-10" x2="174" y2="-10" stroke-width="1.8" opacity="0.45"></line>
+          </g>
+          <ellipse cx="170" cy="-18" rx="17" ry="7.5" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"></ellipse>
+          <ellipse cx="182" cy="-14" rx="10" ry="5.5" fill="#ffffff"></ellipse>
+          <ellipse cx="158" cy="-14" rx="9" ry="5" fill="#ffffff"></ellipse>
+        </g>
+        <g id="mt-sea">
+          <rect x="0" y="200" width="340" height="40" fill="url(#seaG)" opacity="0.9"></rect>
+          <path d="M0,200 Q14,194 28,200 T56,200 T84,200 T112,200 T140,200 T168,200 T196,200 T224,200 T252,200 T280,200 T308,200 T340,200 L340,206 L0,206 Z" fill="#bae6fd" opacity="0.8"></path>
+          <path d="M0,212 Q20,207 40,212 T80,212 T120,212 T160,212 T200,212 T240,212 T280,212 T320,212 L340,212 L340,218 L0,218 Z" fill="#ffffff" opacity="0.25"></path>
+        </g>
         <!-- 🎳 산으로 간 물범 — 굴러서 오르는 세 가지 모습. 접속할 때마다 하나가 뽑힌다 -->
         <g id="fr-roll-a"><g transform="translate(0 30)">
         <defs><clipPath id="fr-roll-a-c"><circle cx="160" cy="168" r="96"></circle></clipPath></defs>
@@ -2230,40 +2282,12 @@
 
                 <!-- 바다에서 솟은 하랑이 산 -->
                 <svg viewBox="0 -34 340 274" style="width: 100%; display: block;" aria-label="바다에서 솟은 하랑이 모양의 산">
-                    <defs>
-                        <linearGradient id="mtG" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#4ade80"/>
-                            <stop offset="55%" stop-color="#10b981"/>
-                            <stop offset="100%" stop-color="#047857"/>
-                        </linearGradient>
-                        <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#7dd3fc"/>
-                            <stop offset="100%" stop-color="#0284c7"/>
-                        </linearGradient>
-                    </defs>
-
                     <!-- 해 -->
                     <circle cx="313" cy="26" r="13" fill="#fcd34d"/>
                     <circle cx="313" cy="26" r="17" fill="#fcd34d" opacity="0.3"/>
 
-                    <!-- 하랑이 산 본체 (물범 모양) -->
-                    <path d="M170,30 C240,30 274,112 274,192 C274,214 260,224 170,224 C80,224 66,214 66,192 C66,112 100,30 170,30 Z" fill="url(#mtG)" stroke="#065f46" stroke-width="3"/>
-                    <!-- 옆 지느러미 (산자락 바위) -->
-                    <path d="M66,196 C46,192 40,204 48,214 C56,222 72,220 78,212 Z" fill="#059669" stroke="#065f46" stroke-width="2.5"/>
-                    <path d="M274,196 C294,192 300,204 292,214 C284,222 268,220 262,212 Z" fill="#059669" stroke="#065f46" stroke-width="2.5"/>
-                    <!-- 정상 눈(雪) 모자 -->
-                    <path d="M170,30 C205,30 226,50 232,72 C216,64 204,74 192,66 C180,58 166,70 154,62 C142,54 124,64 112,68 C120,48 138,30 170,30 Z" fill="#ffffff" opacity="0.92"/>
-                    <!-- 얼굴 -->
-                    <circle cx="143" cy="96" r="9" fill="#1e3a2f"/>
-                    <circle cx="197" cy="96" r="9" fill="#1e3a2f"/>
-                    <circle cx="140" cy="93" r="3" fill="#ffffff"/>
-                    <circle cx="194" cy="93" r="3" fill="#ffffff"/>
-                    <path d="M164,108 C167,105 173,105 176,108 C174,113 166,113 164,108 Z" fill="#1e3a2f"/>
-                    <path d="M165,117 Q170,121 175,117" fill="none" stroke="#1e3a2f" stroke-width="2.2" stroke-linecap="round"/>
-                    <circle cx="124" cy="112" r="7" fill="#f8b9c5" opacity="0.65"/>
-                    <circle cx="216" cy="112" r="7" fill="#f8b9c5" opacity="0.65"/>
-                    <path d="M104,104 L120,107 M104,112 L120,112" stroke="#d1fae5" stroke-width="1.8" stroke-linecap="round"/>
-                    <path d="M236,104 L220,107 M236,112 L220,112" stroke="#d1fae5" stroke-width="1.8" stroke-linecap="round"/>
+                    <!-- 하랑이 산 본체 — 홈 히어로와 공유하는 정의 -->
+                    <use href="#mt-core"/>
 
                     <!-- 등급 기준선 (해발 0m 기준: y = 200 − alt × 170/1100) -->
                     <!-- 900m 마루 -->
@@ -2289,19 +2313,7 @@
                     <text x="156" y="20" text-anchor="end" font-size="9" font-weight="800" fill="#b45309">정상 1,100m</text>
 
                     <!-- 정상 위 하늘 사다리 — 마루에 올라도 등반은 계속된다 -->
-                    <g stroke="#b45309" stroke-linecap="round">
-                        <line x1="166" y1="30" x2="166" y2="-12" stroke-width="2"/>
-                        <line x1="174" y1="30" x2="174" y2="-12" stroke-width="2"/>
-                        <line x1="166" y1="22" x2="174" y2="22" stroke-width="1.8"/>
-                        <line x1="166" y1="14" x2="174" y2="14" stroke-width="1.8"/>
-                        <line x1="166" y1="6" x2="174" y2="6" stroke-width="1.8"/>
-                        <line x1="166" y1="-2" x2="174" y2="-2" stroke-width="1.8" opacity="0.7"/>
-                        <line x1="166" y1="-10" x2="174" y2="-10" stroke-width="1.8" opacity="0.45"/>
-                    </g>
-                    <!-- 사다리가 사라지는 구름 -->
-                    <ellipse cx="170" cy="-18" rx="17" ry="7.5" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
-                    <ellipse cx="182" cy="-14" rx="10" ry="5.5" fill="#ffffff"/>
-                    <ellipse cx="158" cy="-14" rx="9" ry="5" fill="#ffffff"/>
+                    <use href="#mt-sky-ladder"/>
                     <svg x="190" y="-28" width="10" height="10" viewBox="0 0 24 24"><use href="#ic-sparkle"></use></svg>
                     <text x="196" y="-9" font-size="8.5" style="fill: var(--text-muted)">정상 너머로도 길이 이어져요</text>
 
@@ -2316,9 +2328,7 @@
                     </g>
 
                     <!-- 바다 -->
-                    <rect x="0" y="200" width="340" height="40" fill="url(#seaG)" opacity="0.9"/>
-                    <path d="M0,200 Q14,194 28,200 T56,200 T84,200 T112,200 T140,200 T168,200 T196,200 T224,200 T252,200 T280,200 T308,200 T340,200 L340,206 L0,206 Z" fill="#bae6fd" opacity="0.8"/>
-                    <path d="M0,212 Q20,207 40,212 T80,212 T120,212 T160,212 T200,212 T240,212 T280,212 T320,212 L340,212 L340,218 L0,218 Z" fill="#ffffff" opacity="0.25"/>
+                    <use href="#mt-sea"/>
                     <text x="334" y="234" text-anchor="end" font-size="8.5" font-weight="700" fill="#e0f2fe">해발 0m — 바다</text>
                 </svg>
 
@@ -2707,7 +2717,7 @@
 
                 <!-- ③ 하랑이 산 — B안 전용 히어로 -->
                 <div id="home-mountain">
-                    <button id="home-mtn-btn" title="어휘 고도 안내" style="width: 100%; border: none; background: transparent; padding: 0; cursor: pointer; display: block;">
+                    <button id="home-mtn-btn" title="어휘 고도 안내" style="width: 100%; border: none; background: transparent; padding: 0; cursor: pointer; display: block; position: relative;">
                         <div style="display: flex; align-items: flex-end; justify-content: space-between; padding: 0 2px 2px;">
                             <span style="text-align: left;">
                                 <span style="display: block; font-size: 10.5px; font-weight: 800; color: #059669; letter-spacing: 0.3px;">어휘 고도</span>
@@ -2715,15 +2725,39 @@
                             </span>
                             <span id="home-mtn-tier" style="display: inline-flex; align-items: center; gap: 5px; background: var(--surface); border: 1px solid var(--mint-border); border-radius: 999px; padding: 3px 10px; font-size: 11.5px; font-weight: 800; color: #047857;"></span>
                         </div>
-                        <svg viewBox="0 0 340 118" style="width: 100%; height: 118px; display: block;" aria-label="하랑이 산에서의 현재 위치">
-                            <path d="M0 118 L70 58 L112 86 L170 24 L228 82 L272 54 L340 118 Z" fill="var(--brand-mint)" stroke="#34d399" stroke-width="1.5"></path>
-                            <path d="M170 24 L190 45 L150 45 Z" fill="var(--surface)" opacity="0.9"></path>
-                            <line id="home-mtn-line" x1="0" y1="90" x2="340" y2="90" stroke="#059669" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.8"></line>
-                            <!-- 🦭 산으로 간 물범 — 지금 오른 높이에 하랑이가 선다 -->
-                            <ellipse id="home-mtn-shadow" cx="96" cy="90" rx="13" ry="3" fill="#047857" opacity="0.22"></ellipse>
-                            <svg id="home-mtn-harang" x="70" y="38" width="52" height="52" viewBox="10 10 300 300" style="overflow: visible;" aria-hidden="true"><use id="home-mtn-harang-use" href="#fr-roll-a"></use></svg>
-                            <text x="336" y="114" text-anchor="end" font-size="9" font-weight="700" fill="#059669" opacity="0.85">해발 0m</text>
+                        <!-- ⛰ 「어휘 고도란?」 모달과 같은 하랑이 산을, 지금 고도 언저리만 잘라 보여준다.
+                             확대가 아니라 크롭이다 — viewBox의 세로 위치만 옮기므로 산 크기는 그대로다.
+                             그래서 마루에 닿아야만 정상 사다리와 구름이 화면에 들어온다. -->
+                        <svg id="home-mtn-svg" viewBox="0 34 340 118" preserveAspectRatio="xMidYMid slice"
+                             style="width: 100%; height: 118px; display: block; border-radius: 10px; background: var(--surface);"
+                             aria-label="하랑이 산에서의 현재 위치">
+                            <circle cx="313" cy="26" r="13" fill="#fcd34d"></circle>
+                            <circle cx="313" cy="26" r="17" fill="#fcd34d" opacity="0.3"></circle>
+                            <use href="#mt-core"></use>
+                            <g stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,4" opacity="0.5">
+                                <line x1="0" y1="61" x2="340" y2="61"></line>
+                                <line x1="0" y1="92" x2="340" y2="92"></line>
+                                <line x1="0" y1="123" x2="340" y2="123"></line>
+                                <line x1="0" y1="154" x2="340" y2="154"></line>
+                            </g>
+                            <use href="#mt-sky-ladder"></use>
+                            <text x="196" y="-9" font-size="8.5" style="fill: var(--text-muted)">정상 너머로도 길이 이어져요</text>
+                            <use href="#mt-sea"></use>
+                            <text x="8" y="234" font-size="8.5" font-weight="700" fill="#e0f2fe">해발 0m — 바다</text>
+                            <line id="home-mtn-line" x1="0" y1="90" x2="340" y2="90" stroke="#059669" stroke-width="1.6" stroke-dasharray="4 4" opacity="0.9"></line>
+                            <!-- 🦭 산으로 간 물범 — 지금 오른 높이의 비탈 위에 하랑이가 선다 -->
+                            <ellipse id="home-mtn-shadow" cx="96" cy="90" rx="14" ry="3.2" fill="#047857" opacity="0.22"></ellipse>
+                            <svg id="home-mtn-harang" x="70" y="38" width="56" height="56" viewBox="10 10 300 300" style="overflow: visible;" aria-hidden="true"><use id="home-mtn-harang-use" href="#fr-roll-a"></use></svg>
                         </svg>
+                        <!-- 그림이 꽉 차서 눌리는 줄 모르기 쉽다 — 작은 배지로 알린다 -->
+                        <span id="home-mtn-hint" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="11" height="11" style="display:block;">
+                                <circle cx="12" cy="12" r="9.5" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+                                <path d="M12,11 V17" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"></path>
+                                <circle cx="12" cy="7.4" r="1.4" fill="#ffffff"></circle>
+                            </svg>
+                            자세히
+                        </span>
                     </button>
                 </div>
 
@@ -4531,13 +4565,20 @@
                 document.getElementById('home-alt-tier').textContent = ` · ${tier.name}`;
                 document.getElementById('home-mtn-value').innerHTML = `${alt.toLocaleString()}<span style="font-size:17px; font-weight:800;">m</span>`;
                 document.getElementById('home-mtn-tier').innerHTML = `${uiIcon(tier.ic, '12px')} ${tier.name}`;
-                // 산 그림의 현재 위치: 해발 0~1,100m를 그림 바닥(y=112)에서 정상(y=26)에 대응
-                const y = Math.round(112 - Math.max(0, Math.min(1, alt / 1100)) * 86);
+                // 하랑이 산 좌표계(모달과 공유): 해발 0m가 y=200, 정상 1,100m가 y=30
+                const y = Math.max(34, Math.min(198, 200 - alt * 170 / 1100));
                 document.getElementById('home-mtn-line').setAttribute('y1', y);
                 document.getElementById('home-mtn-line').setAttribute('y2', y);
-                // 하랑이가 선을 밟고 서도록 — 발끝이 선에 닿게 높이만큼 위로 올린다
+                // 하랑이는 산 안쪽이 아니라 왼쪽 비탈(실루엣) 위에 걸터앉는다 — 모달과 같은 규칙
+                const ex = mountainEdgeX(y);
+                document.getElementById('home-mtn-shadow').setAttribute('cx', ex);
                 document.getElementById('home-mtn-shadow').setAttribute('cy', y);
-                document.getElementById('home-mtn-harang').setAttribute('y', y - 50);
+                document.getElementById('home-mtn-harang').setAttribute('x', ex - 28);
+                document.getElementById('home-mtn-harang').setAttribute('y', y - 54);
+                // 크롭 창을 지금 고도로 옮긴다. 하랑이를 창 아래쪽 55% 지점에 두어
+                // 올려다볼 여백(=아직 남은 산)이 항상 보이게 한다.
+                const top = Math.max(-44, Math.min(122, y - 66));
+                document.getElementById('home-mtn-svg').setAttribute('viewBox', `0 ${top} 340 118`);
             } else {
                 altitudeEl.style.display = 'none'; // 측정 전에는 표시하지 않음 (배치고사 안내가 담당)
             }
