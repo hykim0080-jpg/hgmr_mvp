@@ -11,7 +11,9 @@ const KEY_PATH = path.join(__dirname, '..', 'serviceAccountKey.json');
 const APPLY = process.argv.includes('--apply');
 
 // 테스트에서 쓴 문자열만. 실사용자가 칠 법한 말은 넣지 않는다.
-const JUNK = ['아무말아무말', '엉뚱한답'];
+// ⚠️ '모름'은 실사용자도 칠 법한 말이다. 출시 전이라 지금은 전부 테스트 흔적이지만,
+//    실사용자가 생긴 뒤에는 이 항목을 반드시 빼야 한다.
+const JUNK = ['아무말아무말', '엉뚱한답', '모름'];
 
 async function main() {
     if (!fs.existsSync(KEY_PATH)) { console.error('❌ serviceAccountKey.json 없음'); process.exit(1); }
