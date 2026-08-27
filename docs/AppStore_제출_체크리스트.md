@@ -1,6 +1,6 @@
 # App Store 제출 체크리스트
 
-> 작성: 2026-07-30 · 기준: [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) · [Upcoming requirements](https://www.developer.apple.com/news/upcoming-requirements/)
+> 작성: 2026-07-30 · **갱신: 2026-08-27** · 기준: [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) · [Upcoming requirements](https://www.developer.apple.com/news/upcoming-requirements/)
 > 제출 문구는 `AppStore_메타데이터.md`, 진행 상태는 `docs/진행_현황.md`
 
 ---
@@ -9,12 +9,16 @@
 
 | # | 항목 | 상태 | 누가 |
 |---|---|---|---|
-| 1 | Xcode 26 / iOS 26 SDK로 빌드 | ⬜ **확인 필요** | 현기님 |
-| 2 | **Sign in with Apple 구현** | 🔴 **미구현 — 최대 리스크** | Code |
-| 3 | Apple Developer 계정 유효 | ⬜ 확인 필요 | 현기님 |
-| 4 | 연령 등급 설문 재응답 | ⬜ | 현기님 |
-| 5 | 스크린샷 7종 | ⬜ (합성 툴 준비됨) | 현기님 |
-| — | 회원 탈퇴 · 암호화 신고 · 방침/약관 URL · 번들 ID | ✅ 완료 | — |
+| 1 | Xcode 26 / iOS 26 SDK로 빌드 | ✅ 완료 — 빌드 5~8 업로드 통과 (구버전이면 업로드 단계에서 거부된다) | — |
+| 2 | **Sign in with Apple 구현** | ✅ 완료 — `com.apple.developer.applesignin` 엔타이틀먼트 매 빌드 검증 중 | — |
+| 3 | Apple Developer 계정 유효 | ✅ 완료 — 업로드가 되고 있으므로 유효 | — |
+| 4 | 연령 등급 설문 재응답 | ⬜ **남음** | 현기님 |
+| 5 | 스크린샷 | ✅ 촬영 완료 (5컷 × 6.9"/6.5") · ⬜ **업로드 남음** | 현기님 |
+| 6 | 메타데이터 입력 (이름·부제·설명·키워드) | ⬜ **남음** | 현기님 |
+| 7 | App Privacy 선언 | ⬜ **남음** (7절 표 그대로) | 현기님 |
+| 8 | 수출 규정(암호화) 선언 | ⬜ **남음** — '표준 암호화' 선택 | 현기님 |
+| 9 | 제출 시 **빌드 8** 선택 | ⬜ **남음** — 5·6·7 도 목록에 뜬다 | 현기님 |
+| — | 회원 탈퇴 · 방침/약관 URL · 번들 ID(`com.hgmr.app`) | ✅ 완료 | — |
 
 ---
 
@@ -33,7 +37,14 @@ xcrun --sdk iphoneos --show-sdk-version   # 26.x 이상
 
 ---
 
-## 2. Sign in with Apple — 이것이 제출을 막는 진짜 요건
+## 2. Sign in with Apple — ✅ 구현 완료 (아래는 배경 기록)
+
+> **2026-08-27 현재 구현되어 있습니다.** 빌드 스크립트(`build_release.sh`)가 IPA에서
+> `com.apple.developer.applesignin` 엔타이틀먼트를 매번 검증하고, 없으면 `STATUS=NEEDS_RESIGN`
+> 으로 멈춥니다 — 그때는 `zsh resign_ios.sh` 로 복원한 뒤 업로드합니다.
+> 아래 절은 "왜 필요했는가"의 기록으로 남깁니다.
+
+## 2-1. (기록) Sign in with Apple — 이것이 제출을 막는 진짜 요건이었다
 
 ### 왜 필요한가
 
@@ -198,10 +209,12 @@ Apple의 정의:
 
 ## 6. 스크린샷
 
-- 필수: **6.9인치 1320×2868** 한 세트 (Apple이 다른 크기로 자동 축소)
-- 목록·캡션 7종은 `AppStore_메타데이터.md`에 준비됨
-- 합성은 **`hgmr-screenshot-tool.html`** 사용 — 촬영본을 넣으면 캡션·배경을 입혀 규격대로 내보냅니다
-- 촬영: 시뮬레이터 `Cmd+S`, 상태바 9:41
+✅ **촬영 완료 (2026-08-27)** — `store_assets/screenshots/6.9`(1320×2868), `/6.5`(1242×2688) 각 5장.
+업로드만 남았습니다. 필수는 6.9" 한 세트이고 나머지 크기는 Apple이 자동 축소합니다.
+
+- 촬영은 **시뮬레이터 수동 캡처가 아니라 스크립트**입니다. 절차와 함정은 `AppStore_메타데이터.md` 「스크린샷」절 참고
+- 캡션 5종도 같은 문서에 있습니다 (브랜드 용어 규칙 적용 완료)
+- 「사람들의 답」 통계 컷은 **의도적으로 보류** — 출시 전이라 어떤 단어든 한 답이 100%로 뜹니다. 분포를 지어내지 않습니다
 - ⚠️ **캡션에 앱에 없는 기능을 적으면 거부 사유**입니다. 문구를 바꾸실 때 확인하세요
 
 ---
@@ -228,10 +241,19 @@ Firebase Analytics를 붙였으므로 **이전에 신고한 것보다 항목이 
 
 ## 8. 제출 직전 마지막 확인
 
-- [ ] `npm run build && firebase deploy --only hosting` — 웹과 앱 번들 동기화
-- [ ] `npx cap sync ios`
-- [ ] Xcode → Product → Archive → Distribute → App Store Connect
-- [ ] 빌드 번호(`CURRENT_PROJECT_VERSION`)를 올렸는지 — 같은 번호는 재업로드 불가
+빌드는 화면 없는 맥에서 스크립트로 돕니다 (Xcode GUI 안 씁니다):
+
+```bash
+# 1) 버전 올리기 — build_release.sh 의 BUILD, android/app/build.gradle 의 versionCode,
+#    ios/App/App.xcodeproj/project.pbxproj 의 CURRENT_PROJECT_VERSION(2군데) 을 «전부» 같은 값으로
+zsh build_release.sh                 # → _build<N>.log, dist/hgmr-1.0-<N>.aab / .ipa
+zsh resign_ios.sh                    # STATUS=NEEDS_RESIGN 이 뜨면 (applesignin 복원)
+xcrun altool --upload-app -f dist/hgmr-1.0-<N>.ipa -t ios \
+  -u hykim0080@gmail.com -p @keychain:hgmr-upload
+```
+
+- [ ] `npm run build && firebase deploy --only hosting` — 웹과 앱 번들 동기화 (빌드 스크립트가 먼저 돌려 줍니다)
+- [ ] 빌드 번호를 올렸는지 — 같은 번호는 재업로드 불가
 - [ ] TestFlight에서 **실기기로 한 번 통과 플레이** (로그인 3종 · 배치고사 · 세션 완료 · 탈퇴)
 - [ ] 심사 제출 시 Review Notes 입력 (아래)
 
@@ -259,7 +281,7 @@ icon at the top right of the quiz screen.
 ### 심사 결과 대응
 
 - 거부 사유는 **Resolution Center**에 옵니다. 대부분 문구 수정이나 설정 하나로 끝납니다
-- **4.8(로그인) 거부가 나오면** Sign in with Apple 미구현이 원인입니다. 2절 참고
+- **4.8(로그인) 거부가 나오면** Sign in with Apple 엔타이틀먼트가 빠진 빌드입니다 — 2절의 재서명 절차 참고
 - 첫 심사는 보통 24~48시간, 길면 일주일
 
 ---
@@ -269,3 +291,14 @@ icon at the top right of the quiz screen.
 - Play 스토어 → `docs/PlayStore_등록문.md` (⚠️ 개인 개발자 계정이면 **테스터 12명 × 14일** 요건이 별도로 있습니다)
 - 스토어 문구 원본 → `AppStore_메타데이터.md`
 - 전체 진행 상황 → `docs/진행_현황.md`
+
+---
+
+## 10. 심사 중에 알아 둘 것 — 단어 데이터는 원격으로 바뀐다
+
+`words.json` 은 앱에 번들되지만, 실행 시 `https://hgmr.co.kr/words.json` 을 받아 다음 실행부터 씁니다.
+**문항 수정에 심사가 필요 없다**는 뜻이고, 동시에 **심사라는 안전망이 없는 경로**라는 뜻이기도 합니다.
+
+- 앱 설명의 단어 수는 정확한 수 대신 **하한("1,380단어 이상")** 으로 적었습니다 — 설명은 바꾸려면 심사가 필요한데 데이터는 그렇지 않기 때문입니다
+- 심사 기간에는 `words.json` 배포를 피하는 편이 안전합니다. 심사자가 보는 것과 저장소가 어긋날 이유를 만들지 않습니다
+- 배포 전 `npm run check-words` 통과는 필수입니다

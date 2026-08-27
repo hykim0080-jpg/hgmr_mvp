@@ -33,7 +33,10 @@ const db = getFirestore();
     await ref.set({
         learnedWords,
         totalLearnedWords: Object.keys(learnedWords).length,
+        // 평균 정답률의 분자·분모는 «짝으로» 심는다. 분자만 심으면 화면이 '-' 로 뜨고
+        // (분모 0), 스토어 컷의 「평균 정답률」 칸이 비어 보인다.
         totalCorrectFirstTry: 71,
+        totalAttempted: 96,
         streak: 9, exp: 2480, blueShards: 24,
         nickname: '한글마루'
     }, { merge: true });
