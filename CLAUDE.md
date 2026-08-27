@@ -122,6 +122,8 @@ node tests/clean_test_stats.js --apply           # ⚠️ 테스트가 남긴 �
 
 ## ⚠️ 현재 주의사항
 
+- 🚧 **심사 중 배포 동결 (2026-08-27 iOS 빌드 9 제출)** — `words.json` 을 배포하지 말 것. 앱이 실행할 때마다 원격 단어를 받아 가므로, **심사자가 보는 내용과 제출한 빌드가 어긋날 수 있다.** 단어 수정은 쌓아 두었다가 심사 결과가 난 뒤 한 번에 내보낸다. `index.html` 변경(웹 배포)도 같은 이유로 미룰 것. **심사 결과가 나오면 이 항목을 지운다.**
+
 - ✅ **번들 ID 통일 완료** (2026-07-30) — iOS·Android·Capacitor 모두 **`com.hgmr.app`**. Firebase iOS 앱도 이 번들 ID로 재등록했고 구글 로그인 검증 완료. 구 `com.hyk.hgmr` iOS 앱은 Firebase 콘솔에서 정리 예정
 - **'❄️ 빙하 키보드'는 비활성** — `usesGlacierKeyboard()`가 `false` 하드코딩. 프로필 설정 시트의 선택 섹션은 **부모 div에 `display:none`이 걸려 이미 숨겨져 있음**(index.html 약 1882줄). 버튼 마크업만 보고 "노출 중"으로 오판하지 말 것. 재활성화하려면 그 `display:none` 제거 + 함수 원복(바로 윗줄 주석)
 - ✅ **`node_modules` git 추적 해제 완료** (2026-08-25 확인 — `git ls-files node_modules` 0건)
