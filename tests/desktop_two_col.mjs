@@ -29,6 +29,9 @@ for (const C of CASES) {
   await sleep(1300);
   await click('#anon-login-btn');
   for (let t = 0; t < 25; t++) { await sleep(1000); if (await vis('#placement-intro-modal') || await vis('#start-study-btn')) break; }
+  // 배치고사 안내는 홈 진입 뒤 «지연 표시»라 아직 안 떴을 수 있다.
+  // 안 떴으면 시작 버튼을 눌러 관문으로 연다 — 어느 쪽이든 배치고사로 들어간다.
+  if (!await vis('#placement-intro-modal')) { await click('#start-study-btn'); await sleep(1200); }
   if (await vis('#placement-intro-modal')) { await click('#placement-start-btn'); await sleep(2500); }
   for (let i = 0; i < 40; i++) {
     if (await vis('#placement-result-modal')) break;

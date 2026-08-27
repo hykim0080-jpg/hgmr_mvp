@@ -286,6 +286,55 @@
             }
         }
 
+        /* 🏔 넓은 화면 풍경 — 좁은 화면에서는 존재하지 않는 것처럼 둔다 */
+        #home-scene-wrap {
+            display: none;
+            position: relative;
+            width: 100%;
+            height: 316px;
+            padding: 0;
+            border: 1px solid var(--info-border);
+            border-radius: 28px;
+            overflow: hidden;
+            background: var(--info-soft);
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+            cursor: pointer;
+        }
+        #home-scene-overlay {
+            position: absolute;
+            left: 30px;
+            top: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            text-align: left;
+            pointer-events: none;
+        }
+        #home-scene-label { font-size: 13px; font-weight: 800; color: #0369a1; }
+        #home-scene-value {
+            font-size: 46px; font-weight: 900; color: #047857;
+            line-height: 1.1; letter-spacing: -1px; font-variant-numeric: tabular-nums;
+        }
+        #home-scene-tier {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: var(--surface); border: 1px solid var(--mint-border);
+            border-radius: 999px; padding: 4px 12px;
+            font-size: 13px; font-weight: 800; color: #047857; margin-top: 4px;
+        }
+        #home-scene-left { font-size: 13px; font-weight: 600; color: #0369a1; margin-top: 7px; }
+        #home-scene-hint {
+            position: absolute; right: 16px; bottom: 14px;
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(15, 23, 42, 0.42); color: #ffffff;
+            border-radius: 999px; padding: 4px 11px;
+            font-size: 11.5px; font-weight: 700; pointer-events: none;
+        }
+        #home-scene-wrap:active #home-scene { transform: scale(0.99); }
+
+        /* ⚠️ 이 기본 규칙은 반드시 아래 미디어쿼리 «앞»에 있어야 한다 —
+           특정도가 같아서(둘 다 0,1,0) 뒤에 오는 쪽이 이긴다. 뒤에 두면 display:none 이 이겨 풍경이 안 뜬다. */
+
         /* ══════════════════════════════════════════════════════════════
            🖥 넓은 화면(마우스) — 2열. 왼쪽 문제, 오른쪽 통계·유의어.
            좁은 창·태블릿·폰은 이 블록에 들어오지 않으므로 지금 모습 그대로다.
@@ -338,7 +387,40 @@
             .meaning  { font-size: 15.5px; }
             /* 신고 깃발은 quiz-box(격자) 기준이 아니라 왼쪽 카드 기준으로 */
             #quiz-main { position: relative; }
+
+            /* ── 🏔 홈: 창을 가로지르는 풍경 한 장 + 그 아래 2열 ── */
+            #home-box {
+                max-width: 1180px !important;
+                /* ⚠️ display 에 !important 금지 — 인라인 display:none 으로 숨겨야 한다 (quiz-box 와 같은 함정) */
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                column-gap: 28px;
+                row-gap: 16px;
+                align-items: start;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                overflow: visible !important;
+            }
+            #home-identity   { grid-column: 1 / -1; }
+            #home-scene-wrap { grid-column: 1 / -1; display: block; }
+            #home-mountain,
+            #home-altitude-hero { display: none !important; }   /* 좁은 화면용 크롭·히어로는 풍경이 대신한다 */
+            #home-action, #home-story-wrap, #open-dev-panel-btn { grid-column: 1; }
+            #home-stats {
+                grid-column: 2;
+                grid-row: span 3;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 24px;
+                box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+                padding: 22px 24px;
+            }
+            #start-study-btn { height: 82px; font-size: 21px; }
         }
+
+
 
         #login-screen,
         #setup-screen {
@@ -2951,6 +3033,68 @@
                     </button>
                 </div>
 
+                <!-- 🏔 넓은 화면 전용 풍경 — 왼쪽 꼬리섬(출발점), 오른쪽 하랑이 산.
+                     좁은 화면에서는 감추고 위의 크롭(#home-mountain)이 그대로 담당한다.
+                     산은 «같은 defs(#mt-core)»를 가져다 쓰므로 모달·크롭과 한 몸이다. -->
+                <button id="home-scene-wrap" title="어휘 고도 안내" aria-label="어휘 고도 안내">
+                    <svg id="home-scene" viewBox="0 0 1200 320" preserveAspectRatio="xMidYMid slice"
+                         style="width: 100%; height: 100%; display: block;" aria-label="꼬리섬에서 하랑이 산까지">
+                        <defs>
+                            <linearGradient id="sc-sky" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="var(--info-soft)"></stop>
+                                <stop offset="100%" stop-color="#e0f2fe"></stop>
+                            </linearGradient>
+                            <linearGradient id="sc-sea" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#bae6fd"></stop>
+                                <stop offset="100%" stop-color="#7dd3fc"></stop>
+                            </linearGradient>
+                            <linearGradient id="sc-isle" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#34d399"></stop>
+                                <stop offset="100%" stop-color="#047857"></stop>
+                            </linearGradient>
+                        </defs>
+                        <rect x="0" y="0" width="1200" height="320" fill="url(#sc-sky)"></rect>
+                        <circle cx="1108" cy="52" r="17" fill="#fcd34d"></circle>
+                        <circle cx="1108" cy="52" r="23" fill="#fcd34d" opacity="0.3"></circle>
+
+                        <!-- 산 — 크롭·모달과 같은 좌표계(0m=y200, 1,100m=y30)를 그대로 확대해 놓는다 -->
+                        <g id="home-scene-mtn" transform="translate(560,-20) scale(1.35)">
+                            <use href="#mt-core"></use>
+                            <use href="#mt-sky-ladder"></use>
+                            <line id="home-scene-line" x1="0" y1="90" x2="340" y2="90"
+                                  stroke="#047857" stroke-width="1.4" stroke-dasharray="5 5" opacity="0.75"></line>
+                            <ellipse id="home-scene-shadow" cx="96" cy="90" rx="14" ry="3.2" fill="#047857" opacity="0.22"></ellipse>
+                            <svg id="home-scene-harang" x="70" y="38" width="56" height="56" viewBox="10 10 300 300" style="overflow: visible;" aria-hidden="true"><use id="home-scene-harang-use" href="#fr-roll-a"></use></svg>
+                        </g>
+
+                        <!-- 바다 -->
+                        <path d="M0 246 C 160 238, 340 254, 520 250 C 680 246, 800 256, 1200 252 L1200 320 L0 320 Z" fill="url(#sc-sea)"></path>
+
+                        <!-- 🦭 꼬리섬 — 물범 꼬리가 물 밖으로 솟은 모양 -->
+                        <g transform="translate(232, 248)">
+                            <path d="M0 4 C -6 -26, -26 -48, -58 -62 C -86 -74, -104 -66, -96 -50 C -88 -34, -56 -22, -26 -12 C -50 -18, -84 -18, -100 -6 C -112 4, -96 10, -70 10 L 70 10 C 96 10, 112 4, 100 -6 C 84 -18, 50 -18, 26 -12 C 56 -22, 88 -34, 96 -50 C 104 -66, 86 -74, 58 -62 C 26 -48, 6 -26, 0 4 Z" fill="url(#sc-isle)"></path>
+                            <path d="M-30 -6 q30 -10 60 0" fill="none" stroke="#a7f3d0" stroke-width="2.5" stroke-linecap="round" opacity="0.8"></path>
+                            <ellipse cx="0" cy="14" rx="116" ry="9" fill="#0284c7" opacity="0.22"></ellipse>
+                        </g>
+                        <text id="home-scene-isle-label" x="232" y="296" text-anchor="middle" font-size="13" font-weight="800" fill="#0369a1" opacity="0.9">꼬리섬 · 여기서 시작했어요</text>
+
+                        <!-- 측정 전에는 하랑이가 여기서 산을 올려다본다 -->
+                        <svg id="home-scene-lookup" x="330" y="176" width="96" height="96" viewBox="10 10 300 300" style="overflow: visible; display: none;" aria-hidden="true"><use href="#fr-lookup"></use></svg>
+
+                        <path d="M470 274 q22 -7 44 0" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.5"></path>
+                        <path d="M640 292 q22 -7 44 0" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.42"></path>
+                        <path d="M1020 286 q22 -7 44 0" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.42"></path>
+                    </svg>
+
+                    <span id="home-scene-overlay">
+                        <span id="home-scene-label">내 어휘 고도</span>
+                        <span id="home-scene-value">해발 <span id="home-scene-m">???</span>m</span>
+                        <span id="home-scene-tier">측정 전</span>
+                        <span id="home-scene-left"></span>
+                    </span>
+                    <span id="home-scene-hint" aria-hidden="true">ⓘ 자세히</span>
+                </button>
+
                 <!-- ④ 오늘의 학습 -->
                 <div id="home-action">
                     <button id="start-study-btn"
@@ -4860,6 +5004,8 @@
                 // 올려다볼 여백(=아직 남은 산)이 항상 보이게 한다.
                 const top = Math.max(-44, Math.min(122, y - 66));
                 document.getElementById('home-mtn-svg').setAttribute('viewBox', `0 ${top} 340 118`);
+                // 🏔 넓은 화면 풍경 — 산 좌표계가 같으므로 y·ex 를 그대로 쓴다 (크롭만 없다)
+                paintHomeScene(true, alt, tier, y, ex);
             } else {
                 altitudeEl.style.display = 'none'; // 측정 전에는 표시하지 않음 (배치고사 안내가 담당)
 
@@ -4884,6 +5030,7 @@
                 seal.setAttribute('height', 104);
                 document.getElementById('home-mtn-harang-use').setAttribute('href', '#fr-lookup');
                 document.getElementById('home-mtn-svg').setAttribute('viewBox', '0 186 340 118');
+                paintHomeScene(false);
             }
             // 측정 전에는 고도 자리를 비운다 — A·B안의 히어로가 빈 채로 뜨지 않도록
             document.getElementById('home-box').classList.toggle('home-unmeasured', !measured);
@@ -4945,7 +5092,9 @@
             applyPanePref();      // 📊 통계창 첫 화면
             refreshStoryChip();   // 📖 오늘의 낱말 이야기
 
-            document.getElementById('home-box').style.display = 'flex';
+            // ⚠️ 'flex' 를 박으면 넓은 화면의 2열 격자를 덮어쓴다 — quiz-box 와 같은 함정.
+            //    인라인을 «비워서» CSS 가 고르게 한다.
+            document.getElementById('home-box').style.display = '';
 
             updateShardCount();
 
@@ -5062,8 +5211,15 @@
         let placementBandT = [1200, 1450]; // 난이도 3분위 경계 (시작 시 풀에서 실계산)
         let placementBandsSeen = new Set();
 
+        let _introRetries = 0;
         function maybeShowPlacementIntro() {
-            if (placementDone || placementPromptShown || !userDocRef) return;
+            if (placementDone || placementPromptShown) return;
+            // ⚠️ 홈 진입 400ms 뒤 «한 번만» 시도하던 탓에, 로그인 문서가 아직 준비되지 않으면
+            //    첫 사용자가 배치고사 안내를 못 보고 그냥 홈에 남았다. 준비될 때까지 몇 번 다시 본다.
+            if (!userDocRef) {
+                if (_introRetries++ < 6) setTimeout(maybeShowPlacementIntro, 600);
+                return;
+            }
             if (Object.keys(learnedWords || {}).length > 0) return; // 학습 이력 있으면 대상 아님
             placementPromptShown = true;
             document.getElementById('placement-intro-modal').style.display = 'flex';
@@ -5700,6 +5856,46 @@
                 tid = setTimeout(fire, 900);
             } else {
                 tid = setTimeout(fire, 350);
+            }
+        }
+
+        // 🏔 넓은 화면 풍경 갱신. 산은 크롭·모달과 «같은 좌표계»(0m=y200, 1,100m=y30)를
+        //    그대로 확대해 놓았을 뿐이라, 위에서 이미 구한 y·ex 를 그대로 쓴다.
+        function paintHomeScene(measured, alt, tier, y, ex) {
+            const svg = document.getElementById('home-scene');
+            if (!svg) return;
+            const $ = id => document.getElementById(id);
+            const lookup = $('home-scene-lookup');
+            const line = $('home-scene-line'), shadow = $('home-scene-shadow'), seal = $('home-scene-harang');
+            if (measured) {
+                lookup.style.display = 'none';
+                line.style.display = ''; shadow.style.display = ''; seal.style.display = '';
+                line.setAttribute('y1', y); line.setAttribute('y2', y);
+                shadow.setAttribute('cx', ex); shadow.setAttribute('cy', y);
+                seal.setAttribute('x', ex - 28); seal.setAttribute('y', y - 54);
+                const use = $('home-scene-harang-use');
+                if (use && rollPoseThisSession) use.setAttribute('href', '#' + rollPoseThisSession);
+                $('home-scene-m').textContent = alt.toLocaleString();
+                $('home-scene-value').style.color = '#047857';
+                const t = $('home-scene-tier');
+                t.innerHTML = `${uiIcon(tier.ic, '12px')} ${tier.name}`;
+                t.style.borderColor = 'var(--mint-border)';
+                t.style.color = '#047857';
+                const left = Math.max(0, 1100 - alt);
+                $('home-scene-left').textContent = left > 0 ? `마루까지 ${left.toLocaleString()}m 남았어요` : '마루에 닿았어요';
+                $('home-scene-isle-label').textContent = '꼬리섬 · 여기서 시작했어요';
+            } else {
+                // 🌊 아직 재기 전 — 하랑이는 꼬리섬 곁에서 산을 올려다본다
+                lookup.style.display = '';
+                line.style.display = 'none'; shadow.style.display = 'none'; seal.style.display = 'none';
+                $('home-scene-m').textContent = '???';
+                $('home-scene-value').style.color = 'var(--text-muted)';
+                const t = $('home-scene-tier');
+                t.textContent = '측정 전';
+                t.style.borderColor = 'var(--info-border)';
+                t.style.color = '#0369a1';
+                $('home-scene-left').textContent = '실력을 알아보면 여기서 산이 시작돼요';
+                $('home-scene-isle-label').textContent = '꼬리섬 · 출발점';
             }
         }
 
@@ -7970,6 +8166,7 @@
         document.getElementById('home-altitude-title').addEventListener('click', openAltitudeGuide);
         document.getElementById('home-altitude-hero').addEventListener('click', openAltitudeGuide);
         document.getElementById('home-mtn-btn').addEventListener('click', openAltitudeGuide);
+        document.getElementById('home-scene-wrap').addEventListener('click', openAltitudeGuide);
         document.getElementById('alt-guide-close-btn').addEventListener('click', () => closeHomeModal('altitude-guide-modal'));
         document.getElementById('alt-guide-stats-btn').addEventListener('click', () => {
             closeHomeModal('altitude-guide-modal');

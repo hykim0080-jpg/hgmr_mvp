@@ -149,7 +149,10 @@ node tests/clean_test_stats.js --apply           # ⚠️ 테스트가 남긴 �
   - ⚠️ **`#quiz-box` 의 `display` 에 `!important` 를 붙이면 안 된다.** 앱은 인라인 `style.display='none'` 으로 화면을 숨기는데, `display: grid !important` 가 그걸 이겨서 **홈 화면에서도 퀴즈 상자가 안 사라졌다.** 보일 때는 인라인을 `''` 로 «비워» CSS 가 고르게 한다(좁으면 flex, 넓으면 grid) — 그래서 숨김 여부를 볼 때도 `style.display` 가 아니라 `getComputedStyle(...).display` 를 봐야 한다.
   - ⚠️ CSS 미디어쿼리와 JS `isWideDesktop()` 은 **같은 조건 문자열**(`WIDE_MQ`)을 쓴다. 한쪽만 고치면 레이아웃은 2열인데 오른쪽이 비거나, 패널만 뜨고 자리가 없다.
   - ⚠️ **배치고사는 조각도 콤보도 주지 않는다** — `comboCount`·`sessionBlueShards` 가 늘 0이라, 오른쪽 칸에 학습용 숫자를 그대로 쓰면 죽은 칸이 된다. 배치고사에는 `placementOuts` 로 센 **한 번에 맞힘 / 놓친 문항**을 쓴다. 추정 고도는 «일부러» 안 보여준다 — 결과는 마지막에 한 번에 알린다
-  - 회귀 테스트: `node tests/desktop_two_col.mjs` (넓은 화면 2열 · 좁은 창 1열 · 홈에서 퀴즈 숨김) · `node tests/desktop_side_panel.mjs` (오른쪽 칸이 화면에 맞는 숫자를 쓰는지)
+  - **홈도 같은 규칙으로 2열이다** — 창을 가로지르는 풍경(`#home-scene-wrap`: 왼쪽 꼬리섬, 오른쪽 하랑이 산) 아래에 「오늘 할 일」(왼쪽)과 「학습 분석」(오른쪽). 좁은 화면은 기존 크롭(`#home-mountain`) 1열 그대로다. 풍경의 산은 `#mt-core` 를 그대로 `<use>` 하고 **좌표계도 같아서**(0m=y200, 1,100m=y30) 크롭이 쓰는 `y`·`ex` 를 그대로 쓴다
+  - ⚠️ **CSS 소스 순서 함정** — `#home-scene-wrap` 의 기본 `display:none` 은 반드시 넓은 화면 미디어쿼리 «앞»에 둔다. 특정도가 같아서(둘 다 0,1,0) 뒤에 두면 `none` 이 이겨 풍경이 안 뜬다
+  - ⚠️ `#home-box` 도 `display` 인라인을 `''` 로 비운다 (`'flex'` 를 박으면 격자를 덮어쓴다 — quiz-box 와 같은 함정)
+  - 회귀 테스트: `node tests/desktop_home.mjs` · `node tests/desktop_two_col.mjs` (넓은 화면 2열 · 좁은 창 1열 · 홈에서 퀴즈 숨김) · `node tests/desktop_side_panel.mjs` (오른쪽 칸이 화면에 맞는 숫자를 쓰는지)
 - 회귀 테스트: `node tests/stats_fit.mjs`(막대 5줄이 스크롤 없이 보이나) · `node tests/stats_cover.mjs`(문장·뜻풀이가 안 가리나, 긴 뜻풀이 강제 포함). 둘 다 운영 `word_stats` 를 건드리므로 실행 후 `node tests/clean_test_stats.js --apply`.
 - **통계창은 두 탭이다** — 「사람들의 답」(응답 분포)과 「유의어 · 예문」. 뒤쪽은 응답 데이터와 무관하게 항상 채워진다. 유의어도 힌트도 없는 단어가 40%라, 그 경우엔 *"이 자리에는 ○○ 말고 대신 쓸 만한 말이 거의 없어요"* 를 보여준다 — 대체어가 없다는 것도 정보다. **처음 보이는 탭은 유의어·예문** 쪽이다: 내 답 하나로 「정답 100%」를 그리는 순간을 만들지 않기 위해서다
 - **화면에 실제로 몇 줄이 보이는지 재려면 줄을 만들어서 재라** — 갓 만든 테스트 계정은 응답 분포가 1줄뿐이라 '보이는 줄 = 전체 줄'이 언제나 참이 된다. `tests/stats_fit.mjs`는 막대 행을 5줄로 복제한 뒤 스크롤 영역 안에 몇 개가 들어오는지 잰다
