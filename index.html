@@ -523,14 +523,19 @@
             /* 탭 + 제목 + 표본 줄 + 표 머리 + 막대 두어 줄 + 다음 버튼이 한 화면에 들어가야 한다.
                키보드 자리보다 커져도 괜찮다 — 정답이 공개된 뒤라 위쪽은 어차피 비어 있다.
                다만 작은 기기에서 문장까지 덮지 않도록 뷰포트 58%로 상한을 둔다. */
-            height: min(58vh, max(var(--kb-height, 330px), 380px));
+            /* ⚠️ height 는 var(--kb-height) 를 쓴다 — 값이 한 번이라도 잘못 들어가면(NaNpx 등)
+               이 선언 전체가 무효가 돼 height:auto 로 떨어진다 — 패널이 내용 높이만큼만 뜨는 버그.
+               그래서 var 를 쓰지 않는 min-height 를 안전망으로 함께 둔다. */
+            height: min(52vh, max(var(--kb-height, 330px), 440px));
+            min-height: min(52vh, 440px);
             margin: 0 !important;
-            padding: 18px 18px 0 !important;
+            padding: 12px 16px 0 !important;
             box-sizing: border-box;
-            border: none;
-            border-top: 1px solid var(--border);
-            border-radius: 26px 26px 0 0;
-            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+            /* 인라인 style 의 border/radius/shadow 를 이겨야 '바닥에서 올라온 시트'로 보인다 */
+            border: none !important;
+            border-top: 1px solid var(--border) !important;
+            border-radius: 26px 26px 0 0 !important;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1) !important;
             z-index: 1001;   /* 키보드(1000)보다 위 — 키보드 하강과 통계 등장이 겹쳐도 통계가 자연스럽게 덮음 */
             display: flex;
             flex-direction: column;
@@ -5235,6 +5240,7 @@
 
             const statsBox = document.getElementById('inline-stats-container');
             statsBox.style.display = 'none';
+            statsBox.style.height = ''; statsBox.style.minHeight = '';   // 뜻풀이 회피로 넣었던 인라인 높이 해제
             statsBox.classList.remove('kb-slot', 'slid-in', 'anim-done');
             document.getElementById('quiz-box').style.display = 'block';
             showHarangCompanion();
@@ -5323,6 +5329,7 @@
                 // 통계창(하단 고정 kb-slot)·키보드 잔재 정리 — result-box를 덮어 축하 화면이 가려지는 버그 방지
                 const _statsBox = document.getElementById('inline-stats-container');
                 _statsBox.style.display = 'none';
+                _statsBox.style.height = ''; _statsBox.style.minHeight = '';
                 _statsBox.classList.remove('kb-slot', 'slid-in', 'anim-done');
                 document.getElementById('custom-keyboard').style.display = 'none';
                 document.getElementById('quiz-box').classList.remove('keyboard-active');
@@ -5631,9 +5638,9 @@
 
             // 두 패널을 탭으로 감싼다. 서버 통계가 오기 전에는 유의어·예문을 먼저 보여준다 —
             // 내 답 하나로 「정답 100%」를 그리는 순간을 만들지 않기 위해서다.
-            const tabBtn = (id, label, on) => `<button type="button" data-pane="${id}" style="flex:1; border:none; cursor:pointer; padding:8px 6px; border-radius:9px; font-size:12.5px; font-weight:800; background:${on ? 'var(--surface)' : 'transparent'}; color:${on ? 'var(--text-primary)' : 'var(--text-muted)'}; box-shadow:${on ? '0 1px 3px rgba(0,0,0,0.10)' : 'none'};">${label}</button>`;
+            const tabBtn = (id, label, on) => `<button type="button" data-pane="${id}" style="flex:1; border:none; cursor:pointer; padding:7px 6px; border-radius:9px; font-size:12.5px; font-weight:800; background:${on ? 'var(--surface)' : 'transparent'}; color:${on ? 'var(--text-primary)' : 'var(--text-muted)'}; box-shadow:${on ? '0 1px 3px rgba(0,0,0,0.10)' : 'none'};">${label}</button>`;
             const wrapPanes = (active, statsHtml, learnHtml) => `
-                <div style="display:flex; gap:4px; background:var(--border); border-radius:11px; padding:3px; margin-bottom:16px;">
+                <div style="display:flex; gap:4px; background:var(--border); border-radius:11px; padding:3px; margin-bottom:10px;">
                     ${tabBtn('stats', '사람들의 답', active === 'stats')}
                     ${tabBtn('learn', '유의어 · 예문', active === 'learn')}
                 </div>
@@ -5675,7 +5682,7 @@
                             사람들은 이 문장을 어떻게 완성했을까요?
                         </div>
                         <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 13px;">지금까지 ${total.toLocaleString()}명이 답했어요</div>
-                        <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); font-weight: bold; border-bottom: 2px solid var(--border-strong); padding-bottom: 7px; margin-bottom: 11px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); font-weight: bold; border-bottom: 2px solid var(--border-strong); padding-bottom: 6px; margin-bottom: 9px;">
                             <span style="margin-left: 5px;">표현</span>
                             <span style="margin-right: 5px;">비율</span>
                         </div>`;
@@ -5693,7 +5700,7 @@
                         barColor = '#94a3b8'; textColor = '#475569';
                     }
                     html += `
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 11px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px;">
                                 <div style="width: 140px; display: flex; align-items: center;">
                                     <span style="font-size: 15px; font-weight: bold; color: ${textColor}; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(submittedWord)}</span>
                                     ${badgeHtml}
@@ -5750,6 +5757,24 @@
                     requestAnimationFrame(fitQuizToKeyboard);
                     requestAnimationFrame(() => {
                         requestAnimationFrame(() => statsContainer.classList.add('slid-in'));
+                    });
+                    // 🛟 뜻풀이가 패널에 잘리면 그만큼만 패널을 낮춘다.
+                    //    (긴 뜻풀이·큰 글씨 설정에서 CSS 상한만으로는 못 막는다)
+                    requestAnimationFrame(() => {
+                        const mean = document.getElementById('meaning-text');
+                        if (!mean) return;
+                        const need = mean.getBoundingClientRect().bottom + 10;
+                        // ⚠️ 이 시점의 패널은 아직 등장 연출 중(translateY)이라 rect.top 이 최종 위치가 아니다.
+                        //    변형에 영향받지 않는 offsetHeight 로 '내려앉을 자리'를 계산한다.
+                        const top = window.innerHeight - statsContainer.offsetHeight;
+                        if (need > top) {
+                            const h = Math.max(340, window.innerHeight - need);
+                            statsContainer.style.height = h + 'px';
+                            statsContainer.style.minHeight = h + 'px';
+                        } else {
+                            statsContainer.style.height = '';
+                            statsContainer.style.minHeight = '';
+                        }
                     });
                     // 등장 연출(0.34s)이 완전히 끝난 뒤 하랑이 애니메이션 재개 + 레이어 승격 해제
                     setTimeout(() => {

@@ -32,38 +32,24 @@ await p.waitForSelector('#quiz-box', { visible: true, timeout: 20000 });
 
 const rows = [];
 for (let i = 0; i < 4; i++) {
-  const w = await cur(); await ans(w ? w.target : '아무말아무말'); await sleep(2600);
+  const w = await cur();
+  // i>=2 는 '아주 긴 뜻풀이' 상황을 강제해 회피 로직(패널 낮추기)이 실제로 도는지 본다
+  if (i >= 2) await p.evaluate(() => { document.getElementById('meaning-text').textContent =
+      '아주 길고 긴 뜻풀이가 세 줄을 넘어가는 경우를 흉내 내기 위한 문장. 이렇게 길면 통계 패널이 그대로 올라올 때 뜻풀이 아랫부분이 잘린다. 그런 상황을 강제로 만든다.'; });
+  await ans(w ? w.target : '아무말아무말'); await sleep(2600);
   if (await vis('#inline-stats-container')) {
     const r = await p.evaluate(() => {
-      const c = document.getElementById('inline-stats-container');
-      const sc = c.querySelector('.stats-scroll');
-      const pane = c.querySelector('[data-pane-body="stats"]');
-      // 막대 행 = 표현 + 막대 + 비율(%) 이 든 flex 줄. 표 머리('표현/비율')는 % 가 없어 제외된다.
-      const bars = [...pane.querySelectorAll(':scope > div')].filter(d =>
-          d.style.display === 'flex' && d.style.alignItems === 'center' && /\d+%/.test(d.textContent));
-      // 갓 만든 계정이라 실제 분포는 대개 1줄뿐이다. 5줄일 때의 기하를 보려고 행을 복제한다.
-      //  (복제 없이 '보이는 줄 = 전체 줄' 만 보면 1줄짜리에서 늘 통과해 버린다)
-      if (bars.length) { for (let i = bars.length; i < 5; i++) bars[0].parentNode.insertBefore(bars[0].cloneNode(true), bars[0].nextSibling); }
-      const all = [...pane.querySelectorAll(':scope > div')].filter(d =>
-          d.style.display === 'flex' && d.style.alignItems === 'center' && /\d+%/.test(d.textContent));
-      const vw = sc.getBoundingClientRect();
-      const 보이는줄 = all.filter(el => { const r = el.getBoundingClientRect(); return r.top >= vw.top - 1 && r.bottom <= vw.bottom + 1; }).length;
-      return { 패널: Math.round(c.getBoundingClientRect().height), 스크롤영역: Math.round(vw.height),
-               실제줄: bars.length, 복제후줄: all.length, 보이는줄, 스크롤필요: sc.scrollHeight - Math.round(vw.height) };
+      const top = document.getElementById('inline-stats-container').getBoundingClientRect().top;
+      const box = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect(); return Math.round(b.bottom); };
+      return { 패널상단: Math.round(top), 패널높이: Math.round(document.getElementById('inline-stats-container').offsetHeight), 문장바닥: box('#sentence-text'), 뜻풀이바닥: box('#meaning-text') , vh: window.innerHeight };
     });
-    rows.push(r);
-    console.log(JSON.stringify(r));
+    rows.push(r); console.log(JSON.stringify(r));
   }
   for (let k = 0; k < 3 && await vis('#next-btn'); k++) { await click('#next-btn'); await sleep(700); }
 }
-console.log('');
-const 막대있음 = rows.filter(r => r.복제후줄 >= 5);
-console.log(`5줄로 만들어 잰 문항 ${막대있음.length}건:`, 막대있음.length > 0 ? '✅' : '❌ (아래 판정 무의미)');
-console.log('패널 460px 이상:', rows.length > 0 && rows.every(r => r.패널 >= 460) ? '✅' : '❌');
-if (막대있음.length) {
-  const 최소 = Math.min(...막대있음.map(r => r.보이는줄));
-  console.log(`5줄일 때 스크롤 없이 보이는 줄: 최소 ${최소}줄`);
-  console.log('두 줄 이상 보임:', 최소 >= 2 ? '✅' : '❌');
-  console.log('세 줄 이상 보임:', 최소 >= 3 ? '✅' : '△ (스크롤 필요)');
-}
+const ok = rows.length > 0 && rows.every(r => r.문장바닥 !== null && r.문장바닥 <= r.패널상단 - 4);
+console.log('문장이 패널에 안 가림:', ok ? '✅' : '❌');
+const ok2 = rows.every(r => r.뜻풀이바닥 == null || r.뜻풀이바닥 <= r.패널상단 - 4);
+console.log('뜻풀이가 패널에 안 가림:', ok2 ? '✅' : '❌');
+console.log('뜻풀이 바닥 최대:', Math.max(...rows.map(r=>r.뜻풀이바닥||0)), '/ 패널상단', rows[0] && rows[0].패널상단);
 await b.close();
