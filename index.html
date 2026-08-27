@@ -520,7 +520,8 @@
             left: 50%;
             width: 100%;
             max-width: 480px;
-            height: var(--kb-height, 330px);
+            /* 측정이 어떤 이유로든 작게 나와도 패널 뼈대(탭·제목·다음 버튼)는 들어가야 한다 */
+            height: max(var(--kb-height, 330px), 300px);
             margin: 0 !important;
             padding: 18px 18px 0 !important;
             box-sizing: border-box;
@@ -4185,6 +4186,11 @@
                 // visualViewport 높이를 --vvh로 노출하고 body.web-kb를 토글해
                 // CSS가 화면을 실제 보이는 영역으로 줄이게 한다.
                 const vv = window.visualViewport;
+                // 🔑 사파리는 키보드가 오르내리는 동안 중간 높이로 resize를 여러 번 쏜다.
+                //    그대로 반영하면 **내려가는 도중의 작은 값이 마지막으로 남아** --kb-height 가
+                //    실제 키보드보다 작아지고, 그 자리를 그대로 쓰는 통계 패널이 짧게 뜬다.
+                //    한 번 열린 동안의 최대치만 채택하고, 완전히 닫히면 다시 잰다.
+                let kbPeak = 0;
                 const applyVV = () => {
                     if (!isMobileDevice || usesGlacierKeyboard()) return;
                     const kb = Math.max(0, window.innerHeight - vv.height);
@@ -4193,7 +4199,11 @@
                     root.style.setProperty('--vvh', Math.round(vv.height) + 'px');
                     root.style.setProperty('--vvtop', Math.round(vv.offsetTop) + 'px');
                     document.body.classList.toggle('web-kb', open);
-                    if (open) setSystemKbHeight(kb);
+                    if (open) {
+                        if (kb > kbPeak) { kbPeak = kb; setSystemKbHeight(kb); }
+                    } else {
+                        kbPeak = 0;   // 완전히 닫혔다 — --kb-height 는 유지(통계 패널이 그 자리를 쓴다)
+                    }
                     const qb = document.getElementById('quiz-box');
                     if (qb) qb.scrollTop = 0;
                     if (qb?.classList.contains('keyboard-active')) {
