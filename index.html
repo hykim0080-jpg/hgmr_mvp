@@ -189,8 +189,11 @@
             overflow: hidden;
         }
 
-        /* 데스크톱 웹 환경에서 화면 중앙에 스마트폰 기기 프레임 형태로 보이도록 설정 */
-        @media (min-width: 560px) and (min-height: 650px) {
+        /* 데스크톱 웹 환경에서 화면 중앙에 카드 형태로 보이도록 설정
+           ⚠️ 높이 하한이 650px 이던 시절엔 «노트북에서 창을 조금만 줄이거나 북마크바를 켜면»
+              카드 스타일이 통째로 꺼지고 모바일 레이아웃이 화면 한가운데 떴다.
+              480px 로 낮춘다 — 폰 가로(높이 390~430)는 여전히 제외된다. */
+        @media (min-width: 560px) and (min-height: 480px) {
             body {
                 background-color: var(--surface);
             }
@@ -224,6 +227,13 @@
                 padding: 10px 20px 20px 20px;
                 /* 상단 여백을 10px로 최소화하여 밀착 */
                 box-sizing: border-box;
+                /* 🖥 넘치면 «래퍼»가 스크롤한다 — 카드 안쪽이 굴러가지 않게.
+                   주변이 텅 빈데 480px 상자 안만 스크롤되는 게 데스크톱에서 가장 어색했다. */
+                overflow-y: auto;
+                /* ⚠️ 이 래퍼는 base 에서 flex-direction: column 이다(여기서 안 바꾼다).
+                   그래서 justify-content 는 «세로» 축이다. center 로 두면 내용이 길어질 때
+                   위쪽이 잘려 스크롤로도 닿지 않는다. 반드시 flex-start. */
+                justify-content: flex-start;
             }
 
             /* 메인 카드 컴포넌트 */
@@ -232,8 +242,16 @@
                 max-width: 480px;
                 /* 전형적인 모바일 웹뷰 가로폭 */
                 height: auto;
-                max-height: calc(100vh - 100px);
-                /* 헤더 바로 아래 밀착되므로 가용 높이 확대하여 스크롤 완전 방지 */
+                /* ⚠️ max-height 를 걸지 않는다. 예전엔 calc(100vh - 100px) 로 못 박아서
+                   통계가 뜨는 순간 카드 «안쪽»에 스크롤이 생겼다(1440×700 에서 623>598 실측).
+                   내용만큼 늘어나게 두고, 넘치는 건 .app-wrapper 가 스크롤한다.
+                   ⚠️ base 의 `flex: 1` 과 `overflow-y: auto` 도 반드시 함께 풀어야 한다 —
+                   max-height 만 지우면 flex:1 이 래퍼 높이만큼 늘려 놔서 증상이 그대로다.
+                   ⚠️ !important 가 필요하다: 이 미디어쿼리는 `.quiz-container` 기본 규칙보다
+                   «위»에 있고 특정도가 같아서(둘 다 0,1,0) 나중에 오는 기본 규칙이 이긴다.
+                   (같은 블록의 margin·padding 이 이미 !important 인 것도 같은 이유다) */
+                flex: 0 0 auto !important;
+                overflow-y: visible !important;
                 margin: 0 auto !important;
                 /* 중앙 정렬 */
                 padding: 30px 24px !important;
@@ -1244,6 +1262,52 @@
         }
         @media (hover: hover) {
             .feed-stat-card:hover { background: var(--bg-muted); }
+        }
+
+        /* 🖥 마우스 환경 hover — 「눌러도 되는 것」의 유일한 단서다.
+           ⚠️ 카드·칩 상당수는 마크업에 인라인 background 가 있어 배경색으로는 못 이긴다.
+              인라인이 건드리지 않는 filter/transform/box-shadow 로 표현한다. */
+        @media (hover: hover) and (pointer: fine) {
+            #home-mtn-btn:hover,
+            #home-accuracy-card:hover,
+            #home-badges-card:hover,
+            #home-story-chip:hover,
+            #home-avatar-btn:hover,
+            .count-chip:hover,
+            .pane-opt:hover,
+            [data-pane]:hover,
+            .badge-card:hover,
+            .hm-ghost:hover {
+                filter: brightness(0.975);
+                transform: translateY(-1px);
+                transition: filter .15s ease, transform .15s ease;
+            }
+            /* ⚠️ 이 저장소의 다크는 «미디어쿼리 + .force-dark» 두 경로다.
+               미디어쿼리 없이 :root:not(.force-light) 만 쓰면 라이트에서도 걸린다. */
+            @media (prefers-color-scheme: dark) {
+                :root:not(.force-light) #home-mtn-btn:hover,
+                :root:not(.force-light) #home-accuracy-card:hover,
+                :root:not(.force-light) #home-badges-card:hover,
+                :root:not(.force-light) .count-chip:hover,
+                :root:not(.force-light) [data-pane]:hover {
+                    filter: brightness(1.12);   /* 어두운 배경에선 밝히는 쪽이 눌리는 느낌이다 */
+                }
+            }
+            :root.force-dark #home-mtn-btn:hover,
+            :root.force-dark #home-accuracy-card:hover,
+            :root.force-dark #home-badges-card:hover,
+            :root.force-dark .count-chip:hover,
+            :root.force-dark [data-pane]:hover {
+                filter: brightness(1.12);
+            }
+            /* 🩹 전역 `button:hover { background:#059669 }` 는 (0,1,1) 이라
+               `.hm-ghost` (0,1,0) 를 이긴다 — 「로그인 없이 둘러보기」가 초록으로 칠해졌다. */
+            .hm-ghost:hover {
+                background: none;
+                color: var(--text-primary);
+            }
+            /* 다음 버튼이 Enter 로도 눌린다는 걸 알려 준다 */
+            #next-btn::after { content: "  ⏎"; font-size: .85em; opacity: .7; }
         }
         .feed-stat-card:active {
             background: var(--bg-muted);
@@ -6510,7 +6574,62 @@
         window.saveDevWord = saveDevWord;
 
         // 🛠️ 개발자 단축키 지원 (F4 또는 Alt + Q를 누르면 단어 검토 제보 토글)
+        // ⌨️ 데스크톱 키보드 흐름 — 손이 키보드를 떠나지 않게.
+        //
+        // ⚠️ inputEl 의 keypress 에 이미 «isShowingStats 면 loadQuestion» 이 있었지만 **죽은 코드**였다.
+        //    정답을 제출하면 showInlineStats 가 inputEl.disabled = true 로 만들고,
+        //    **disabled 입력은 키 이벤트를 받지 않는다.** 그래서 실제로는 매 문항 마우스로
+        //    「다음」을 눌러야 했다. 창(window) 수준에서 받아야 동작한다.
+        //
+        // 안전장치: 글자를 입력 중이거나(활성 input/textarea), 모달이 열려 있으면 손대지 않는다.
+        const ESC_CLOSE = {   // Esc 로 닫아도 «갇히지 않는» 모달만. 결과·재개 모달은 일부러 뺐다.
+            'topic-modal': 'close-topic-btn',
+            'exit-confirm-modal': 'exit-cancel-btn',
+            'report-modal': 'report-cancel-btn',
+            'altitude-guide-modal': 'alt-guide-close-btn',
+            'stats-modal': 'close-stats-btn',
+            'calendar-modal': 'close-calendar-btn',
+            'vocab-modal': 'close-vocab-btn',
+            'story-modal': 'story-close-btn',
+            'achievement-modal': 'close-achievement-btn',
+            'layout-modal': 'layout-close-btn',
+            'profile-edit-modal': 'close-profile-edit-btn',
+            'account-modal': 'account-close-btn',
+            'logout-confirm-modal': 'logout-cancel-btn',
+            'delete-account-modal': 'delete-cancel-btn',
+        };
+        const anyModalOpen = () => [...document.querySelectorAll('[id$="-modal"]')]
+            .some(m => getComputedStyle(m).display !== 'none');
+        const typingNow = () => {
+            const a = document.activeElement;
+            if (!a) return false;
+            const t = (a.tagName || '').toLowerCase();
+            return (t === 'input' || t === 'textarea' || a.isContentEditable) && !a.disabled;
+        };
         window.addEventListener('keydown', function (e) {
+            // Esc — 열려 있는 모달의 «닫기 버튼»을 대신 누른다 (직접 숨기면 정리 로직을 건너뛴다)
+            if (e.key === 'Escape') {
+                for (const [modalId, btnId] of Object.entries(ESC_CLOSE)) {
+                    const m = document.getElementById(modalId);
+                    if (m && getComputedStyle(m).display !== 'none') {
+                        const btn = document.getElementById(btnId);
+                        if (btn) { e.preventDefault(); btn.click(); }
+                        return;   // 가장 먼저 걸린 하나만 닫는다
+                    }
+                }
+                return;
+            }
+            // Enter — 정답이 공개된 상태면 다음 문항으로
+            if (e.key === 'Enter' && !e.isComposing && !typingNow() && !anyModalOpen()) {
+                if (isShowingStats || placementRevealed) {
+                    const next = document.getElementById('next-btn');
+                    if (next && getComputedStyle(next).display !== 'none' && !next.disabled) {
+                        e.preventDefault();
+                        next.click();
+                        return;
+                    }
+                }
+            }
             // F4 키 또는 Alt + Q / Alt + q 키가 눌렸을 때
             if (e.key === 'F4' || (e.key === 'q' && e.altKey) || (e.key === 'Q' && e.altKey)) {
                 e.preventDefault();
@@ -6589,6 +6708,9 @@
 
         inputEl.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
+                // ⚠️ isShowingStats 분기는 여기선 «거의» 닿지 않는다 — 통계가 뜨는 순간
+                //    inputEl.disabled = true 라 키 이벤트가 오지 않는다. 실제 처리는 위쪽
+                //    window keydown 이 한다. 남겨 두는 건 disabled 되기 전 찰나의 경합 대비.
                 if (isShowingStats) {
                     loadQuestion();
                 } else {

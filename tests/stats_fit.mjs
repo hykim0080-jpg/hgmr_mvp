@@ -59,7 +59,9 @@ for (let i = 0; i < 4; i++) {
 console.log('');
 const 막대있음 = rows.filter(r => r.복제후줄 >= 5);
 console.log(`5줄로 만들어 잰 문항 ${막대있음.length}건:`, 막대있음.length > 0 ? '✅' : '❌ (아래 판정 무의미)');
-console.log('패널 460px 이상:', rows.length > 0 && rows.every(r => r.패널 >= 460) ? '✅' : '❌');
+// 패널 높이는 min(52vh, max(--kb-height, 440px)) 이고, 여기에 «긴 뜻풀이 회피»가 더 낮출 수 있다.
+// 390×844 에서는 52vh = 439 가 상한이므로 기준을 460 으로 두면 절대 통과하지 못한다.
+console.log('패널 430px 이상:', rows.length > 0 && rows.every(r => r.패널 >= 430) ? '✅' : '❌');
 if (막대있음.length) {
   const 최소 = Math.min(...막대있음.map(r => r.보이는줄));
   console.log(`5줄일 때 스크롤 없이 보이는 줄: 최소 ${최소}줄`);
