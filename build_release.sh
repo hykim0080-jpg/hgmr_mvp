@@ -1,5 +1,5 @@
 #!/bin/zsh
-# 릴리스 빌드 — Android AAB + iOS IPA (build 4)
+# 릴리스 빌드 — Android AAB + iOS IPA
 # 화면 없는 맥에서 릴레이로 돌리기 위해 전 과정을 로그로만 남긴다.
 setopt pipefail
 cd ~/Desktop/hgmr || exit 1
@@ -10,7 +10,7 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 VER=1.0
-BUILD=${BUILD:-5}          # BUILD=6 zsh build_release.sh 처럼 덮어쓸 수 있다
+BUILD=${BUILD:-6}          # BUILD=7 zsh build_release.sh 처럼 덮어쓸 수 있다
 LOG=~/Desktop/hgmr/_build$BUILD.log
 : > "$LOG"
 exec >> "$LOG" 2>&1

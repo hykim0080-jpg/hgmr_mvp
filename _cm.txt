@@ -1,0 +1,16 @@
+build: 빌드 6 — 오늘 웹으로 나간 변경을 네이티브에 반영
+
+빌드 5는 8월 19일 자산 기준이라, 스토어에 그대로 심사를 넣으면 방금 찍은
+스크린샷과 다른 앱이 심사된다.
+
+- versionCode 5→6, CURRENT_PROJECT_VERSION 5→6
+- build_release.sh / resign_ios.sh 기본 BUILD 6
+
+번들에 들어간 것 확인:
+  구글·애플 로그인 복구(browserPopupRedirectResolver)
+  하랑이 산 크롭 홈 · 바다 상태(fr-lookup) · 굴러 오르는 하랑이
+  통계창 두 탭(statsFirstPane, pane-opt)
+  순화 문항 교체 · 단어 1388개
+
+dist/hgmr-1.0-6.aab (versionCode 6)
+dist/hgmr-1.0-6.ipa (CFBundleVersion 6, com.hgmr.app, applesignin 포함)
