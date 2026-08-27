@@ -4106,6 +4106,14 @@
                 statsFirstPane = data.statsFirstPane === 'learn' ? 'learn' : 'stats';
                 totalCorrectFirstTry = parseInt(data.totalCorrectFirstTry) || 0;
                 totalAttempted = parseInt(data.totalAttempted) || 0;
+                // 🩹 분자가 분모보다 크면 짝이 깨진 기록이다 (분모 필드가 생기기 전의 누적분).
+                //    예전엔 Math.min 으로 가려서 «평균 정답률 100%»로 보였다 — 가리지 말고 짝을 다시 맞춘다.
+                //    되살릴 방법이 없는 값이라 둘 다 0으로 되돌리고, 이후 실측으로 다시 쌓는다.
+                if (totalCorrectFirstTry > totalAttempted) {
+                    track('accuracy_rebase', { correct: totalCorrectFirstTry, attempted: totalAttempted });
+                    totalCorrectFirstTry = 0; totalAttempted = 0;
+                    try { await setDoc(userDocRef, { totalCorrectFirstTry: 0, totalAttempted: 0 }, { merge: true }); } catch (e) { }
+                }
                 blueShards = (data.blueShards !== undefined) ? (parseInt(data.blueShards) || 0) : totalCorrectFirstTry;
                 equippedTitle = toTitleId(data.equippedTitle);
                 learnedWords = data.learnedWords || {};
@@ -4564,7 +4572,7 @@
         }
 
         async function syncUserData() {
-            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, avatarPose: avatarPose, scarfColor: scarfColor, targetWordCount: targetWordCount, keyboardMode: keyboardMode, statsFirstPane: statsFirstPane, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, blueShards: blueShards, equippedTitle: equippedTitle, learnedWords: learnedWords, selectedTopic: selectedTopic, vocabRating: Math.round(vocabRating), vocabRatingN: vocabRatingN, vocabPeak: Math.round(vocabPeak), placementDone: placementDone, ratingHistory: ratingHistory }, { merge: true }); }
+            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, avatarPose: avatarPose, scarfColor: scarfColor, targetWordCount: targetWordCount, keyboardMode: keyboardMode, statsFirstPane: statsFirstPane, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, totalAttempted: totalAttempted, blueShards: blueShards, equippedTitle: equippedTitle, learnedWords: learnedWords, selectedTopic: selectedTopic, vocabRating: Math.round(vocabRating), vocabRatingN: vocabRatingN, vocabPeak: Math.round(vocabPeak), placementDone: placementDone, ratingHistory: ratingHistory }, { merge: true }); }
             catch (error) { }
         }
 
@@ -5122,7 +5130,12 @@
 
             if (isCorrect) {
                 const firstTry = placementWrong === 0; // 한 번에 맞히면 낱말 조각으로 수집
-                ratePlacement(currentWord, 1);
+                // ⚠️ 채점은 «첫 시도»만 1점이다. 재입력 기회(총 3번)까지 1점으로 세면
+                //    실제 정답률이 모형의 P(맞힘)보다 훨씬 높아져 θ가 통째로 부풀려진다.
+                //    시뮬레이션(sim_placement.js, 200시행): 재시도도 1점이면 +145~190m 과대평가,
+                //    첫 시도만 세면 편향 ±10m. 700m(=표시 상한)이 그냥 기본값이 되던 원인이었다.
+                //    재입력은 «학습»을 위해 남겨 둔다 — 측정에는 넣지 않는다.
+                ratePlacement(currentWord, firstTry ? 1 : 0);
                 recordLearned(currentWord.target, todayStr, firstTry);
                 inputGroup.classList.remove('wrong', 'show-answer', 'synonym');
                 inputGroup.classList.add('correct');
@@ -5296,6 +5309,7 @@
 
                 // 2. 누적 학습 단어 수 및 첫 시도 정답 누적 (안전한 정수형 강제 캐스팅 가산)
                 const addedCorrectCount = parseInt(sessionCorrectFirstTry) || 0;
+                const addedAttempted = parseInt(sessionAttempted) || 0;   // 계측용 — 아래에서 0으로 되돌리기 전에 잡아 둔다
 
                 // 학습 어휘 수 = 첫 시도 정답한 단어 수 (masteredCount) — 초록 조각과 항상 동일
                 totalLearnedWords = masteredCount();
@@ -5347,8 +5361,8 @@
                 track('study_complete', {
                     topic: selectedTopic,
                     words: completedQuestions,
-                    correct_first_try: sessionCorrectFirstTry,
-                    accuracy: completedQuestions ? Math.round(sessionCorrectFirstTry / completedQuestions * 100) : 0,
+                    correct_first_try: addedCorrectCount,
+                    accuracy: addedAttempted ? Math.round(addedCorrectCount / addedAttempted * 100) : 0,
                     shards: sessionBlueShards,
                     new_words: sessionNewWords,
                     streak: streakDays,
@@ -5552,10 +5566,16 @@
             }
         }
 
-        async function showInlineStats(currentWordObj, recordedAnswer, isRecovery = false) {
+        async function showInlineStats(currentWordObj, recordedAnswer, isRecovery = false, firstTryCorrect = false) {
             isShowingStats = true;
-            // 📊 이 문항의 답이 확정됨 → 평균 정답률의 분모 +1 (문항당 한 번만)
-            if (!attemptCounted) { attemptCounted = true; sessionAttempted++; }
+            // 📊 이 문항의 답이 확정됨 → 평균 정답률 분모 +1, 첫 시도 정답이면 분자도 +1 (문항당 한 번만)
+            // ⚠️ 분자와 분모는 «반드시 같은 자리»에서 함께 움직여야 한다. 예전엔 분자를 채점부에서,
+            //    분모를 여기서 올려서 한쪽만 오르는 경로가 생기면 정답률이 100%로 굳었다.
+            if (!attemptCounted) {
+                attemptCounted = true;
+                sessionAttempted++;
+                if (firstTryCorrect) sessionCorrectFirstTry++;
+            }
             const statsContainer = document.getElementById('inline-stats-container');
             const nextBtn = document.getElementById('next-btn');
             const submitBtn = document.getElementById('submit-btn');
@@ -5916,10 +5936,7 @@
                 lastShardGain = { blue: blueGain, green: newlyMastered ? 1 : 0, combo: comboBonus ? comboCount : 0 };
                 updateShardCount();
 
-                if (!hasFailedCurrent) {
-                    currentExp += 20;
-                    sessionCorrectFirstTry++;
-                }
+                if (!hasFailedCurrent) currentExp += 20;   // 정답률 분자는 showInlineStats 에서 함께 센다
                 // 정답 단어를 오늘 날짜와 함께 완료 기록
                 const today = new Date();
                 const yyyy = today.getFullYear();
@@ -5931,7 +5948,7 @@
                 advanceProgress(currentWord); quizQueue.shift();
                 updateDashboard();
                 showHarangMotion('clap', 1800, lastShardGain); // 🦭 물범 박수 + 조각 획득
-                showInlineStats(currentWord, userAnswer, !!currentWord._reinserted && !currentWord._synRetry && !hasFailedCurrent);
+                showInlineStats(currentWord, userAnswer, !!currentWord._reinserted && !currentWord._synRetry && !hasFailedCurrent, !hasFailedCurrent);
 
             }
             // 2. 유의어인 경우 (사용자가 입력한 답과 의도한 답을 함께 표시)
@@ -5974,10 +5991,7 @@
                 lastShardGain = { blue: blueGain, green: 0, combo: comboBonus ? comboCount : 0 };
                 updateShardCount();
 
-                if (!hasFailedCurrent) {
-                    currentExp += 20;
-                    sessionCorrectFirstTry++;
-                }
+                if (!hasFailedCurrent) currentExp += 20;   // 정답률 분자는 showInlineStats 에서 함께 센다
                 const today = new Date();
                 const yyyy = today.getFullYear();
                 const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -5996,7 +6010,7 @@
                 advanceProgress(currentWord); quizQueue.shift();
                 updateDashboard();
                 showHarangMotion('clap', 1800, lastShardGain); // 🦭 물범 박수 + 조각 획득
-                showInlineStats(currentWord, userAnswer, false);
+                showInlineStats(currentWord, userAnswer, false, !hasFailedCurrent);
 
             }
             // 3. 오답인 경우
