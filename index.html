@@ -5213,6 +5213,7 @@
             placementWrong = 0;
             placementEstHistory = [];
             placementItems = []; placementOuts = []; placementConfirmLeft = -1;
+            sessionSeen = [];
             // 🧭 앵커 4문항: 난이도 백분위 12·38·62·88% «부근»에서 매번 새로 뽑는다.
             // 고정 선정은 전 사용자가 같은 문제로 시작해 재응시·공유 시 답이 새고 지루하다.
             // ±4% 폭(약 110개 후보) 안에서 무작위 — 난이도 구조와 밴드 경유는 그대로 유지된다.
@@ -5308,6 +5309,9 @@
         }
 
         function placementAdvance() {
+            // 🖥 넓은 화면 오른쪽 칸의 「방금 지나온 말」 재료. 이 시점엔 정답이 이미 공개돼 있다.
+            const _seen = quizQueue[0];
+            if (_seen) { sessionSeen.unshift({ t: _seen.target, m: _seen.meaning }); sessionSeen = sessionSeen.slice(0, 3); }
             placementWrong = 0; // 다음 문항을 위해 오답 카운터 초기화
             placementRevealed = true;   // 정답 공개됨 — 신고 대상은 lastActiveWord로 고정
             quizQueue.shift();
@@ -5721,12 +5725,17 @@
                     <div style="font-size:11px; color:var(--text-muted); font-weight:700;">${label}</div>
                     <div style="font-size:22px; font-weight:800; color:${color}; font-variant-numeric:tabular-nums;">${value}</div>
                 </div>`;
+            // ⚠️ 배치고사는 «조각도 콤보도 주지 않는다» — comboCount·sessionBlueShards 가 늘 0이라
+            //    학습용 숫자를 그대로 쓰면 죽은 칸이 된다. 배치고사에는 배치고사의 숫자를 쓴다.
+            const hit  = placementOuts.filter(o => o === 1).length;
+            const miss = placementOuts.filter(o => o !== 1).length;
             let html = `
                 <div style="font-size:12px; font-weight:800; color:var(--text-muted); margin-bottom:14px;">${isPlacement ? '실력 알아보는 중' : '오늘의 학습'}</div>
                 <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px;">
                     ${cell('진행', `${done}<span style="font-size:14px; color:var(--text-muted);">/${target}</span>`, 'var(--text-primary)')}
-                    ${cell('연속 정답', comboCount, '#d97706')}
-                    ${cell('모은 조각', `+${sessionBlueShards}`, '#1d4ed8')}
+                    ${isPlacement
+                        ? cell('한 번에 맞힘', hit, '#059669') + cell('놓친 문항', miss, 'var(--text-secondary)')
+                        : cell('연속 정답', comboCount, '#d97706') + cell('모은 조각', `+${sessionBlueShards}`, '#1d4ed8')}
                 </div>`;
             if (sessionSeen.length) {
                 html += `<div style="font-size:12px; font-weight:800; color:var(--text-muted); margin:22px 0 12px;">방금 지나온 말</div>
@@ -5744,7 +5753,9 @@
                         <rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="var(--text-muted)" stroke-width="1.8"></rect>
                         <path d="M8.5 11 V8 a3.5 3.5 0 0 1 7 0 v3" fill="none" stroke="var(--text-muted)" stroke-width="1.8"></path>
                     </svg>
-                    <span style="font-size:13px; color:var(--text-secondary); line-height:1.5;">사람들의 답과 유의어·예문은 <b style="color:var(--text-sub);">답을 낸 뒤</b> 이 자리에 펼쳐집니다</span>
+                    <span style="font-size:13px; color:var(--text-secondary); line-height:1.5;">${isPlacement
+                        ? '지금은 실력을 재는 중이에요. <b style="color:var(--text-sub);">결과는 마지막에</b> 한 번에 알려드려요'
+                        : '사람들의 답과 유의어·예문은 <b style="color:var(--text-sub);">답을 낸 뒤</b> 이 자리에 펼쳐집니다'}</span>
                 </div>`;
             box.innerHTML = html;
             box.style.display = 'block';
