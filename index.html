@@ -4445,8 +4445,7 @@
             track('study_start', { topic: selectedTopic, target_count: target });
 
             try {
-                const response = await fetch('words.json');
-                const rawData = await response.json();
+                const rawData = await loadWordsData();
                 addToStatVocab(rawData);   // 통계 필터의 사전 통과 목록
 
                 // 📏 전역 문제 난이도 보정치 로드 (실패해도 초기값으로 진행)
@@ -4964,10 +4963,99 @@
             return false;
         }
 
+        // ===== 📚 단어 데이터 로드 — 번들 기준선 + 원격 갱신 =====
+        // 네이티브 앱은 words.json 이 번들돼 있어서, 문항 하나 고치려면 심사를 거쳐야 했다.
+        // 그래서 다음 순서로 읽는다:
+        //   1) 번들 사본을 기준선으로 읽는다 (오프라인·첫 실행 보장)
+        //   2) 저장해 둔 원격 사본이 검증을 통과하면 그걸 쓴다
+        //   3) 백그라운드로 새 원격 사본을 받아 저장한다 — 이번 세션에는 쓰지 않는다
+        //      (학습 도중에 문제 목록이 바뀌지 않게)
+        // 웹은 fetch('words.json') 자체가 이미 최신(no-cache)이라 캐시를 쓰지 않는다.
+        //
+        // ⚠️ 심사라는 안전망이 없는 경로다. 잘못된 파일이 배포되면 즉시 모든 기기에 나간다.
+        //    반드시 validWordList() 를 통과한 것만 쓰고, 하나라도 어긋나면 조용히 번들로 되돌린다.
+        //    배포 전에는 `npm run check-words` 를 통과시킬 것.
+        const WORDS_REMOTE = 'https://hgmr.co.kr/words.json';
+        const WORDS_CACHE_KEY = 'hgmrWordsCache';
+        const WORDS_META_KEY = 'hgmrWordsMeta';
+        let bundledWords = null;   // 번들 사본 (기준선)
+        let wordsData = null;      // 이번 실행에서 실제로 쓰는 목록
+
+        const isNativeApp = () => !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+
+        // 번들이 바뀌었는지 알아보는 값싼 지문 — 앱 업데이트로 번들이 새로워지면 옛 캐시를 버린다
+        function wordsFingerprint(list) {
+            return `${list.length}:${list[0] && list[0].target}:${list[list.length - 1] && list[list.length - 1].target}`;
+        }
+        const WORDS_ABS_MIN = 300;   // 어떤 상황에서도 이보다 적은 목록은 정상일 수 없다
+        function validWordList(v, baseCount) {
+            if (!Array.isArray(v)) return false;
+            // 절대 하한 — 기준선(baseCount) 자체가 이상해도 잘린 파일을 걸러낸다
+            if (v.length < WORDS_ABS_MIN) return false;
+            // 번들보다 눈에 띄게 적으면 잘렸거나 잘못 만든 파일로 본다
+            if (v.length < Math.floor(baseCount * 0.9)) return false;
+            for (const w of v) {
+                if (!w || typeof w.target !== 'string' || !w.target) return false;
+                if (typeof w.sentence !== 'string' || !w.sentence) return false;
+                if (typeof w.meaning !== 'string' || !w.meaning) return false;
+                if (!Number.isFinite(w.level)) return false;
+            }
+            return true;
+        }
+
+        async function loadWordsData() {
+            if (wordsData) return wordsData;
+            bundledWords = await (await fetch('words.json')).json();
+            wordsData = bundledWords;
+
+            if (isNativeApp()) {
+                try {
+                    const meta = JSON.parse(localStorage.getItem(WORDS_META_KEY) || 'null');
+                    const raw = localStorage.getItem(WORDS_CACHE_KEY);
+                    if (raw && meta && meta.bundleFp === wordsFingerprint(bundledWords)) {
+                        const cached = JSON.parse(raw);
+                        if (validWordList(cached, bundledWords.length)) wordsData = cached;
+                        else localStorage.removeItem(WORDS_CACHE_KEY);
+                    } else if (raw) {
+                        // 앱이 업데이트돼 번들이 바뀌었다 — 옛 캐시는 버린다
+                        localStorage.removeItem(WORDS_CACHE_KEY);
+                        localStorage.removeItem(WORDS_META_KEY);
+                    }
+                } catch (e) { /* 캐시가 깨졌다 — 번들로 간다 */ }
+                refreshWordsSoon();
+            }
+            return wordsData;
+        }
+
+        let wordsRefreshQueued = false;
+        function refreshWordsSoon() {
+            if (wordsRefreshQueued) return;
+            wordsRefreshQueued = true;
+            // 첫 화면 렌더를 방해하지 않도록 늦춘다
+            setTimeout(async () => {
+                try {
+                    const res = await fetch(WORDS_REMOTE, { cache: 'no-store' });
+                    if (!res.ok) return;
+                    const text = await res.text();
+                    if (text.length > 3000000) return;          // 상식 밖 크기 — 무시
+                    const data = JSON.parse(text);
+                    if (!validWordList(data, bundledWords.length)) {
+                        console.warn('[words] 원격 사본 검증 실패 — 번들 유지');
+                        return;
+                    }
+                    localStorage.setItem(WORDS_CACHE_KEY, text);
+                    localStorage.setItem(WORDS_META_KEY, JSON.stringify({
+                        at: Date.now(), n: data.length, bundleFp: wordsFingerprint(bundledWords)
+                    }));
+                    console.log(`[words] 원격 사본 저장 ${data.length}개 — 다음 실행부터 적용`);
+                } catch (e) { /* 오프라인 등 — 조용히 무시 */ }
+            }, 5000);
+        }
+
         async function startPlacement() {
             document.getElementById('placement-intro-modal').style.display = 'none';
             try {
-                if (!allWordsCache) allWordsCache = await (await fetch('./words.json')).json();
+                if (!allWordsCache) allWordsCache = await loadWordsData();
                 addToStatVocab(allWordsCache);
             } catch (e) {
                 showToast('단어 데이터를 불러오지 못했어요. 네트워크 확인 후 다시 시도해 주세요.', 'error');
