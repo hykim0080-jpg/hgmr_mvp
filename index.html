@@ -5421,6 +5421,67 @@
             // 모바일은 키보드 하강 완료 후 표시 (아래 whenKeyboardGone) — 미리 띄우면 하강 중 화면 중앙에 뜬다
             if (!isMobileDevice) statsContainer.style.display = 'block';
 
+            // ── 📚 유의어·예문 패널 — 응답 데이터와 무관하게 어떤 문항에서도 채워진다.
+            //    유의어도 힌트도 없는 단어가 40%라, 그 경우엔 '이 자리엔 이 말이 거의 유일하다'를 알려준다.
+            //    (그것도 정보다 — 대체어가 없다는 뜻이므로)
+            const buildLearnHtml = () => {
+                const w = currentWordObj;
+                const syns = [...new Set([...(w.accepts || []), ...acceptedStems(w)])]
+                    .filter(x => !correctForms.has(x));
+                const chip = (t) => `<span style="display:inline-block; font-size:14px; font-weight:800; color:#1d4ed8; background:#dbeafe; border-radius:999px; padding:5px 12px; margin:0 6px 6px 0;">${escapeHTML(t)}</span>`;
+                let html = `<div style="font-size:16px; font-weight:800; color:var(--text-primary); margin-bottom:14px;">이 자리에 들어갈 수 있는 말</div>`;
+                html += `<div style="background:var(--brand-mint); border:1px solid var(--mint-border); border-radius:12px; padding:11px 13px; margin-bottom:14px;">
+                        <span style="font-size:15px; font-weight:900; color:#047857;">${escapeHTML(w.target)}</span>
+                        <span style="font-size:13px; color:var(--text-secondary); line-height:1.55;"> — ${escapeHTML(w.meaning || '')}</span>
+                    </div>`;
+                if (syns.length) {
+                    html += `<div style="font-size:12.5px; font-weight:800; color:var(--text-muted); margin-bottom:8px;">이 말도 정답으로 인정돼요</div>
+                        <div style="margin-bottom:14px;">${syns.map(chip).join('')}</div>`;
+                } else {
+                    html += `<div style="display:flex; align-items:flex-start; gap:8px; background:var(--surface); border:1px solid var(--border-strong); border-radius:12px; padding:11px 13px; margin-bottom:14px;">
+                            <span style="font-size:13px; color:var(--text-secondary); line-height:1.55;">이 자리에는 <b style="color:var(--text-body);">${escapeHTML(w.target)}</b> 말고 대신 쓸 만한 말이 거의 없어요. 그만큼 자리를 정확히 차지하는 단어예요.</span>
+                        </div>`;
+                }
+                if (w.hint) {
+                    html += `<div style="font-size:12.5px; font-weight:800; color:var(--text-muted); margin-bottom:8px;">다른 예문</div>
+                        <div style="background:var(--surface); border:1px solid var(--border-strong); border-radius:12px; padding:11px 13px; font-size:14px; color:var(--text-body); line-height:1.6;">${escapeHTML(w.hint).replace(/_{2,}/g, `<b style="color:#047857;">${escapeHTML(splitVerbEnding(w).stem)}</b>`)}</div>`;
+                }
+                return html;
+            };
+
+            // 두 패널을 탭으로 감싼다. 서버 통계가 오기 전에는 유의어·예문을 먼저 보여준다 —
+            // 내 답 하나로 「정답 100%」를 그리는 순간을 만들지 않기 위해서다.
+            const tabBtn = (id, label, on) => `<button type="button" data-pane="${id}" style="flex:1; border:none; cursor:pointer; padding:8px 6px; border-radius:9px; font-size:12.5px; font-weight:800; background:${on ? 'var(--surface)' : 'transparent'}; color:${on ? 'var(--text-primary)' : 'var(--text-muted)'}; box-shadow:${on ? '0 1px 3px rgba(0,0,0,0.10)' : 'none'};">${label}</button>`;
+            const wrapPanes = (active, statsHtml, learnHtml, n) => `
+                <div style="display:flex; gap:4px; background:var(--border); border-radius:11px; padding:3px; margin-bottom:16px;">
+                    ${tabBtn('stats', n > 0 ? `사람들의 답 ${n}` : '사람들의 답', active === 'stats')}
+                    ${tabBtn('learn', '유의어 · 예문', active === 'learn')}
+                </div>
+                <div data-pane-body="stats" style="display:${active === 'stats' ? 'block' : 'none'};">${statsHtml}</div>
+                <div data-pane-body="learn" style="display:${active === 'learn' ? 'block' : 'none'};">${learnHtml}</div>`;
+
+            // 탭 전환 — 컨테이너에 한 번만 위임해 둔다 (내용이 교체돼도 살아 있다)
+            if (!statsContainer.dataset.paneBound) {
+                statsContainer.dataset.paneBound = '1';
+                statsContainer.addEventListener('click', (e) => {
+                    const btn = e.target.closest('[data-pane]');
+                    if (!btn || !statsContainer.contains(btn)) return;
+                    const want = btn.dataset.pane;
+                    statsContainer.querySelectorAll('[data-pane-body]').forEach(el => {
+                        el.style.display = el.dataset.paneBody === want ? 'block' : 'none';
+                    });
+                    statsContainer.querySelectorAll('[data-pane]').forEach(b => {
+                        const on = b.dataset.pane === want;
+                        b.style.background = on ? 'var(--surface)' : 'transparent';
+                        b.style.color = on ? 'var(--text-primary)' : 'var(--text-muted)';
+                        b.style.boxShadow = on ? '0 1px 3px rgba(0,0,0,0.10)' : 'none';
+                    });
+                    statsContainer.dataset.userPicked = '1';
+                    track('stats_pane', { pane: want });
+                });
+            }
+            statsContainer.dataset.userPicked = '';
+
             // 통계 막대 HTML 조립 (로컬/서버 공용) — 순수 문자열 생성, 네트워크 없음
             const buildStatsHtml = (answers) => {
                 if (Object.keys(answers).length === 0)
@@ -5485,10 +5546,12 @@
                 return html;
             };
 
-            // 🌟 1) 로컬(내 답안)으로 즉시 렌더 — 네트워크 대기 없이 통계 골격을 바로 그림
+            // 🌟 1) 즉시 렌더 — 유의어·예문 탭부터. 내 답 하나로 「정답 100%」를 그리지 않는다.
             const myKey = recordedAnswer ? sanitizeStatKey(recordedAnswer) : null;
-            const localAnswers = myKey ? { [myKey]: 1 } : {};
-            statsContainer.innerHTML = buildStatsHtml(localAnswers);
+            const learnHtml = buildLearnHtml();
+            statsContainer.innerHTML = wrapPanes('learn',
+                '<div style="text-align:center; color:var(--text-muted); font-size:13.5px; padding:22px 0;">답을 모으는 중…</div>',
+                learnHtml, 0);
 
             // 📊 모바일: 스크롤 래핑 + 하단 다음 버튼 + 페이드 (여기까지 동기 — 무거운 작업 없음)
             if (isMobileDevice) {
@@ -5516,18 +5579,25 @@
             }
 
             // 🌟 2) 서버 통계는 백그라운드로 받아, 페이드 완료 후 조용히 갱신 (막대만 교체)
+            const paintStats = (html, n) => {
+                if (!isShowingStats) return;              // 이미 다음 문제로 넘어갔으면 무시
+                const body = statsContainer.querySelector('[data-pane-body="stats"]');
+                if (body) body.innerHTML = html;
+                const tab = statsContainer.querySelector('[data-pane="stats"]');
+                if (tab && n > 0) tab.textContent = `사람들의 답 ${n}`;
+            };
             getDoc(doc(db, "word_stats", word)).then((docSnap) => {
-                let answers = docSnap.exists() ? (docSnap.data().answers || {}) : {};
+                const answers = docSnap.exists() ? (docSnap.data().answers || {}) : {};
                 if (myKey && !answers[myKey]) answers[myKey] = 1;
-                if (Object.keys(answers).length === 0) return;
-                const serverHtml = buildStatsHtml(answers);
-                setTimeout(() => {
-                    if (!isShowingStats) return; // 이미 다음 문제로 넘어갔으면 무시
-                    const scroll = statsContainer.querySelector('.stats-scroll');
-                    if (isMobileDevice && scroll) scroll.innerHTML = serverHtml;
-                    else if (!isMobileDevice) statsContainer.innerHTML = serverHtml;
-                }, 720); // 페이드(≈0.3s 지연 + 0.32s)가 끝난 뒤 갱신
-            }).catch((e) => console.warn("통계 서버 갱신 실패:", e));
+                const n = Object.values(answers).reduce((a, b) => a + b, 0);
+                const html = n === 0
+                    ? '<div style="text-align:center; color:var(--text-muted); font-size:13.5px; padding:22px 0; line-height:1.6;">아직 이 문장에 답한 사람이 없어요.<br>당신이 첫 번째예요.</div>'
+                    : buildStatsHtml(answers);
+                setTimeout(() => paintStats(html, n), 720); // 페이드(≈0.3s 지연 + 0.32s)가 끝난 뒤 갱신
+            }).catch((e) => {
+                console.warn("통계 서버 갱신 실패:", e);
+                paintStats('<div style="text-align:center; color:var(--text-muted); font-size:13.5px; padding:22px 0;">지금은 다른 사람의 답을 불러올 수 없어요.</div>', 0);
+            });
         }
 
         // 🔁 세션 내 재출제: 오답 단어를 같은 세션 3~6문제 뒤에 다시 넣어 즉시 복습
