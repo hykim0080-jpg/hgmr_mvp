@@ -8,6 +8,7 @@ const head = t => (t || '').split(/_+/)[0].trim();
 const bySent = new Map(words.map(w => [head(w.sentence), w]));
 const b = await puppeteer.launch({ executablePath: CHROME, headless: 'new', args: ['--no-sandbox'] });
 const p = await b.newPage();
+p.on('pageerror', e => console.log('PAGE ERROR:', String(e).slice(0, 200)));
 await p.setViewport({ width: 1440, height: 700, deviceScaleFactor: 1 });   // 북마크바 있는 창
 const vis = s => p.evaluate(x => { const e = document.querySelector(x); return !!e && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().height > 0; }, s);
 const click = async s => { await p.waitForSelector(s, { timeout: 20000 }); await p.evaluate(x => document.querySelector(x).click(), s); };

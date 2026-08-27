@@ -286,6 +286,60 @@
             }
         }
 
+        /* ══════════════════════════════════════════════════════════════
+           🖥 넓은 화면(마우스) — 2열. 왼쪽 문제, 오른쪽 통계·유의어.
+           좁은 창·태블릿·폰은 이 블록에 들어오지 않으므로 지금 모습 그대로다.
+           ══════════════════════════════════════════════════════════════ */
+        @media (min-width: 1100px) and (min-height: 480px) and (hover: hover) and (pointer: fine) {
+            .app-wrapper {
+                padding: 22px 28px 28px !important;
+            }
+            /* quiz-box 는 카드를 벗고 «격자»가 된다 — 카드 옷은 quiz-main 이 입는다 */
+            #quiz-box {
+                max-width: 1180px !important;
+                /* ⚠️ display 에 !important 를 붙이면 인라인 `display:none` 을 이겨 버려
+                   홈 화면에서도 퀴즈 상자가 사라지지 않는다. 붙이지 말 것. */
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) 440px;
+                column-gap: 32px;
+                align-items: start;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                overflow: visible !important;
+            }
+            #quiz-main {
+                grid-column: 1;
+                flex: 0 0 auto;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 28px;
+                box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+                padding: 30px 32px;
+                box-sizing: border-box;
+            }
+            /* ⚠️ 인라인 style 이 배경·여백·테두리를 들고 있어 !important 가 필요하다 */
+            #inline-stats-container {
+                grid-column: 2;
+                grid-row: 1;   /* 격자의 실제 흐름 자식은 quiz-main 과 이것 둘뿐이다 */
+                margin-top: 0 !important;
+                background: var(--surface) !important;
+                border: 1px solid var(--border) !important;
+                border-radius: 28px !important;
+                box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08) !important;
+                padding: 26px 24px !important;
+            }
+            /* 입력줄을 바닥으로 밀던 것 — 키보드가 없는 화면에서는 문제 바로 아래가 맞다 */
+            #quiz-main .input-group {
+                margin-top: 22px;
+            }
+            .sentence { font-size: 26px; min-height: auto; }
+            .meaning  { font-size: 15.5px; }
+            /* 신고 깃발은 quiz-box(격자) 기준이 아니라 왼쪽 카드 기준으로 */
+            #quiz-main { position: relative; }
+        }
+
         #login-screen,
         #setup-screen {
             height: 100%;
@@ -333,6 +387,15 @@
             background-color: #f59e0b;
             width: 0%;
             transition: width 0.5s ease;
+        }
+
+        /* 🖥 넓은 화면에서 왼쪽 카드가 되는 묶음. 좁은 화면에서는 «투명한 통과 상자»로,
+           quiz-container 가 갖고 있던 세로 흐름(특히 .input-group 의 margin-top:auto)을 그대로 이어받는다. */
+        #quiz-main {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
         }
 
         .quiz-container {
@@ -2960,9 +3023,11 @@
                 </div>
             </div>
             <div class="quiz-container" id="quiz-box">
+
+                <!-- 🖥 넓은 화면에서 «왼쪽 카드»가 되는 묶음 — 통계 패널만 오른쪽 열로 간다 -->
+                <div id="quiz-main">
                 <!-- 🛠️ 개발자용 단어 검토 제보 버튼 -->
                 <button id="flag-word-btn" class="flag-btn" title="이 단어 신고하기 (오류 검토 요청)" aria-label="단어 신고"><svg class="ui-ic" viewBox="0 0 24 24" style="width:17px;height:17px;" aria-hidden="true"><use href="#ic-flag"></use></svg></button>
-
                 <div id="quiz-head" style="display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding-right: 52px;">
                     <button id="quiz-home-btn" title="학습 종료하고 홈으로" aria-label="학습 종료하고 홈으로"
                         style="flex-shrink: 0; width: 34px; height: 34px; border: none; border-radius: 50%; background: var(--bg-muted); color: var(--text-secondary); font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
@@ -3018,6 +3083,7 @@
                     <button id="next-btn"
                         style="display: none; flex: 1; background-color: #3b82f6; color: white; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; white-space: nowrap; animation: fadeIn 0.2s ease;">다음
                         ➔</button>
+                </div>
                 </div>
 
                 <!-- 정답 통계: 입력 박스 아래(키보드가 사라진 자리)에 표시 — 위 요소들이 밀리지 않아 하랑이 좌표 고정 -->
@@ -5319,7 +5385,10 @@
             statsBox.style.display = 'none';
             statsBox.style.height = ''; statsBox.style.minHeight = '';   // 뜻풀이 회피로 넣었던 인라인 높이 해제
             statsBox.classList.remove('kb-slot', 'slid-in', 'anim-done');
-            document.getElementById('quiz-box').style.display = 'block';
+            renderSidePanel();   // 🖥 넓은 화면이면 오른쪽 칸을 「푸는 중」 내용으로 채운다
+            // ⚠️ 'block' 을 박으면 넓은 화면의 2열 격자(grid)를 덮어쓴다. 인라인을 «비워서»
+            //    CSS 가 고르게 한다 — 좁은 화면 flex, 넓은 화면 grid.
+            document.getElementById('quiz-box').style.display = '';
             showHarangCompanion();
 
             const nextBtn = document.getElementById('next-btn');
@@ -5630,6 +5699,58 @@
             }
         }
 
+        // 🖥 넓은 화면(마우스) 2열 판정 — CSS 미디어쿼리와 «같은 조건»을 쓴다.
+        //    한쪽만 고치면 레이아웃은 2열인데 오른쪽이 비거나, 반대로 패널만 뜨고 자리가 없다.
+        const WIDE_MQ = '(min-width: 1100px) and (min-height: 480px) and (hover: hover) and (pointer: fine)';
+        function isWideDesktop() {
+            try { return window.matchMedia(WIDE_MQ).matches; } catch (e) { return false; }
+        }
+
+        // 방금 지나온 말 — 오른쪽 칸을 채우는 재료 (최대 3개, 세션 한정)
+        let sessionSeen = [];
+
+        // 🖥 답을 내기 «전»의 오른쪽 칸.
+        //    유의어를 미리 보여주면 문제가 무의미해지므로, 답이 새지 않는 것만 둔다.
+        function renderSidePanel() {
+            const box = document.getElementById('inline-stats-container');
+            if (!box || !isWideDesktop()) return false;
+            const target = totalQuestions || dailyTarget || targetWordCount || 10;
+            const done = Math.min(completedQuestions, target);
+            const cell = (label, value, color) => `
+                <div style="background:var(--bg-subtle); border:1px solid var(--border); border-radius:14px; padding:12px;">
+                    <div style="font-size:11px; color:var(--text-muted); font-weight:700;">${label}</div>
+                    <div style="font-size:22px; font-weight:800; color:${color}; font-variant-numeric:tabular-nums;">${value}</div>
+                </div>`;
+            let html = `
+                <div style="font-size:12px; font-weight:800; color:var(--text-muted); margin-bottom:14px;">${isPlacement ? '실력 알아보는 중' : '오늘의 학습'}</div>
+                <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px;">
+                    ${cell('진행', `${done}<span style="font-size:14px; color:var(--text-muted);">/${target}</span>`, 'var(--text-primary)')}
+                    ${cell('연속 정답', comboCount, '#d97706')}
+                    ${cell('모은 조각', `+${sessionBlueShards}`, '#1d4ed8')}
+                </div>`;
+            if (sessionSeen.length) {
+                html += `<div style="font-size:12px; font-weight:800; color:var(--text-muted); margin:22px 0 12px;">방금 지나온 말</div>
+                    <div style="display:flex; flex-direction:column; gap:11px;">` +
+                    sessionSeen.map(w => `
+                        <div style="display:flex; gap:10px; align-items:baseline;">
+                            <span style="font-size:15px; font-weight:800; color:#047857; width:66px; flex-shrink:0;">${escapeHTML(w.t)}</span>
+                            <span style="font-size:13px; color:var(--text-secondary); line-height:1.5;">${escapeHTML(w.m || '')}</span>
+                        </div>`).join('<div style="height:1px; background:var(--bg-muted);"></div>') +
+                    `</div>`;
+            }
+            html += `
+                <div style="margin-top:22px; background:var(--bg-muted); border:1px dashed var(--border-strong); border-radius:16px; padding:16px 18px; display:flex; align-items:center; gap:11px;">
+                    <svg viewBox="0 0 24 24" style="width:17px; height:17px; flex-shrink:0;" aria-hidden="true">
+                        <rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="var(--text-muted)" stroke-width="1.8"></rect>
+                        <path d="M8.5 11 V8 a3.5 3.5 0 0 1 7 0 v3" fill="none" stroke="var(--text-muted)" stroke-width="1.8"></path>
+                    </svg>
+                    <span style="font-size:13px; color:var(--text-secondary); line-height:1.5;">사람들의 답과 유의어·예문은 <b style="color:var(--text-sub);">답을 낸 뒤</b> 이 자리에 펼쳐집니다</span>
+                </div>`;
+            box.innerHTML = html;
+            box.style.display = 'block';
+            return true;
+        }
+
         async function showInlineStats(currentWordObj, recordedAnswer, isRecovery = false, firstTryCorrect = false) {
             isShowingStats = true;
             // 📊 이 문항의 답이 확정됨 → 평균 정답률 분모 +1, 첫 시도 정답이면 분자도 +1 (문항당 한 번만)
@@ -5821,9 +5942,19 @@
             // 🌟 1) 즉시 렌더 — 유의어·예문 탭부터. 내 답 하나로 「정답 100%」를 그리지 않는다.
             const myKey = recordedAnswer ? sanitizeStatKey(recordedAnswer) : null;
             const learnHtml = buildLearnHtml();
-            statsContainer.innerHTML = wrapPanes(statsFirstPane,
+            // 🖥 넓은 화면에는 자리가 있다 — 탭으로 나누지 않고 둘 다 편다.
+            //    paintStats 가 [data-pane-body="stats"] 를 찾으므로 그 마크업은 유지한다.
+            const wrapWide = (statsHtml, learnHtml2) => `
+                <div data-pane-body="stats" style="display:block;">${statsHtml}</div>
+                <div style="height:1px; background:var(--border); margin:22px 0;"></div>
+                <div data-pane-body="learn" style="display:block;">${learnHtml2}</div>`;
+            const wide = isWideDesktop();
+            statsContainer.innerHTML = (wide ? wrapWide : (a, b) => wrapPanes(statsFirstPane, a, b))(
                 '<div style="text-align:center; color:var(--text-muted); font-size:13.5px; padding:22px 0;">답을 모으는 중…</div>',
                 learnHtml);
+            // 방금 지나온 말에 쌓아 둔다 (다음 문항의 오른쪽 칸 재료)
+            sessionSeen.unshift({ t: currentWordObj.target, m: currentWordObj.meaning });
+            sessionSeen = sessionSeen.slice(0, 3);
 
             // 📊 모바일: 스크롤 래핑 + 하단 다음 버튼 + 페이드 (여기까지 동기 — 무거운 작업 없음)
             if (isMobileDevice) {
@@ -6635,7 +6766,7 @@
                 e.preventDefault();
                 const flagBtn = document.getElementById('flag-word-btn');
                 // 퀴즈 화면이 열려있고 제보 버튼이 활성화된 상태일 때만 동작
-                if (flagBtn && document.getElementById('quiz-box').style.display !== 'none') {
+                if (flagBtn && getComputedStyle(document.getElementById('quiz-box')).display !== 'none') {
                     openReportModal();
                 }
             }
@@ -7235,7 +7366,7 @@
         // 퀴즈가 '실제 화면에 떠 있는 상태'인지 판정 (종료 후 잔여 큐 오판 방지)
         function isQuizActive() {
             return quizQueue && quizQueue.length > 0
-                && document.getElementById('quiz-box').style.display !== 'none';
+                && getComputedStyle(document.getElementById('quiz-box')).display !== 'none';
         }
 
         // 프로필·학습 설정 시트 열기 (프로필 아바타·헤더 프로필 칩 공용)
