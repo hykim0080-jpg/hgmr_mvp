@@ -30,7 +30,7 @@ seq.forEach(l => console.log('  ' + l));
 
 const final = await p.evaluate(() => {
     const v = getComputedStyle(document.documentElement).getPropertyValue('--kb-height').trim();
-    // 패널 높이 = max(--kb-height, 300px)
+    // 패널 높이 = min(58vh, max(--kb-height, 380px))
     const el = document.getElementById('inline-stats-container');
     const prev = el.style.display;
     // 퀴즈 밖이라 자기 자신과 조상들이 모두 숨어 있다 — 측정을 위해 잠깐 편다
@@ -47,5 +47,5 @@ const final = await p.evaluate(() => {
 console.log('\n최종', JSON.stringify(final));
 const px = parseInt(final.kbHeight, 10);
 console.log('내려가는 중간값에 안 끌려감 (336 유지):', px === 336 ? '✅' : `❌ (${final.kbHeight})`);
-console.log('패널 높이 300px 이상:', final.패널높이 >= 300 ? '✅' : `❌ (${final.패널높이})`);
+console.log('패널 높이 380px 이상:', final.패널높이 >= 380 ? '✅' : `❌ (${final.패널높이})`);
 await b.close();

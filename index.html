@@ -520,8 +520,10 @@
             left: 50%;
             width: 100%;
             max-width: 480px;
-            /* 측정이 어떤 이유로든 작게 나와도 패널 뼈대(탭·제목·다음 버튼)는 들어가야 한다 */
-            height: max(var(--kb-height, 330px), 300px);
+            /* 탭 + 제목 + 표본 줄 + 표 머리 + 막대 두어 줄 + 다음 버튼이 한 화면에 들어가야 한다.
+               키보드 자리보다 커져도 괜찮다 — 정답이 공개된 뒤라 위쪽은 어차피 비어 있다.
+               다만 작은 기기에서 문장까지 덮지 않도록 뷰포트 58%로 상한을 둔다. */
+            height: min(58vh, max(var(--kb-height, 330px), 380px));
             margin: 0 !important;
             padding: 18px 18px 0 !important;
             box-sizing: border-box;
@@ -5673,7 +5675,7 @@
                             사람들은 이 문장을 어떻게 완성했을까요?
                         </div>
                         <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 13px;">지금까지 ${total.toLocaleString()}명이 답했어요</div>
-                        <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); font-weight: bold; border-bottom: 2px solid var(--border-strong); padding-bottom: 8px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); font-weight: bold; border-bottom: 2px solid var(--border-strong); padding-bottom: 7px; margin-bottom: 11px;">
                             <span style="margin-left: 5px;">표현</span>
                             <span style="margin-right: 5px;">비율</span>
                         </div>`;
@@ -5691,7 +5693,7 @@
                         barColor = '#94a3b8'; textColor = '#475569';
                     }
                     html += `
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 11px;">
                                 <div style="width: 140px; display: flex; align-items: center;">
                                     <span style="font-size: 15px; font-weight: bold; color: ${textColor}; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHTML(submittedWord)}</span>
                                     ${badgeHtml}
@@ -5710,7 +5712,7 @@
                 const etcRate = total > 0 ? Math.round((etcCount / total) * 100) : 0;
                 if (etcCount > 0 && etcRate > 0) {
                     html += `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; opacity: 0.75;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 11px; opacity: 0.75;">
                     <div style="width: 140px; display: flex; align-items: center;">
                         <span style="font-size: 14px; font-weight: bold; color: var(--text-muted);">기타</span>
                     </div>
