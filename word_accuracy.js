@@ -21,7 +21,8 @@ const stems = w => {
     }
     return out;
 };
-const only = process.argv.slice(2);
+const DETAIL = process.argv.includes('--detail');
+const only = process.argv.slice(2).filter(a => !a.startsWith('--'));
 
 (async () => {
     const snap = await db.collection('word_stats').get();
@@ -48,7 +49,7 @@ const only = process.argv.slice(2);
         }
         if (n < 4 && !only.length) continue;   // 표본이 너무 적으면 판단 불가
         wrong.sort((x, y) => y[1] - x[1]);
-        rows.push({ t: w.target, n, rate: n ? c / n : 0, lv: w.level, giveup, junk, wrong: wrong.slice(0, 4) });
+        rows.push({ t: w.target, n, rate: n ? c / n : 0, lv: w.level, giveup, junk, wrong: wrong.slice(0, 5), w });
     }
     rows.sort((a, b) => a.rate - b.rate || b.n - a.n);
     const list = only.length ? rows : rows.slice(0, 25);
@@ -56,6 +57,12 @@ const only = process.argv.slice(2);
     for (const r of list) {
         console.log(`${String(Math.round(r.rate * 100)).padStart(3)}%  n=${String(r.n).padStart(3)}  포기 ${String(r.giveup).padStart(2)}  Lv${r.lv}  ${r.t}`);
         if (r.wrong.length) console.log(`        많이 친 오답: ${r.wrong.map(([a, c]) => `${a}(${c})`).join(', ')}`);
+        if (DETAIL) {
+            console.log(`        뜻   : ${r.w.meaning}`);
+            console.log(`        예문 : ${r.w.sentence}`);
+            console.log(`        인정 : ${(r.w.accepts || []).join(', ')}${r.w.hint ? '   | 힌트 있음' : ''}`);
+            console.log('');
+        }
     }
     process.exit(0);
 })();
