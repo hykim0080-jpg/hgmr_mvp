@@ -1066,6 +1066,14 @@
         #home-greeting { display: none; }
         /* 고도 히어로는 기본 숨김 — 각 배치안이 자기 것만 켠다.
            인라인 style로 숨기면 클래스 규칙이 이기지 못하므로 여기서 처리한다. */
+        /* 📊 통계창 첫 화면 선택 칩 */
+        .pane-opt {
+            border: none; cursor: pointer; padding: 5px 11px; border-radius: 999px;
+            font-size: 11.5px; font-weight: 800; background: transparent; color: var(--text-muted);
+            font-family: inherit; white-space: nowrap;
+        }
+        .pane-opt.on { background: var(--surface); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.10); }
+
         /* ⛰ 하랑이 산 히어로 — 크롭 창이 눌린다는 걸 보이게 한다 */
         #home-mtn-hint {
             position: absolute; right: 8px; bottom: 8px;
@@ -2272,6 +2280,18 @@
                         <span style="font-size: 14px; line-height: 1;">&#8250;</span>
                     </span>
                 </button>
+
+                <!-- 📊 통계창에서 먼저 열리는 탭 — 응답이 적은 단어를 자주 만나면 유의어 쪽이 낫다 -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 0; gap: 10px;">
+                    <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-muted); flex-shrink: 0;">
+                        <svg class="ui-ic" viewBox="0 0 24 24" style="width:12px;height:12px;" aria-hidden="true"><use href="#ic-chart"></use></svg>
+                        정답 후 첫 화면
+                    </span>
+                    <span style="display: inline-flex; gap: 4px; background: var(--border); border-radius: 999px; padding: 3px;">
+                        <button class="pane-opt" data-pane-pref="stats" type="button">사람들의 답</button>
+                        <button class="pane-opt" data-pane-pref="learn" type="button">유의어 · 예문</button>
+                    </span>
+                </div>
 
                 <!-- 👤 계정 관리 진입 — 로그아웃·회원 탈퇴는 서브 모달로 격리 (오인 탭 방지, 2026-07-31) -->
                 <button id="open-account-btn"
@@ -3991,6 +4011,9 @@
         let dailyTarget = 0;
         let targetWordCount = 30;
         let keyboardMode = 'system';   // 'system'(기본 키보드) | 'glacier'(빙하 자모 키보드)
+        // 통계창에서 먼저 열리는 탭. 통계가 주력 기능이라 'stats'가 기본,
+        // 응답이 적은 단어를 자주 만나는 사람은 'learn'으로 바꿀 수 있다.
+        let statsFirstPane = 'stats';  // 'stats'(사람들의 답) | 'learn'(유의어·예문)
         let tempKeyboardMode = 'system';
 
         // 네트워크가 응답하지 않을 때 무한 대기를 막는 타임아웃 헬퍼
@@ -4018,6 +4041,7 @@
                 scarfColor = data.scarfColor || '#10B981';
                 targetWordCount = parseInt(data.targetWordCount) || 30;
                 keyboardMode = data.keyboardMode === 'glacier' ? 'glacier' : 'system';
+                statsFirstPane = data.statsFirstPane === 'learn' ? 'learn' : 'stats';
                 totalCorrectFirstTry = parseInt(data.totalCorrectFirstTry) || 0;
                 totalAttempted = parseInt(data.totalAttempted) || 0;
                 blueShards = (data.blueShards !== undefined) ? (parseInt(data.blueShards) || 0) : totalCorrectFirstTry;
@@ -4470,7 +4494,7 @@
         }
 
         async function syncUserData() {
-            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, avatarPose: avatarPose, scarfColor: scarfColor, targetWordCount: targetWordCount, keyboardMode: keyboardMode, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, blueShards: blueShards, equippedTitle: equippedTitle, learnedWords: learnedWords, selectedTopic: selectedTopic, vocabRating: Math.round(vocabRating), vocabRatingN: vocabRatingN, vocabPeak: Math.round(vocabPeak), placementDone: placementDone, ratingHistory: ratingHistory }, { merge: true }); }
+            try { await setDoc(userDocRef, { exp: currentExp, streak: streakDays, last_date: lastDate, nickname: userNickname, emoji: userEmoji, avatarPose: avatarPose, scarfColor: scarfColor, targetWordCount: targetWordCount, keyboardMode: keyboardMode, statsFirstPane: statsFirstPane, totalLearnedWords: totalLearnedWords, totalCorrectFirstTry: totalCorrectFirstTry, blueShards: blueShards, equippedTitle: equippedTitle, learnedWords: learnedWords, selectedTopic: selectedTopic, vocabRating: Math.round(vocabRating), vocabRatingN: vocabRatingN, vocabPeak: Math.round(vocabPeak), placementDone: placementDone, ratingHistory: ratingHistory }, { merge: true }); }
             catch (error) { }
         }
 
@@ -4710,6 +4734,7 @@
             document.getElementById('home-badges-text').textContent = `${unlockedCount}개`; // "N개" 단일 카운트 표시
 
             applyHomeLayout();    // 🧭 홈 화면 배치
+            applyPanePref();      // 📊 통계창 첫 화면
             refreshStoryChip();   // 📖 오늘의 낱말 이야기
 
             document.getElementById('home-box').style.display = 'flex';
@@ -5181,6 +5206,7 @@
                         emoji: userEmoji,
                         targetWordCount: targetWordCount,
                         keyboardMode: keyboardMode,
+                        statsFirstPane: statsFirstPane,
                         totalLearnedWords: totalLearnedWords,
                         totalCorrectFirstTry: totalCorrectFirstTry,
                         totalAttempted: totalAttempted,
@@ -5452,9 +5478,9 @@
             // 두 패널을 탭으로 감싼다. 서버 통계가 오기 전에는 유의어·예문을 먼저 보여준다 —
             // 내 답 하나로 「정답 100%」를 그리는 순간을 만들지 않기 위해서다.
             const tabBtn = (id, label, on) => `<button type="button" data-pane="${id}" style="flex:1; border:none; cursor:pointer; padding:8px 6px; border-radius:9px; font-size:12.5px; font-weight:800; background:${on ? 'var(--surface)' : 'transparent'}; color:${on ? 'var(--text-primary)' : 'var(--text-muted)'}; box-shadow:${on ? '0 1px 3px rgba(0,0,0,0.10)' : 'none'};">${label}</button>`;
-            const wrapPanes = (active, statsHtml, learnHtml, n) => `
+            const wrapPanes = (active, statsHtml, learnHtml) => `
                 <div style="display:flex; gap:4px; background:var(--border); border-radius:11px; padding:3px; margin-bottom:16px;">
-                    ${tabBtn('stats', n > 0 ? `사람들의 답 ${n}` : '사람들의 답', active === 'stats')}
+                    ${tabBtn('stats', '사람들의 답', active === 'stats')}
                     ${tabBtn('learn', '유의어 · 예문', active === 'learn')}
                 </div>
                 <div data-pane-body="stats" style="display:${active === 'stats' ? 'block' : 'none'};">${statsHtml}</div>
@@ -5491,9 +5517,10 @@
                 const sortedAnswers = Object.entries(answers).filter(([w]) => !isBlockedAnswer(w))
                     .sort((a, b) => b[1] - a[1]).slice(0, 5);
                 let html = `
-                        <div style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 15px;">
+                        <div style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">
                             사람들은 이 문장을 어떻게 완성했을까요?
                         </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 13px;">지금까지 ${total.toLocaleString()}명이 답했어요</div>
                         <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); font-weight: bold; border-bottom: 2px solid var(--border-strong); padding-bottom: 8px; margin-bottom: 15px;">
                             <span style="margin-left: 5px;">표현</span>
                             <span style="margin-right: 5px;">비율</span>
@@ -5549,9 +5576,9 @@
             // 🌟 1) 즉시 렌더 — 유의어·예문 탭부터. 내 답 하나로 「정답 100%」를 그리지 않는다.
             const myKey = recordedAnswer ? sanitizeStatKey(recordedAnswer) : null;
             const learnHtml = buildLearnHtml();
-            statsContainer.innerHTML = wrapPanes('learn',
+            statsContainer.innerHTML = wrapPanes(statsFirstPane,
                 '<div style="text-align:center; color:var(--text-muted); font-size:13.5px; padding:22px 0;">답을 모으는 중…</div>',
-                learnHtml, 0);
+                learnHtml);
 
             // 📊 모바일: 스크롤 래핑 + 하단 다음 버튼 + 페이드 (여기까지 동기 — 무거운 작업 없음)
             if (isMobileDevice) {
@@ -5579,12 +5606,10 @@
             }
 
             // 🌟 2) 서버 통계는 백그라운드로 받아, 페이드 완료 후 조용히 갱신 (막대만 교체)
-            const paintStats = (html, n) => {
+            const paintStats = (html) => {
                 if (!isShowingStats) return;              // 이미 다음 문제로 넘어갔으면 무시
                 const body = statsContainer.querySelector('[data-pane-body="stats"]');
                 if (body) body.innerHTML = html;
-                const tab = statsContainer.querySelector('[data-pane="stats"]');
-                if (tab && n > 0) tab.textContent = `사람들의 답 ${n}`;
             };
             getDoc(doc(db, "word_stats", word)).then((docSnap) => {
                 const answers = docSnap.exists() ? (docSnap.data().answers || {}) : {};
@@ -5593,10 +5618,10 @@
                 const html = n === 0
                     ? '<div style="text-align:center; color:var(--text-muted); font-size:13.5px; padding:22px 0; line-height:1.6;">아직 이 문장에 답한 사람이 없어요.<br>당신이 첫 번째예요.</div>'
                     : buildStatsHtml(answers);
-                setTimeout(() => paintStats(html, n), 720); // 페이드(≈0.3s 지연 + 0.32s)가 끝난 뒤 갱신
+                setTimeout(() => paintStats(html), 720); // 페이드(≈0.3s 지연 + 0.32s)가 끝난 뒤 갱신
             }).catch((e) => {
                 console.warn("통계 서버 갱신 실패:", e);
-                paintStats('<div style="text-align:center; color:var(--text-muted); font-size:13.5px; padding:22px 0;">지금은 다른 사람의 답을 불러올 수 없어요.</div>', 0);
+                paintStats('<div style="text-align:center; color:var(--text-muted); font-size:13.5px; padding:22px 0;">지금은 다른 사람의 답을 불러올 수 없어요.</div>');
             });
         }
 
@@ -7028,6 +7053,21 @@
                 applyHomeLayout();
                 setDoc(userDocRef, { homeLayout: homeLayout }, { merge: true }).catch(() => {});
                 track('layout_change', { to: homeLayout });
+            });
+        });
+
+        // 통계창에서 먼저 열리는 탭 선택
+        function applyPanePref() {
+            document.querySelectorAll('.pane-opt').forEach(b => b.classList.toggle('on', b.dataset.panePref === statsFirstPane));
+        }
+        document.querySelectorAll('.pane-opt').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const next = btn.dataset.panePref;
+                if (next === statsFirstPane) return;
+                statsFirstPane = next;
+                applyPanePref();
+                if (userDocRef) setDoc(userDocRef, { statsFirstPane }, { merge: true }).catch(() => {});
+                track('stats_pane_pref', { to: next });
             });
         });
 

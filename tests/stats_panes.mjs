@@ -73,6 +73,29 @@ for (let i = 0; i < 8 && rows.length < 4; i++) {
     for (let k = 0; k < 3 && await vis('#next-btn'); k++) { await click('#next-btn'); await sleep(700); }
 }
 
+// ── 설정: 정답 후 첫 화면 바꾸기 → 다음 문항에서 반영되는지
+let pref = null;
+await p.evaluate(() => document.getElementById('profile-edit-modal').style.display = 'flex');
+await sleep(600);
+const chips = await p.evaluate(() => [...document.querySelectorAll('.pane-opt')].map(b => `${b.dataset.panePref}:${b.classList.contains('on') ? 'on' : 'off'}`));
+await p.evaluate(() => document.querySelector('.pane-opt[data-pane-pref="learn"]').click());
+await sleep(500);
+const chipsAfter = await p.evaluate(() => [...document.querySelectorAll('.pane-opt')].map(b => `${b.dataset.panePref}:${b.classList.contains('on') ? 'on' : 'off'}`));
+await p.evaluate(() => document.getElementById('profile-edit-modal').style.display = 'none');
+await sleep(400);
+for (let k = 0; k < 3 && await vis('#next-btn'); k++) { await click('#next-btn'); await sleep(700); }
+if (await vis('#quiz-box')) {
+    const w2 = await cur();
+    await answer(w2 ? w2.target : '아무말아무말');
+    await sleep(2200);
+    if (await vis('#inline-stats-container')) {
+        pref = await p.evaluate(() => {
+            const l = document.querySelector('#inline-stats-container [data-pane-body="learn"]');
+            return l && l.style.display !== 'none' ? 'learn' : 'stats';
+        });
+    }
+}
+
 rows.forEach(r => console.log(`${r.단어.padEnd(6)} 유의어${r.유의어} 힌트${r.힌트 ? 'O' : 'X'} | 첫탭:${r.첫탭} 유의어패널 ${r.유의어패널}자 | 전환후 stats:${r.전환후.stats} learn:${r.전환후.learn}`));
 const ok = (label, cond) => console.log(`${label}: ${cond ? '✅' : '❌'}`);
 console.log('');
@@ -80,8 +103,12 @@ ok(`통계창 표본 ${rows.length}건 확보`, rows.length > 0);
 if (rows.length) {
     ok('탭 두 개', rows.every(r => r.탭수 === 2));
     ok('유의어 패널이 항상 채워짐', rows.every(r => r.유의어패널 > 40));
-    ok('유의어·예문이 먼저 보임', rows.every(r => r.첫탭 === 'learn'));
     ok('탭 전환 동작', rows.every(r => r.전환후.stats === 'block' && r.전환후.learn === 'none'));
 }
+console.log(`\n설정 칩 초기: ${chips.join(' ')} → 바꾼 뒤: ${chipsAfter.join(' ')}`);
+ok('기본 첫 탭은 사람들의 답', rows.length > 0 && rows[0].첫탭 === 'stats');
+ok('설정 칩이 stats 로 시작', chips.includes('stats:on'));
+ok('칩을 누르면 learn 으로 바뀜', chipsAfter.includes('learn:on') && chipsAfter.includes('stats:off'));
+ok('설정이 다음 문항에 반영됨', pref === 'learn');
 await b.close();
 process.exit(rows.length ? 0 : 1);
