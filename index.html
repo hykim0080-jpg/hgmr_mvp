@@ -4593,10 +4593,12 @@
             if (measured) {
                 // 바다 상태(측정 전)에서 건드린 것들을 되돌린다 — 배치고사를 방금 마친 경우
                 {
-                    document.getElementById('home-mtn-value').parentElement.style.color = '';
+                    // ⚠️ style.color = '' 로 되돌리면 마크업에 있던 인라인 색까지 사라진다.
+                    //    (바다 상태가 그 인라인 선언을 덮어썼기 때문) 원래 값을 명시적으로 되돌린다.
+                    document.getElementById('home-mtn-value').parentElement.style.color = '#047857';
                     const tierEl = document.getElementById('home-mtn-tier');
-                    tierEl.style.borderColor = '';
-                    tierEl.style.color = '';
+                    tierEl.style.borderColor = 'var(--mint-border)';
+                    tierEl.style.color = '#047857';
                     document.getElementById('home-mtn-line').style.display = '';
                     document.getElementById('home-mtn-shadow').style.display = '';
                     const seal = document.getElementById('home-mtn-harang');
