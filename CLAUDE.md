@@ -121,6 +121,8 @@ node tests/clean_test_stats.js --apply           # ⚠️ 테스트가 남긴 �
 - **`initializeAuth()`를 쓴다면 `popupRedirectResolver`를 반드시 함께 넘길 것** (2026-08-26) — `getAuth()`와 달리 `initializeAuth()`는 팝업/리다이렉트 리졸버를 자동으로 넣어주지 않는다. 빠지면 웹에서 `signInWithPopup`이 **팝업조차 열지 않고 `auth/argument-error`로 즉시 실패**한다. 구글·애플 로그인이 이 이유로 5/27부터 3개월간 웹에서 죽어 있었다(네이티브는 `signInWithCredential`이라 무사). 지금은 `browserPopupRedirectResolver`를 넘긴다 — 지우지 말 것
 - **`index.html`에 standalone(전체화면) 메타를 넣지 말 것** — iOS 홈 화면 앱에서는 `window.open`이 Safari로 빠져나가 `signInWithPopup` 기반 구글·애플 로그인이 **실패**한다. 촬영용 전체화면 페이지는 `/shot.html`로 분리돼 있다
 - **어휘 고도는 내려갈 수 있다** (P17 개정, 2026-08-23) — 칭호와 최고 기록만 유지된다. *"한 번 오른 고도는 절대 내려가지 않아요"* 류의 문구를 다시 쓰지 말 것 (앱·스토어 문구에서 이미 한 번 걷어냈다)
+- **문항을 고치면 그 표제어의 응답 통계도 지워야 한다** — `word_stats`는 표제어로만 묶여 있어서, 뜻풀이·예문을 바꿔도 옛 답안이 남는다. 그러면 「사람들은 이 문장을 어떻게 완성했을까요?」가 **지금 화면과 다른 문제**에 대한 답을 보여준다(실제로 '관건'에 옛 뜻 기준 답인 '잠금'·'보안'이 남아 있었다). `node reset_word_stats.js --since 30 --apply` — 항상 홈에 백업을 먼저 남긴다. 출시 직전에는 `--all`로 한 번 비우는 것을 권한다
+- **정답률 진단은 `node word_accuracy.js`** — '모르겠어요'(정답 보기)와 장난 입력은 분모에서 빼고 포기율을 따로 센다. 이걸 안 빼면 포기가 오답으로 잡혀 문항이 실제보다 어려워 보인다
 - **E2E 테스트는 운영 Firestore에 쓴다** — `tests/*.mjs`가 제출한 답이 `word_stats`에 남는다. 일반 학습뿐 아니라 **배치고사도** `recordWordStat()`을 탄다. 돌린 뒤 반드시 `node tests/clean_test_stats.js --apply`
 - **맥 릴리스 빌드의 두 함정** (둘 다 `build_release.sh`에 반영·주석 처리됨)
   - AGP는 Java 17+ 필요한데 시스템 기본이 Corretto 11 → `JAVA_HOME`을 Android Studio 번들 JBR로 지정
