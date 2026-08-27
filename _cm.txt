@@ -1,0 +1,18 @@
+fix(native): 팝업 리졸버를 웹에서만 넘긴다 + 부팅 안전망
+
+TestFlight 첫 실행에서 로그인 버튼도 '터치하여 시작'도 안 뜨고
+민트 화면만 남는다는 보고.
+
+1) browserPopupRedirectResolver 는 location.protocol 이 http(s)일 때만 성립한다.
+   Capacitor 웹뷰는 capacitor://localhost 라 초기화 단계에서 걸릴 수 있다.
+   네이티브 로그인은 어차피 플러그인 시트(signInWithCredential)를 쓰므로 필요가 없어,
+   웹에서만 넘기도록 했다. (웹에서 빼면 signInWithPopup 이 auth/argument-error 로 죽는다)
+
+2) index.html 은 통짜 <script type="module"> 하나라, 평가 중 예외가 하나만 나도
+   그 뒤가 전부 안 돌고 스플래시만 남는다. 실기기는 콘솔을 볼 수 없으므로
+   모듈보다 먼저 도는 안전망을 뒀다 — error/unhandledrejection 을 잡고,
+   8초 안에 어떤 진입 화면도 못 그리면 로그인 버튼과 이유를 화면에 띄운다.
+   원인이 1)이 아니어도 다음 빌드가 이유를 화면으로 알려 준다.
+
+tests/boot_rescue.mjs: Firebase CDN 을 막아 모듈을 강제로 죽이고,
+로그인 버튼과 안내 문구가 뜨는지 확인
