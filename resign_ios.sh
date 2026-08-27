@@ -8,7 +8,7 @@ setopt pipefail
 cd ~/Desktop/hgmr || exit 1
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 
-VER=1.0; BUILD=${BUILD:-7}
+VER=1.0; BUILD=${BUILD:-8}
 ID=19601AE691A4417E59B89F7C0AE5C8CF8A06578C
 SRC=~/Desktop/hgmr/ios/export/out$BUILD/App.ipa
 WORK=/tmp/resign$BUILD

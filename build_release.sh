@@ -10,7 +10,7 @@ export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 VER=1.0
-BUILD=${BUILD:-7}          # BUILD=7 zsh build_release.sh 처럼 덮어쓸 수 있다
+BUILD=${BUILD:-8}          # BUILD=7 zsh build_release.sh 처럼 덮어쓸 수 있다
 LOG=~/Desktop/hgmr/_build$BUILD.log
 : > "$LOG"
 exec >> "$LOG" 2>&1
