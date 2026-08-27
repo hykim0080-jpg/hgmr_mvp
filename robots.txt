@@ -1,0 +1,9 @@
+# 한글마루 — https://hgmr.co.kr
+User-agent: *
+Allow: /
+
+# 검색에 뜰 이유가 없는 것들
+Disallow: /shot.html
+Disallow: /admin.html
+
+Sitemap: https://hgmr.co.kr/sitemap.xml

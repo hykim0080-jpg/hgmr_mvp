@@ -4,7 +4,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>한글마루</title>
+    <title>한글마루 — 문맥 빈칸으로 키우는 어휘력·문해력</title>
+    <meta name="description" content="문장 속 빈칸에 알맞은 낱말을 직접 써넣으며 어휘력을 키우는 국어 학습 서비스. 수능·학술·비즈니스·감정 표현까지, 내 어휘 수준을 해발 고도로 확인하고 망각곡선에 맞춰 복습합니다.">
+    <link rel="canonical" href="https://hgmr.co.kr/">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <!-- 🔎 공유 카드 (카카오톡·트위터·페이스북·슬랙) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="한글마루">
+    <meta property="og:locale" content="ko_KR">
+    <meta property="og:url" content="https://hgmr.co.kr/">
+    <meta property="og:title" content="한글마루 — 문맥 빈칸으로 키우는 어휘력·문해력">
+    <meta property="og:description" content="뜻은 아는데 그 단어가 떠오르지 않을 때. 매일 10분, 문장 속 빈칸을 채우며 어휘력을 키웁니다.">
+    <meta property="og:image" content="https://hgmr.co.kr/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="한글마루 — 문맥 빈칸으로 키우는 어휘력·문해력">
+    <meta name="twitter:description" content="뜻은 아는데 그 단어가 떠오르지 않을 때. 매일 10분, 문장 속 빈칸을 채우며 어휘력을 키웁니다.">
+    <meta name="twitter:image" content="https://hgmr.co.kr/og-image.png">
+    <!-- 🔎 구조화 데이터 — 검색 결과에 서비스 정보를 붙인다 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://hgmr.co.kr/#website",
+          "url": "https://hgmr.co.kr/",
+          "name": "한글마루",
+          "description": "문맥 빈칸으로 키우는 어휘력·문해력 국어 학습 서비스",
+          "inLanguage": "ko-KR"
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://hgmr.co.kr/#app",
+          "name": "한글마루",
+          "url": "https://hgmr.co.kr/",
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "Web, iOS, Android",
+          "inLanguage": "ko-KR",
+          "description": "문장 속 빈칸에 알맞은 낱말을 직접 써넣으며 어휘력을 키우는 국어 학습 서비스. 어휘 수준을 해발 고도로 확인하고 망각곡선에 맞춰 복습합니다.",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+        }
+      ]
+    }
+    </script>
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -421,6 +465,16 @@
         }
 
 
+
+        #login-tagline {
+            margin: 10px 0 0;
+            font-size: 14.5px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-align: center;
+            word-break: keep-all;
+            max-width: 320px;
+        }
 
         #login-screen,
         #setup-screen {
@@ -2271,7 +2325,9 @@
             <use href="#fr-idle-1" style="animation: s1of2 1.2s infinite;"></use>
             <use href="#fr-idle-2" style="animation: s2of2 1.2s infinite;"></use>
         </svg>
-        <div class="hm-wordmark">한글마루</div>
+        <h1 class="hm-wordmark">한글마루</h1>
+        <!-- 🔎 크롤러가 보는 유일한 화면이다. 무엇을 하는 서비스인지 «글자로» 있어야 한다. -->
+        <p id="login-tagline">문맥 속 빈칸을 채우며 어휘력을 키우는 국어 학습</p>
         <div style="flex: 1;"></div>
         <div id="login-btn-group" style="width: 100%; max-width: 360px; display: none; flex-direction: column; gap: 12px;">
             <!-- 이메일 로그인: 인증 메일 검증 필수 (2026-07-26 재활성화) -->
