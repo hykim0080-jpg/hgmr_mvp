@@ -26,27 +26,38 @@ Password: HgmrReview2026!
 - 이메일 인증까지 **이미 완료 처리**해 두었으므로 바로 로그인됩니다.
 - App Store Connect → **앱 심사 정보 → 로그인 필요** 체크 → 위 값을 사용자 이름/암호 칸에 입력해 주세요.
   (지금은 「로그인 불필요」로 되어 있을 텐데, Apple이 계정 자격증명을 요구했으니 켜는 편이 안전합니다.)
-- 녹화에서 이 계정으로 **탈퇴**를 시연한 뒤에는 알려 주세요. 같은 아이디·비밀번호로 즉시 다시 만들어 두겠습니다.
+
+**학습 이력을 미리 심어 두었습니다** — 48단어 학습 · 해발 **652m** · 연속 5일 · 지혜 조각 17.
+고도는 세션(20문항)을 끝내야 정산되는 구조라, 빈 계정으로 녹화하면 배치고사 20문항 + 학습 20문항을
+다 찍어야 홈에 숫자가 뜹니다. 이력을 심어 두면 **로그인 직후 홈에 고도가 보이므로** 녹화가 3분으로 끝납니다.
+배치고사 안내창도 뜨지 않습니다(학습 이력이 있는 계정은 대상 제외).
+
+- 녹화에서 이 계정으로 **탈퇴**를 시연한 뒤에는 알려 주세요. 같은 아이디·비밀번호로 다시 만들고
+  이력까지 그대로 다시 심어 두겠습니다 (명령 두 줄이면 됩니다).
 
 ---
 
-## 2. 화면 녹화 대본 (아이폰 실기기, 2~4분)
+## 2. 화면 녹화 대본 (아이폰 실기기, 약 3분)
 
-**준비** — 설정 › 제어 센터에 「화면 기록」 추가 · 방해금지 모드 켜기 · TestFlight의 **빌드 9** 설치 확인 · 앱을 완전히 종료(앱 스위처에서 밀어 올리기)
+**준비** — 설정 › 제어 센터에 「화면 기록」 추가 · 방해금지 모드 켜기 · TestFlight **빌드 9** 설치 확인 ·
+앱을 앱 스위처에서 완전히 밀어 종료(실행 장면이 찍혀야 함)
 
 | # | 화면 | 할 일 | 왜 필요한가 |
 |---|---|---|---|
-| 1 | 홈 화면 | 녹화 시작 → **아이콘을 눌러 앱을 실행**. 스플래시부터 찍혀야 함 | Apple 요구 1번: "must begin with launching the app" |
-| 2 | 로그인 | **회원가입** 탭 → 아무 새 이메일 + 비밀번호로 가입 → "인증 메일을 보냈어요" 안내까지 | 계정 **등록** 흐름 |
-| 3 | 로그인 | **로그인** 탭 → `appreview@hgmr.co.kr` / `HgmrReview2026!` 입력 → 진입 | 계정 **로그인** 흐름 |
-| 4 | 배치고사 | 안내 → 5~6문항 정도 풀기 (틀려도 무방) → 결과 고도 확인 | 핵심 기능 ① 수준 진단 |
-| 5 | 학습 | 문장 빈칸 → 답 입력 → 정답/오답 → **통계·유의어·예문** 패널 → 다음 문항, 3~4개 반복 | 핵심 기능 ② 문맥 빈칸 학습 |
-| 6 | 홈 | 산 화면에서 **고도가 오른 것**과 지혜 조각 확인 | 핵심 기능 ③ 진척 |
+| 1 | 홈 화면 | 녹화 시작 → **아이콘을 눌러 앱 실행**. 스플래시부터 | Apple 1번: "must begin with launching the app" |
+| 2 | 로그인 | **회원가입** 탭 → 아무 새 이메일 + 비밀번호 → 가입 → "이메일 인증 후 로그인할 수 있어요" 안내까지 (20초) | 계정 **등록** 흐름 |
+| 3 | 로그인 | **로그인** 탭 → `appreview@hgmr.co.kr` / `HgmrReview2026!` | 계정 **로그인** 흐름 |
+| 4 | 홈 | **해발 652m·연속 5일·조각 17이 보이는 것**을 2~3초 머무르며 보여주기 | 핵심 기능 ① 진척·수준 표시 |
+| 5 | 학습 | 학습 시작 → 문장 빈칸에 답 입력 → 정답/오답 → **통계·유의어·예문 패널** 확인 → 다음. **3~4문항 반복** | 핵심 기능 ② 문맥 빈칸 학습 |
+| 6 | 학습 | 좌상단 **X**로 나가기 → 홈 복귀 | — |
 | 7 | 프로필 | 프로필 › **계정 관리** › **회원 탈퇴** › 안내 읽고 › `탈퇴` 입력 › 탈퇴하기 → 로그인 화면 복귀 | 계정 **삭제** 흐름 (5.1.1(v)) |
+
+**끝까지 안 해도 되는 것** — 20문항 세션을 완주할 필요 없습니다. 4번에서 이미 고도가 보이므로
+5번은 학습 방식만 보여주면 충분합니다.
 
 **찍지 않아도 되는 것** — 결제·구독 없음, 사용자 생성 콘텐츠 없음, 위치·카메라·연락처·ATT 권한 요청 없음.
 
-**끝난 뒤** — 사진 앱 › 영상 › 공유 › **"파일에 저장" › iCloud Drive** 에 넣어 주세요. 제가 맥에서 꺼내 압축하고 사이트에 올리겠습니다.
+**끝난 뒤** — 사진 앱 › 영상 › 공유 › **"파일에 저장" › iCloud Drive**. 제가 맥에서 꺼내 사이트에 올리겠습니다.
 
 ---
 
@@ -120,10 +131,16 @@ A demo account is provided in the App Review Information section:
 (The email address of this account is already verified, so it signs in
 immediately.)
 
-After signing in, the placement test starts automatically. Answer a few items -
-correct answers are not required - and the main learning screen follows. Type
-the word that fits the blank and press Enter or the confirm button. Account
-deletion is at Profile > Account settings > Delete account.
+A brand-new account begins with a short adaptive placement test that estimates
+the learner's level. The demo account above already has study history, so it
+goes straight to the home screen, where the estimated level is shown as an
+altitude on a mountain (currently 652 m). Tap the start button to begin a
+session: type the word that fits the blank and press Enter or the confirm
+button. After each answer the app shows what other learners answered, plus
+synonyms and further examples.
+
+Account deletion is at Profile > Account settings > Delete account, and
+requires typing a confirmation word.
 
 5) EXTERNAL SERVICES USED
 
