@@ -70,3 +70,4 @@ _test12.log
 
 # word_stats 백업 (개인 데이터는 아니지만 저장소에 둘 이유 없음)
 hgmr_wordstats_backup_*.json
+www/review/

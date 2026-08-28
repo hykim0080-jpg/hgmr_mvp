@@ -5,5 +5,6 @@ Allow: /
 # 검색에 뜰 이유가 없는 것들
 Disallow: /shot.html
 Disallow: /admin.html
+Disallow: /review/
 
 Sitemap: https://hgmr.co.kr/sitemap.xml
